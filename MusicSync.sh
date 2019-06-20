@@ -11,15 +11,12 @@
 # Import sensitive data from file #
 ###################################
 #
-source /home/jlivin25/bin/myscripts/controlscripts/kodi_password.sh
+source /home/$user/scripts/controls_cripts/config.sh
 #
 ####################
 ## set variables  ##
 ####################
 #
-# KODI Details
-SERVER=192.168.0.2
-PORT=8080
 #
 # Music Sources
 download_flac=/home/jlivin25/Music/DownloadTransfers #FLAC Files from Lidarr transferred via rsync to media pc
@@ -37,11 +34,11 @@ M4A_musicdest=/media/Data_1/Music/correct/Albums/ #where the M4A files are store
 #
 # clean Audiolibrary
 clean_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' http://$kodiuser:$kodipass@$SERVER:$PORT/jsonrpc
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' http://"$kodiuser":"$kodipass"@"$SERVER":"$PORT"/jsonrpc
 }
 # update AudioLibrary
 update_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' http://$kodiuser:$kodipass@$SERVER:$PORT/jsonrpc
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' http://"$kodiuser":"$kodipass"@"$SERVER":"$PORT"/jsonrpc
 }
 #
 #######################
