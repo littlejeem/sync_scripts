@@ -7,26 +7,11 @@
 ## script is in $HOME/bin folder                                                          ###
 #############################################################################################
 #
-###################################
-# Import sensitive data from file #
-###################################
+####################################
+## Import settings data from file ##
+####################################
 #
-source /home/$user/scripts/controls_cripts/config.sh
-#
-####################
-## set variables  ##
-####################
-#
-#
-# Music Sources
-download_flac=/home/jlivin25/Music/DownloadTransfers #FLAC Files from Lidarr transferred via rsync to media pc
-rip_flac=/home/jlivin25/Music/RipTransfers #FLAC files ripped from CD by rippng script on media pc
-alaclibrary_source=/home/jlivin25/Music/Library/alacimports #Beets library location where the FLAC files are converted to M4A and placed
-flaclibrary_source=/home/jlivin25/Music/Library/flacimports #Beets library location where the FLAC files are tagged and moved too
-#
-# Music Destinations
-FLAC_musicdest=/media/Data_1/Music/FLAC_Backups/ #where the FLAC files are stored
-M4A_musicdest=/media/Data_1/Music/correct/Albums/ #where the M4A files are stored
+source .config.sh
 #
 ######################
 ## Define Functions ##
@@ -49,20 +34,19 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "my
 clean_KodiAudio
 #
 # start MUSIC Import
-#
 # convert flacs to alac and copy to the alac library imports first by using -c flag to specify an alternative config to merge
-/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/alac/config.yaml import -q $download_flac
-rm /home/jlivin25/.config/beets/alac/musiclibrary.blb
+$beets_path/beet $beets_switch $beets_alac_path/config.yaml import -q $download_flac
+rm $beets_alac_path/musiclibrary.blb
 sleep 5s
-/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/alac/config.yaml import -q $rip_flac
-rm /home/jlivin25/.config/beets/alac/musiclibrary.blb
+$beets_path/beet $beets_switch $beets_alac_path/config.yaml import -q $rip_flac
+rm $beets_alac_path/musiclibrary.blb
 sleep 5s
 # correct the flac file tags now and move to the flac import library using -c flac to specify an alternative config to merge
-/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/config.yaml import -q $download_flac
-rm /home/jlivin25/.config/beets/flac/musiclibrary.blb
+$beets_path/beet $beets_switch $beets_flac_path/config.yaml import -q $download_flac
+rm $beets_flac_path/musiclibrary.blb
 sleep 5s
-/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/config.yaml import -q $rip_flac
-rm /home/jlivin25/.config/beets/flac/musiclibrary.blb
+$beets_path/beet $beets_switch $beets_flac_path/config.yaml import -q $rip_flac
+rm $beets_flac_path/musiclibrary.blb
 sleep 5s
 #
 # sync tagged flac files next
