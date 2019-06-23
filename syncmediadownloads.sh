@@ -42,26 +42,18 @@
 # Import sensitive data from file #
 ###################################
 #
-source ./config.sh
+source .config.sh
 #
 #
 ####################
 ## set variables  ##
 ####################
 #
-losslessmusicsource=/mnt/usbstorage/music/
-losslessmusicdest=/home/jlivin25/Music/DownloadTransfers/
-tvsource=/mnt/usbstorage/tv/
-tvdest=/media/Data_1/"James' Files"/"My Videos"/"TV Series"
-nflsource=/mnt/usbstorage/download/complete/transmission/nfl/
-nfldest=/home/jlivin25/"TV Shows"/NFL
-moviesource=/mnt/usbstorage/movies/
-moviedest=/media/Data_1/"James' Files"/"My Videos"/"HD Films"
 locknamelong=`basename "$0"`    			# imports the name of this script
 lockname=${locknamelong::-3}    			# reduces the name to remove .sh
 logfolder=/home/jlivin25/bin/myscripts/scriptlogs/      # Where the logs are kept
 logname=$lockname.log  					# Uses the script name to create the log
-rswit=-vzrc						# switchs for rsync, stopped using 'a' so as to use umask 
+rswit=-vzrc						# switchs for rsync, stopped using 'a' so as to use umask
 umaskset=0000						# Umask for 777 perms is 0000
 kodilocal=http://$kodiuser:$kodipass@192.168.0.2:8080/jsonrpc
 #KODI 17/18 - Krypton Functions for library actions
@@ -94,7 +86,7 @@ echo "----------------------------------------------------" >> $logfolder/$logna
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync started" >> $logfolder/$logname
 # sync flac source files first
 umask $umaskset
-rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$losslessmusicsource" "$losslessmusicdest" >> $logfolder/$logname
+rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$lossless_source" "$lossless_dest" >> $logfolder/$logname
 sleep 1
 /home/jlivin25/bin/myscripts/MusicSync.sh
 #update music library on Kodi
@@ -111,7 +103,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Film sync started" >> $logfolder/$logname
 umask $umaskset
-rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$moviesource" "$moviedest" >> $logfolder/$logname
+rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$movie_source" "$movie_dest" >> $logfolder/$logname
 # update Video Library on Kodi
 sleep 1
 update_videolibrary
@@ -127,7 +119,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync started" >> $logfolder/$logname
 umask $umaskset
-rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$tvsource" "$tvdest" >> $logfolder/$logname
+rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$tv_source" "$tv_dest" >> $logfolder/$logname
 # add sleep
 sleep 1
 # update Video Library on Kodi
@@ -144,7 +136,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$log
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync started" >> $logfolder/$logname
 umask $umaskset
-rsync --protect-args -vzrc pi@192.168.0.18:"$nflsource" "$nfldest" >> $logfolder/$logname
+rsync --protect-args -vzrc pi@192.168.0.18:"$nfl_source" "$nfl_dest" >> $logfolder/$logname
 # add sleep
 sleep 1
 # update Video Library on Kodi
@@ -161,4 +153,3 @@ update_musiclibrary
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
 exit 0
-
