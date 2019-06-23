@@ -42,7 +42,7 @@
 # Import sensitive data from file #
 ###################################
 #
-source /home/jlivin25/bin/myscripts/controlscripts/kodi_password.sh
+source ./config.sh
 #
 #
 ####################
@@ -64,7 +64,7 @@ logname=$lockname.log  					# Uses the script name to create the log
 rswit=-vzrc						# switchs for rsync, stopped using 'a' so as to use umask 
 umaskset=0000						# Umask for 777 perms is 0000
 kodilocal=http://$kodiuser:$kodipass@192.168.0.2:8080/jsonrpc
-#KODI 17 - Krypton Functions for library actions
+#KODI 17/18 - Krypton Functions for library actions
 update_videolibrary () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodilocal
 }
