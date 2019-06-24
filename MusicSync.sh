@@ -37,17 +37,13 @@ clean_KodiAudio
 # convert flacs to alac and copy to the alac library imports first by using -c flag to specify an alternative config to merge
 $beets_path/beet $beets_switch $beets_alac_path/config.yaml import -q $download_flac
 rm $beets_alac_path/musiclibrary.blb
-sleep 5s
 $beets_path/beet $beets_switch $beets_alac_path/config.yaml import -q $rip_flac
 rm $beets_alac_path/musiclibrary.blb
-sleep 5s
 # correct the flac file tags now and move to the flac import library using -c flac to specify an alternative config to merge
 $beets_path/beet $beets_switch $beets_flac_path/config.yaml import -q $download_flac
 rm $beets_flac_path/musiclibrary.blb
-sleep 5s
 $beets_path/beet $beets_switch $beets_flac_path/config.yaml import -q $rip_flac
 rm $beets_flac_path/musiclibrary.blb
-sleep 5s
 #
 # sync tagged flac files next
 cd $flaclibrary_source
