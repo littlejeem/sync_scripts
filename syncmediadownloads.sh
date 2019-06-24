@@ -53,7 +53,6 @@ locknamelong=`basename "$0"`    			# imports the name of this script
 lockname=${locknamelong::-3}    			# reduces the name to remove .sh
 logfolder=/home/jlivin25/bin/myscripts/scriptlogs/      # Where the logs are kept
 logname=$lockname.log  					# Uses the script name to create the log
-rswit=-vzrc						# switchs for rsync, stopped using 'a' so as to use umask
 umaskset=0000						# Umask for 777 perms is 0000
 kodilocal=http://$kodiuser:$kodipass@192.168.0.2:8080/jsonrpc
 #KODI 17/18 - Krypton Functions for library actions
