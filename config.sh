@@ -1,8 +1,14 @@
+########################
+## "Global Settings" ###
+########################
+user=""
+rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
+rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
+#
+#
 ####################
 ## "Kodi Config" ###
 ####################
-#
-#
 kodiuser="" #username ofthe kodi interface on the local machine
 kodipass="" #password of same
 PORT="" #port that kodi is running under, usually 8080
@@ -49,16 +55,15 @@ nfl_dest=""
 ## "MusicSync.sh Settings" ##
 #############################
 # Music Sources
-download_flac=/home/jlivin25/Music/DownloadTransfers #FLAC Files from Lidarr transferred via rsync to media pc
-rip_flac=/home/jlivin25/Music/RipTransfers #FLAC files ripped from CD by rippng script on media pc
-alaclibrary_source=/home/jlivin25/Music/Library/alacimports #Beets library location where the FLAC files are converted to M4A and placed
-flaclibrary_source=/home/jlivin25/Music/Library/flacimports #Beets library location where the FLAC files are tagged and moved too
-#
+download_flac="" #FLAC Files from Lidarr transferred via rsync to media pc
+rip_flac="" #FLAC files ripped from CD by rippng script on media pc
+alaclibrary_source="" #Beets library location where the FLAC files are converted to M4A and placed
+flaclibrary_source="" #Beets library location where the FLAC files are tagged and moved too
 # Music Destinations
-FLAC_musicdest=/media/Data_1/Music/FLAC_Backups/ #where the FLAC files are stored
-M4A_musicdest=/media/Data_1/Music/correct/Albums/ #where the M4A files are stored
+FLAC_musicdest="" #where the FLAC files are stored
+M4A_musicdest="" #where the M4A files are stored
 # Beets
-beets_path=""
+beets_path="/home/$user/.local/bin/beet" #default destination set change as appropriate
 beets_switch=""
 beets_flac_path="" #path to beets config & library file directory (FLAC)
 beets_alac_path="" #path to beets config & libraryfile directory (alac)
