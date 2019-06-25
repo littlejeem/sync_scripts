@@ -1,8 +1,10 @@
 ########################
 ## "Global Settings" ###
 ########################
-user=""
+user="" #user who will be running the script
 rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
+rsync_variable1="--protect-args" #default destination set, change as appropriate
+rsync_variable2="--remove-source-files" #default destination set, change as appropriate
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
 #
 #
