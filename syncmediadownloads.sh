@@ -85,7 +85,7 @@ echo "----------------------------------------------------" >> $logfolder/$logna
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync started" >> $logfolder/$logname
 # sync flac source files first
 umask $umaskset
-rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$lossless_source" "$lossless_dest" >> $logfolder/$logname
+rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
 sleep 1
 /home/jlivin25/bin/myscripts/MusicSync.sh
 #update music library on Kodi
@@ -102,7 +102,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Film sync started" >> $logfolder/$logname
 umask $umaskset
-rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$movie_source" "$movie_dest" >> $logfolder/$logname
+rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$movie_source" "$movie_dest" >> $logfolder/$logname
 # update Video Library on Kodi
 sleep 1
 update_videolibrary
@@ -118,7 +118,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync started" >> $logfolder/$logname
 umask $umaskset
-rsync --protect-args --remove-source-files -vzrc pi@192.168.0.18:"$tv_source" "$tv_dest" >> $logfolder/$logname
+rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$tv_source" "$tv_dest" >> $logfolder/$logname
 # add sleep
 sleep 1
 # update Video Library on Kodi
@@ -135,7 +135,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$log
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync started" >> $logfolder/$logname
 umask $umaskset
-rsync --protect-args -vzrc pi@192.168.0.18:"$nfl_source" "$nfl_dest" >> $logfolder/$logname
+rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
 # add sleep
 sleep 1
 # update Video Library on Kodi
