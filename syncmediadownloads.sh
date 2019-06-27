@@ -51,7 +51,7 @@ sleep 1m #sleep for cron @reboot to allow tine for network to start
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync started" >> $logfolder/$logname
 # sync flac source files first
-umask $umask_syncmedia
+umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
 /home/jlivin25/bin/myscripts/MusicSync.sh
 update_musiclibrary #update music library on Kodi
@@ -63,7 +63,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$
 #####################
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Film sync started" >> $logfolder/$logname
-umask $umask_syncmedia
+umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$movie_source" "$movie_dest" >> $logfolder/$logname
 update_videolibrary # update Video Library on Kodi
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$logname
@@ -74,7 +74,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$
 ###################
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync started" >> $logfolder/$logname
-umask $umask_syncmedia
+umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$tv_source" "$tv_dest" >> $logfolder/$logname
 update_videolibrary # update Video Library on Kodi
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
@@ -85,7 +85,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$log
 ####################
 echo "----------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync started" >> $logfolder/$logname
-umask $umask_syncmedia
+umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
 echo "----------------------------------------------------" >> $logfolder/$logname
