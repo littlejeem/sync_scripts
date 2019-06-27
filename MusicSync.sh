@@ -48,12 +48,12 @@ rm "$beets_flac_path"/musiclibrary.blb
 #
 # sync tagged flac files next
 cd "$flaclibrary_source"
-DIR=$PWD
+DIR=${PWD}
 if [ ! "$(ls -A "$DIR")" ]
 then
-    echo "$DIR" is empty, no action"
+    echo ""$DIR" is empty, no action"
 else
-    echo "$DIR" is not empty, copying then deleting files"
+    echo ""$DIR" is not empty, copying then deleting files"
     sleep 5s
     cp -rpv "$flaclibrary_source"/* "$FLAC_musicdest"
     rm -r *
@@ -62,12 +62,12 @@ fi
 #
 # sync alac music files next
 cd "$alaclibrary_source"
-DIR=$PWD
+DIR=${PWD}
 if [ ! "$(ls -A "$DIR")" ]
 then
-    echo "$DIR" is empty, no action"
+    echo ""$DIR" is empty, no action"
 else
-    echo "$DIR" is not empty, copying then deleting files"
+    echo ""$DIR" is not empty, copying then deleting files"
     sleep 5s
     cp -rpv "$alaclibrary_source"/* "$M4A_musicdest"
     rm -r *
