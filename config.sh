@@ -6,6 +6,7 @@ rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
 rsync_variable1="--protect-args" #default destination set, change as appropriate
 rsync_variable2="--remove-source-files" #default destination set, change as appropriate
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
+logfolder="$USER/scripts/scriptlogs/"
 #
 #
 ####################
@@ -14,7 +15,7 @@ rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you 
 kodiuser="" #username ofthe kodi interface on the local machine
 kodipass="" #password of same
 PORT="" #port that kodi is running under, usually 8080
-#
+KODIASSEMBLY="http://"$kodiuser":"$kodipass"@"$LOCAL_IP":"$PORT"/jsonrpc" #auto generated for curl from other variables
 #
 ########################
 ## "Machine Settings" ##
@@ -52,7 +53,8 @@ movie_dest=""
 nfl_source=""
 nfl_dest=""
 #
-#
+#Umask
+umask_syncmedia="" #umask set prior to an rsync, 0000 is the default for 777 equiv permissions
 #############################
 ## "MusicSync.sh Settings" ##
 #############################
