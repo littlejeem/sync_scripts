@@ -7,18 +7,19 @@
 #############################################################################################
 #
 #
-###################################
-# Import sensitive data from file #
-###################################
-source .config.sh
-#
-#
 ####################
 ## set variables  ##
 ####################
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
+DIR2=${PWD}
+#
+#
+###################################
+# Import sensitive data from file #
+###################################
+source "$DIR2"/config.sh
 #
 #
 ##############################################################
@@ -53,7 +54,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync started" >> $logfolder/$l
 # sync flac source files first
 umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
-/home/jlivin25/bin/myscripts/MusicSync.sh
+"$DIR2"/MusicSync.sh #run seperate 'tagger' script
 update_musiclibrary #update music library on Kodi
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$logname
 #
