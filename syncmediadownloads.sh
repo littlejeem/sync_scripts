@@ -19,6 +19,7 @@ DIR2=${PWD}
 ###################################
 # Import sensitive data from file #
 ###################################
+echo "Directory being used is "$DIR2"" # for error checking
 source "$DIR2"/config.sh
 #
 #
@@ -26,19 +27,19 @@ source "$DIR2"/config.sh
 ## set FUNCTIONS - tested on KODI 17/18 for library actions ##
 ##############################################################
 update_videolibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodilocal
+curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
 #
 update_musiclibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodilocal
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
 #
 clean_videolibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodilocal
+curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
 #
 clean_musiclibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodilocal
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
 #
 echo "----------------------------------------------------" > $logfolder/$logname
