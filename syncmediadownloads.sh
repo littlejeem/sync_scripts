@@ -19,7 +19,6 @@ DIR2=${PWD}
 ###################################
 # Import sensitive data from file #
 ###################################
-echo "Directory being used is "$DIR2"" # for error checking
 source "$DIR2"/config.sh
 #
 #
@@ -45,6 +44,7 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 echo "#####################################################################################################################" > $logfolder/$logname
 echo "#####################################################################################################################" > $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
+echo "Directory being used is "$DIR2"" >> $logfolder/$logname# for error checking
 sleep 1m #sleep for cron @reboot to allow tine for network to start
 #
 #
