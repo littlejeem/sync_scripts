@@ -12,7 +12,8 @@
 ## Import settings data from file ##
 ####################################
 #
-source .config.sh
+DIR2=${PWD}
+source "$DIR2"/config.sh
 #
 ######################
 ## Define Functions ##
