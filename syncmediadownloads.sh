@@ -19,7 +19,6 @@ DIR2=${PWD}
 ###################################
 # Import sensitive data from file #
 ###################################
-echo "Directory being used is "$DIR2"" # for error checking
 source "$DIR2"/config.sh
 #
 #
@@ -42,15 +41,17 @@ clean_musiclibrary () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
 #
-echo "----------------------------------------------------" > $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong Started, sleeping for 3mins to allow network to start" >> $logfolder/$logname
+echo "#####################################################################################################################" > $logfolder/$logname
+echo "#####################################################################################################################" > $logfolder/$logname
+echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
+echo "Directory being used is "$DIR2"" >> $logfolder/$logname# for error checking
 sleep 1m #sleep for cron @reboot to allow tine for network to start
 #
 #
 ######################
 ## start MUSIC sync ##
 ######################
-echo "----------------------------------------------------" >> $logfolder/$logname
+echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync started" >> $logfolder/$logname
 # sync flac source files first
 umask "$umask_syncmedia"
@@ -63,7 +64,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$
 #####################
 ## start FILM sync ##
 #####################
-echo "----------------------------------------------------" >> $logfolder/$logname
+echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Film sync started" >> $logfolder/$logname
 umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$movie_source" "$movie_dest" >> $logfolder/$logname
@@ -74,7 +75,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$
 ###################
 ## start TV sync ##
 ###################
-echo "----------------------------------------------------" >> $logfolder/$logname
+echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync started" >> $logfolder/$logname
 umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$tv_source" "$tv_dest" >> $logfolder/$logname
@@ -85,14 +86,13 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$log
 ####################
 ## start NFL sync ##
 ####################
-echo "----------------------------------------------------" >> $logfolder/$logname
+echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync started" >> $logfolder/$logname
 umask "$umask_syncmedia"
 rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
-echo "----------------------------------------------------" >> $logfolder/$logname
+echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
-echo "----------------------------------------------------" >> $logfolder/$logname
 #
 #
 exit 0

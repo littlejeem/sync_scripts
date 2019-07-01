@@ -6,7 +6,16 @@ rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
 rsync_variable1="--protect-args" #default destination set, change as appropriate
 rsync_variable2="--remove-source-files" #default destination set, change as appropriate
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
-logfolder="$USER/scripts/scriptlogs/"
+logfolder="/home/"$user"/scripts/scriptlogs"
+#
+#
+########################
+## "Machine Settings" ##
+########################
+LOCAL_IP="" #IP address of the local system
+REMOTE_IP="" #IP address of the remote system
+LOCAL_USER="" #username for the rsync local (pull too)
+REMOTE_USER="" #username for the rsync remote system (pull from)
 #
 #
 ####################
@@ -16,14 +25,6 @@ kodiuser="" #username ofthe kodi interface on the local machine
 kodipass="" #password of same
 PORT="" #port that kodi is running under, usually 8080
 KODIASSEMBLY="http://"$kodiuser":"$kodipass"@"$LOCAL_IP":"$PORT"/jsonrpc" #auto generated for curl from other variables
-#
-########################
-## "Machine Settings" ##
-########################
-LOCAL_IP="" #IP address of the local system
-REMOTE_IP="" #IP address of the remote system
-LOCAL_USER="" #username for the rsync local (pull too)
-REMOTE_USER="" #username for the rsync remote system (pull from)
 #
 #
 ####################
