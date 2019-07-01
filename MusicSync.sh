@@ -21,19 +21,17 @@ source "$DIR2"/config.sh
 #
 # clean Audiolibrary
 clean_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' http://"$kodiuser":"$kodipass"@"$SERVER":"$PORT"/jsonrpc
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
 # update AudioLibrary
 update_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' http://"$kodiuser":"$kodipass"@"$SERVER":"$PORT"/jsonrpc
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
 #
 #######################
 ## Start Main Script ##
 #######################
 #
-# clean Kodi AudioLibrary
-clean_KodiAudio
 #
 # start MUSIC Import
 # convert flacs to alac and copy to the alac library imports first by using -c flag to specify an alternative config to merge
