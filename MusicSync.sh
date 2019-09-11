@@ -27,11 +27,15 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 update_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
+##################
+# Initial Setup ##
+##################
+#
+mkdir -p $logfolder
 #
 #######################
 ## Start Main Script ##
 #######################
-#
 #
 # start MUSIC Import
 # convert flacs to alac and copy to the alac library imports first by using -c flag to specify an alternative config to merge
@@ -50,7 +54,7 @@ cd "$flaclibrary_source"
 DIR=${PWD}
 if [ ! "$(ls -A "$DIR")" ]
 then
-    echo ""$DIR" is empty, no action"
+    echo ""$DIR" is empty, no action" >> "$logfolder"/"$logname".log
 else
     echo ""$DIR" is not empty, copying then deleting files"
     sleep 5s
