@@ -94,8 +94,20 @@ else
 fi
 #
 #
-# tidy up source download directory
+# tidy up source rip directory
 cd "$rip_flac"
+DIR=${PWD}
+if [ ! "$(ls -A "$DIR")" ]
+then
+    echo ""$DIR" is empty, no action"
+else
+    echo ""$DIR" is not empty, deleting files"
+    rm -r *
+fi
+#
+#
+# tidy up upload directory
+cd "$upload_mp3"
 DIR=${PWD}
 if [ ! "$(ls -A "$DIR")" ]
 then
