@@ -12,8 +12,9 @@
 ## Import settings data from file ##
 ####################################
 #
-DIR2=${PWD}
-source "$DIR2"/config.sh
+VERSION=1.0
+WORKDIR="$HOME/bin/sync_scripts"
+source "$WORKDIR"/config.sh
 #
 ######################
 ## Define Functions ##
@@ -26,6 +27,18 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 # update AudioLibrary
 update_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
+}
+#
+# deleting if
+delete_if () {
+  DIR=${PWD}
+  if [ ! "$(ls -A "$DIR")" ]
+  then
+      echo ""$DIR" is empty, no action"
+  else
+      echo ""$DIR" is not empty, deleting files"
+      rm -r *
+  fi
 }
 ##################
 # Initial Setup ##
@@ -89,39 +102,15 @@ fi
 #
 # tidy up source download directory
 cd "$download_flac"
-DIR=${PWD}
-if [ ! "$(ls -A "$DIR")" ]
-then
-    echo ""$DIR" is empty, no action"
-else
-    echo ""$DIR" is not empty, deleting files"
-    rm -r *
-fi
-#
+delete_if
 #
 # tidy up source rip directory
 cd "$rip_flac"
-DIR=${PWD}
-if [ ! "$(ls -A "$DIR")" ]
-then
-    echo ""$DIR" is empty, no action"
-else
-    echo ""$DIR" is not empty, deleting files"
-    rm -r *
-fi
-#
+delete_if
 #
 # tidy up upload directory
 cd "$upload_mp3"
-DIR=${PWD}
-if [ ! "$(ls -A "$DIR")" ]
-then
-    echo ""$DIR" is empty, no action"
-else
-    echo ""$DIR" is not empty, deleting files"
-    rm -r *
-fi
-#
+delete_if
 #
 # all done
 exit
