@@ -64,6 +64,7 @@ download_flac="" #FLAC Files from Lidarr transferred via rsync to media pc
 rip_flac="" #FLAC files ripped from CD by rippng script on media pc
 alaclibrary_source="" #Beets library location where the FLAC files are converted to M4A and placed
 flaclibrary_source="" #Beets library location where the FLAC files are tagged and moved too
+upload_mp3="" #Beets library where the mp3 uploads are stored
 # Music Destinations
 FLAC_musicdest="" #where the FLAC files are stored
 M4A_musicdest="" #where the M4A files are stored
@@ -71,4 +72,5 @@ M4A_musicdest="" #where the M4A files are stored
 beets_path="/home/$user/.local/bin/beet" #default destination set change as appropriate
 beets_switch=""
 beets_flac_path="" #path to beets config & library file directory (FLAC)
-beets_alac_path="" #path to beets config & libraryfile directory (alac)
+beets_alac_path="" #path to beets config & library file directory (alac)
+beets_upload_path="" #path to beets config & library file directory (upload)
