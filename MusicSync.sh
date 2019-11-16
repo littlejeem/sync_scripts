@@ -49,6 +49,7 @@ rm "$beets_flac_path"/musiclibrary.blb
 "$beets_path" "$beets_switch" "$beets_flac_path"/config.yaml import -q "$rip_flac"
 rm "$beets_flac_path"/musiclibrary.blb
 #
+#
 # sync tagged flac files next
 cd "$flaclibrary_source"
 DIR=${PWD}
@@ -79,5 +80,35 @@ else
     clean_KodiAudio
     sleep 5s
 fi
+#
+#
+# tidy up source download directory
+cd "$download_flac"
+DIR=${PWD}
+if [ ! "$(ls -A "$DIR")" ]
+then
+    echo ""$DIR" is empty, no action"
+else
+    echo ""$DIR" is not empty, deleting files"
+    rm -r *
+fi
+#
+#
+# tidy up source download directory
+cd "$rip_flac"
+DIR=${PWD}
+if [ ! "$(ls -A "$DIR")" ]
+then
+    echo ""$DIR" is empty, no action"
+else
+    echo ""$DIR" is not empty, deleting files"
+    rm -r *
+fi
+#
+#
+
+
+
+
 # all done
 exit
