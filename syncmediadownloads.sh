@@ -10,10 +10,11 @@
 ####################
 ## set variables  ##
 ####################
+VERSION="v1.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
-DIR2=${PWD}
+DIR2="$HOME/bin/sync_scripts"
 #
 #
 ###################################
