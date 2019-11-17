@@ -52,7 +52,7 @@ sleep 1m #sleep for cron @reboot to allow tine for network to start
 ##################
 ### MUSIC sync ###
 ##################
-if [ "$MUSIC" -eq 1]
+if [[ "$MUSIC" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync SELECTED, sync started" >> $logfolder/$logname
@@ -78,7 +78,7 @@ echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$
 ###############
 ### TV sync ###
 ###############
-if [ "$MUSIC" -eq 1]
+if [[ "$TV" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
