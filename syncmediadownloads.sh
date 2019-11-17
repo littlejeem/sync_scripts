@@ -49,22 +49,24 @@ echo "Directory being used is "$DIR2"" >> $logfolder/$logname# for error checkin
 sleep 1m #sleep for cron @reboot to allow tine for network to start
 #
 #
-######################
-## start MUSIC sync ##
-######################
-echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync started" >> $logfolder/$logname
-# sync flac source files first
-umask "$umask_syncmedia"
-rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
-"$DIR2"/MusicSync.sh #run seperate 'tagger' script
-update_musiclibrary #update music library on Kodi
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$logname
+##################
+### MUSIC sync ###
+##################
+if [ "$MUSIC" -eq 1]
+then
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync SELECTED, sync started" >> $logfolder/$logname
+  "$DIR2"/MusicSync.sh #run seperate 'tagger' script
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync DESELECTED, no sync" >> $logfolder/$logname
+fi
 #
 #
-#####################
-## start FILM sync ##
-#####################
+#################
+### FILM sync ###
+#################
 echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Film sync started" >> $logfolder/$logname
 umask "$umask_syncmedia"
@@ -73,15 +75,21 @@ update_videolibrary # update Video Library on Kodi
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$logname
 #
 #
-###################
-## start TV sync ##
-###################
-echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync started" >> $logfolder/$logname
-umask "$umask_syncmedia"
-rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$tv_source" "$tv_dest" >> $logfolder/$logname
-update_videolibrary # update Video Library on Kodi
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
+###############
+### TV sync ###
+###############
+if [ "$MUSIC" -eq 1]
+then
+  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
+  umask "$umask_syncmedia"
+  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$tv_source" "$tv_dest" >> $logfolder/$logname
+  update_videolibrary # update Video Library on Kodi
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync DESELECTED, no sync" >> $logfolder/$logname
+fi
 #
 #
 ####################
