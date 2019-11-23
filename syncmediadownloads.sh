@@ -10,7 +10,7 @@
 ####################
 ## set variables  ##
 ####################
-VERSION="v1.0"
+VERSION="v2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
@@ -43,57 +43,79 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 }
 #
 echo "#####################################################################################################################" > $logfolder/$logname
-echo "#####################################################################################################################" > $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
 echo "Directory being used is "$DIR2"" >> $logfolder/$logname# for error checking
 sleep 1m #sleep for cron @reboot to allow tine for network to start
 #
 #
-######################
-## start MUSIC sync ##
-######################
-echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync started" >> $logfolder/$logname
-# sync flac source files first
-umask "$umask_syncmedia"
-rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
-"$DIR2"/MusicSync.sh #run seperate 'tagger' script
-update_musiclibrary #update music library on Kodi
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Music sync finished" >> $logfolder/$logname
+##################
+### MUSIC sync ###
+##################
+if [[ "$MUSIC" -eq 1 ]]
+then
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
+  "$DIR2"/MusicSync.sh #run seperate 'tagger' script
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync DESELECTED, no sync" >> $logfolder/$logname
+fi
 #
 #
-#####################
-## start FILM sync ##
-#####################
-echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Film sync started" >> $logfolder/$logname
-umask "$umask_syncmedia"
-rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$movie_source" "$movie_dest" >> $logfolder/$logname
-update_videolibrary # update Video Library on Kodi
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Movie sync finished" >> $logfolder/$logname
+#################
+### FILM sync ###
+#################
+if [[ "$MOVIES" -eq 1 ]]
+then
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync SELECTED, sync started" >> $logfolder/$logname
+  umask "$umask_syncmedia"
+  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$movie_source" "$movie_dest" >> $logfolder/$logname
+  update_videolibrary # update Video Library on Kodi
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync COMPLETE" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync DESELECTED, no sync" >> $logfolder/$logname
+fi
 #
 #
-###################
-## start TV sync ##
-###################
-echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync started" >> $logfolder/$logname
-umask "$umask_syncmedia"
-rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$tv_source" "$tv_dest" >> $logfolder/$logname
-update_videolibrary # update Video Library on Kodi
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
+###############
+### TV sync ###
+###############
+if [[ "$TV" -eq 1 ]]
+then
+  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
+  umask "$umask_syncmedia"
+  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$tv_source" "$tv_dest" >> $logfolder/$logname
+  update_videolibrary # update Video Library on Kodi
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync DESELECTED, no sync" >> $logfolder/$logname
+fi
 #
 #
 ####################
 ## start NFL sync ##
 ####################
-echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync started" >> $logfolder/$logname
-umask "$umask_syncmedia"
-rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
+if [[ "$NFL" -eq 1 ]]
+then
+  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync SELECTED, sync started" >> $logfolder/$logname
+  umask "$umask_syncmedia"
+  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync DESELECTED, no sync" >> $logfolder/$logname
+fi
+#
+#
 echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
+echo "####################################################################################" >> $logfolder/$logname
 #
 #
 exit 0
