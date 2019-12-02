@@ -55,6 +55,7 @@ if [[ "$MUSIC" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
+  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
   "$DIR2"/MusicSync.sh #run seperate 'tagger' script
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
 else
