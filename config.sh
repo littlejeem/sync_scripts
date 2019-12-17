@@ -73,3 +73,12 @@ beets_switch=""
 beets_flac_path="" #path to beets config & library file directory (FLAC)
 beets_alac_path="" #path to beets config & library file directory (alac)
 beets_upload_path="" #path to beets config & library file directory (upload)
+#
+#
+###########################
+### "Pushover" Settings ###
+###########################
+app_token=""
+user_token=""
+#
+#
