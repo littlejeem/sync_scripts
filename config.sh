@@ -75,10 +75,22 @@ beets_alac_path="" #path to beets config & library file directory (alac)
 beets_upload_path="" #path to beets config & library file directory (upload)
 #
 #
-###########################
-### "Pushover" Settings ###
-###########################
+#########################
+## "Pushover" Settings ##
+#########################
 app_token=""
 user_token=""
+#
+#
+#######################
+## "Backup" Settings ##
+#######################
+sleeptime=""                    # dfines how long should the sleep period be, not necessary once script working, default is seconds, append with 'm' if wanting minutes
+mount=""
+uuid=""
+scriptlocation=""
+loglocation=""
+rsyncsource=""
+rsyncdestination=""
 #
 #
