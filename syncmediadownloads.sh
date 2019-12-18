@@ -114,6 +114,22 @@ else
 fi
 #
 #
+##############################
+## start "MUSICSERVER" sync ##
+##############################
+if [[ "$MUSICSERVER" -eq 1 ]]
+then
+  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync SELECTED, sync started" >> $logfolder/$logname
+  umask "$umask_syncmedia"
+  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$REMOTE_USER"@"$REMOTE_IP":"$musicserver_source" "$musicserver_dest" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync finished" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync DESELECTED, no sync" >> $logfolder/$logname
+fi
+#
+#
 echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
 echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
 echo "####################################################################################" >> $logfolder/$logname
