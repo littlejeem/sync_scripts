@@ -21,6 +21,8 @@ source "$WORKDIR"/config.sh
 ######################
 #
 # clean Audiolibrary
+if [[ "$musicserver" -eq 0 ]]
+then
 clean_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
@@ -28,6 +30,9 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 update_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
+else
+  echo "no kodi library functions defined as needed"
+fi
 #
 # deleting if
 delete_if () {
