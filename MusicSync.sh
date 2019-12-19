@@ -12,7 +12,7 @@
 ## Import settings data from file ##
 ####################################
 #
-VERSION=1.0
+VERSION=1.3
 WORKDIR="$HOME/bin/sync_scripts"
 source "$WORKDIR"/config.sh
 #
