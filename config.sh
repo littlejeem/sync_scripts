@@ -6,43 +6,58 @@ rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
 rsync_variable1="--protect-args" #default destination set, change as appropriate
 rsync_variable2="--remove-source-files" #default destination set, change as appropriate
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
-logfolder="/home/"$user"/scripts/scriptlogs"
+logfolder="/home/"$user"/bin/scriptlogs"
+rsync_port="ssh -p 5018" #IN DEVELOPMENT NOT YET IN USE
 #
 #
 ########################
 ## "Machine Settings" ##
 ########################
-LOCAL_IP="" #IP address of the local system
-REMOTE_IP="" #IP address of the remote system
-LOCAL_USER="" #username for the rsync local (pull too)
-REMOTE_USER="" #username for the rsync remote system (pull from)
+mediapc_ip="" #IP address of the local system
+downloadbox_ip="" #IP address of the remote system
+mediapc_user="" #username for the rsync local (pull too)
+downloadbox_user="" #username for the rsync remote system (pull from)
+musicserver_user= "" #username for the rsync local (push too)
+musicserver_ip="" #username for the rsync remote system (push to)
 #
 #
 ####################
 ## "Kodi Config" ###
 ####################
-kodiuser="" #username ofthe kodi interface on the local machine
-kodipass="" #password of same
-PORT="" #port that kodi is running under, usually 8080
-KODIASSEMBLY="http://"$kodiuser":"$kodipass"@"$LOCAL_IP":"$PORT"/jsonrpc" #auto generated for curl from other variables
+kodiVIDEOuser="" #username of the kodi interface on the local machine
+kodiVIDEOpass="" #password of same
+portVIDEO="" #port that kodi is running under, usually 8080
+kodi_VIDEO_assembly="http://"$kodiVIDEOuser":"$kodiVIDEOpass"@"$LOCAL_IP":"$portVIDEO"/jsonrpc" #auto generated for curl from other variables
+#
+kodiMUSICuser="" #username ofthe kodi interface on the music server machine
+kodiMUSICpass="" #password of same
+portMUSIC="8080" #port that kodi is running under, usually 8080
+kodi_MUSIC_assembly="http://"$kodiMUSICuser":"$kodiMUSICpass"@"$REMOTESERVER_IP":"$portMUSIC"/jsonrpc" #auto generated for curl from other variables
 #
 #
 ####################
 ## "Sync Choices" ##
 ####################
-MUSIC="0" #1 to include, 0 to ignore. 0 is set as default
-TV="0" #1 to include, 0 to ignore. 0 is set as default
-MOVIES="0" #1 to include, 0 to ignore. 0 is set as default
-NFL="0" #1 to include, 0 to ignore. 0 is set as default
+music="0" #1 to include, 0 to ignore. 0 is set as default
+tv="0" #1 to include, 0 to ignore. 0 is set as default
+movies="0" #1 to include, 0 to ignore. 0 is set as default
+nfl="0" #1 to include, 0 to ignore. 0 is set as default
+audiobooks="0" #1 to include, 0 to ignore. 0 is set as default
+musicserver="0" #1 to include, 0 to ignore. 0 is set as default
 #
 #
 ######################################
 ## "syncmediadownloads.sh Settings" ##
 ######################################
-#
 # LOSSLESS AUDIO
 lossless_source=""
 lossless_dest=""
+# MUSICSERVER AUDIO
+musicserver_source=""
+musicserver_dest=""
+# AUDIOBOOKS
+audiobook_source=""
+audiobook_dest=""
 # TV
 tv_source=""
 tv_dest=""
@@ -52,8 +67,10 @@ movie_dest=""
 # NFL
 nfl_source=""
 nfl_dest=""
-#
-#Umask
+# MUSIC SERVER
+$musicserver_source=""
+$musicserver_dest=""
+# Umask
 umask_syncmedia="" #umask set prior to an rsync, 0000 is the default for 777 equiv permissions
 #############################
 ## "MusicSync.sh Settings" ##
@@ -85,7 +102,6 @@ user_token=""
 #######################
 ## "Backup" Settings ##
 #######################
-sleeptime=""                    # dfines how long should the sleep period be, not necessary once script working, default is seconds, append with 'm' if wanting minutes
 mount=""
 uuid=""
 scriptlocation=""
