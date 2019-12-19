@@ -24,26 +24,28 @@ musicserver_ip="" #username for the rsync remote system (push to)
 ####################
 ## "Kodi Config" ###
 ####################
+# video
 kodiVIDEOuser="" #username of the kodi interface on the local machine
 kodiVIDEOpass="" #password of same
-portVIDEO="" #port that kodi is running under, usually 8080
-kodi_VIDEO_assembly="http://"$kodiVIDEOuser":"$kodiVIDEOpass"@"$LOCAL_IP":"$portVIDEO"/jsonrpc" #auto generated for curl from other variables
-#
+portVIDEO="" #port that kodi video server is running under, usually 8080
+portMUSIC="" #port that kodi music server is running under, usually 8080
+kodi_VIDEO_assembly="http://"$kodiVIDEOuser":"$kodiVIDEOpass"@"$mediapc_ip":"$portVIDEO"/jsonrpc" #auto generated for curl from other variables
+# music
 kodiMUSICuser="" #username ofthe kodi interface on the music server machine
 kodiMUSICpass="" #password of same
 portMUSIC="8080" #port that kodi is running under, usually 8080
-kodi_MUSIC_assembly="http://"$kodiMUSICuser":"$kodiMUSICpass"@"$REMOTESERVER_IP":"$portMUSIC"/jsonrpc" #auto generated for curl from other variables
+kodi_MUSIC_assembly="http://"$kodiMUSICuser":"$kodiMUSICpass"@"$musicserver_ip":"$portMUSIC"/jsonrpc" #auto generated for curl from other variables
 #
 #
 ####################
 ## "Sync Choices" ##
 ####################
 music="0" #1 to include, 0 to ignore. 0 is set as default
+musicserver="0" #1 to include, 0 to ignore. 0 is set as default
 tv="0" #1 to include, 0 to ignore. 0 is set as default
 movies="0" #1 to include, 0 to ignore. 0 is set as default
 nfl="0" #1 to include, 0 to ignore. 0 is set as default
 audiobooks="0" #1 to include, 0 to ignore. 0 is set as default
-musicserver="0" #1 to include, 0 to ignore. 0 is set as default
 #
 #
 ######################################
