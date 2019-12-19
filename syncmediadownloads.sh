@@ -65,6 +65,29 @@ else
 fi
 #
 #
+##############################
+## start "MUSICSERVER" sync ##
+##############################
+if [[ "$musicserver" -eq 1 ]]
+then
+  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync SELECTED, sync started" >> $logfolder/$logname
+  umask "$umask_syncmedia"
+  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_source" >> $logfolder/$logname
+  update_musiclibrary
+  clean_musiclibrary
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync finished" >> $logfolder/$logname
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync DESELECTED, no sync" >> $logfolder/$logname
+fi
+#
+#
+echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
+echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
+echo "####################################################################################" >> $logfolder/$logname
+#
+#
 ###############
 ## FILM sync ##
 ###############
@@ -113,29 +136,6 @@ else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync DESELECTED, no sync" >> $logfolder/$logname
 fi
-#
-#
-##############################
-## start "MUSICSERVER" sync ##
-##############################
-if [[ "$musicserver" -eq 1 ]]
-then
-  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync SELECTED, sync started" >> $logfolder/$logname
-  umask "$umask_syncmedia"
-  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_source" >> $logfolder/$logname
-  update_musiclibrary
-  clean_musiclibrary 
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync finished" >> $logfolder/$logname
-else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync DESELECTED, no sync" >> $logfolder/$logname
-fi
-#
-#
-echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
-echo "####################################################################################" >> $logfolder/$logname
 #
 #
 exit 0
