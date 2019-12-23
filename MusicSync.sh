@@ -117,5 +117,25 @@ delete_if
 cd "$upload_mp3"
 delete_if
 #
+#
+#########################
+### MUSIC SERVER sync ###
+#########################
+if [[ "$musicserver" -eq 1 ]]
+then
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $logfolder/$logname.log
+  rsync "$rsync_altswitch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished" >> $logfolder/$logname.log
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync" >> $logfolder/$logname.log
+fi
+update_KodiAudioServer
+sleep 5s
+clean_KodiAudioServer
+sleep 5s
+#
+#
 # all done
 exit
