@@ -1,3 +1,8 @@
+###################
+## Version "2.0" ##
+###################
+#
+#
 ########################
 ## "Global Settings" ###
 ########################
@@ -6,8 +11,9 @@ rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
 rsync_variable1="--protect-args" #default destination set, change as appropriate
 rsync_variable2="--remove-source-files" #default destination set, change as appropriate
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
+rsync_altswitch="-vzr"
 logfolder="/home/"$user"/bin/scriptlogs"
-rsync_port="ssh -p 5018" #IN DEVELOPMENT NOT YET IN USE
+rsync_port="ssh -p 0000" #IN DEVELOPMENT NOT YET IN USE
 #
 #
 ########################
@@ -28,7 +34,6 @@ musicserver_ip="" #username for the rsync remote system (push to)
 kodiVIDEOuser="" #username of the kodi interface on the local machine
 kodiVIDEOpass="" #password of same
 portVIDEO="" #port that kodi video server is running under, usually 8080
-portMUSIC="" #port that kodi music server is running under, usually 8080
 kodi_VIDEO_assembly="http://"$kodiVIDEOuser":"$kodiVIDEOpass"@"$mediapc_ip":"$portVIDEO"/jsonrpc" #auto generated for curl from other variables
 # music
 kodiMUSICuser="" #username ofthe kodi interface on the music server machine
