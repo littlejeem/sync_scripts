@@ -46,7 +46,7 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 echo "#####################################################################################################################" > $logfolder/$logname
 echo " - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
 echo "Directory being used is "$DIR2"" >> $logfolder/$logname# for error checking
-sleep 1m #sleep for cron @reboot to allow tine for network to start
+sleep 15s #sleep for cron @reboot to allow tine for network to start
 #
 #
 ################
@@ -56,7 +56,7 @@ if [[ "$music" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
+  rsync "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
   "$DIR2"/MusicSync.sh #run seperate 'tagger' script
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
 else
@@ -72,7 +72,6 @@ if [[ "$musicserver" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync SELECTED, sync started" >> $logfolder/$logname
-  umask "$umask_syncmedia"
   rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_source" >> $logfolder/$logname
   update_musiclibrary
   clean_musiclibrary
@@ -95,8 +94,7 @@ if [[ "$movies" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync SELECTED, sync started" >> $logfolder/$logname
-  umask "$umask_syncmedia"
-  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest" >> $logfolder/$logname
+  rsync "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest" >> $logfolder/$logname
   update_videolibrary # update Video Library on Kodi Video Server
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync COMPLETE" >> $logfolder/$logname
 else
@@ -112,8 +110,7 @@ if [[ "$tv" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
-  umask "$umask_syncmedia"
-  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest" >> $logfolder/$logname
+  rsync "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest" >> $logfolder/$logname
   update_videolibrary # update Video Library on Kodi Video Server
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
 else
@@ -129,7 +126,6 @@ if [[ "$nfl" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync SELECTED, sync started" >> $logfolder/$logname
-  umask "$umask_syncmedia"
   rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
 else
