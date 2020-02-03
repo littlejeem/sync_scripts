@@ -34,22 +34,23 @@ function rsync_command ()
   Timestamp "$Timestamp_message"
   Timestamp_message=$(echo "sync started")
   Timestamp "$Timestamp_message"
-  message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - sync started")
+  message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
   Pushover
-  #rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$logdir"/"$Timestamp".log
+  rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$logdir"/"$Timestamp".log
   Timestamp_message=$(echo "sync completed")
   Timestamp "$Timestamp_message"
 }
 #
 function exit_segment ()
 {
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - sync completed"
   rm -r "$lockdir"          #remove the lockdir once used
   umount "$mountpoint"
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed"
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - Hard Drive "$mountpoint" unmounted"
-  message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - sync completed, unplug the drive")
+  message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed, unplug the drive")
   Pushover
   echo "-------------------------------------------------------------------------"
+  exit 0
 }
 #
 #
