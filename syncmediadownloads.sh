@@ -10,18 +10,18 @@
 ####################
 ## set variables  ##
 ####################
-VERSION="v2.0"
+version="v2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
-DIR2="$HOME/bin/sync_scripts"
+workdir="/home/"$username"/bin/sync_scripts"
 stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 #
 #
 #####################################
 ## Import sensitive data from file ##
 #####################################
-source "$DIR2"/config.sh
+source "$workdir"/config.sh
 #
 #
 ##############################################################
@@ -45,7 +45,7 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 #
 echo "#####################################################################################################################" > $logfolder/$logname
 echo " - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
-echo "Directory being used is "$DIR2"" >> $logfolder/$logname# for error checking
+echo "Directory being used is "$workdir"" >> $logfolder/$logname# for error checking
 sleep 15s #sleep for cron @reboot to allow tine for network to start
 #
 #
@@ -57,7 +57,7 @@ then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
   rsync "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
-  "$DIR2"/MusicSync.sh #run seperate 'tagger' script
+  "$workdir"/MusicSync.sh #run seperate 'tagger' script
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
 else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
