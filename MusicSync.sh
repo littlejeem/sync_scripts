@@ -12,9 +12,9 @@
 ## Import settings data from file ##
 ####################################
 #
-VERSION=2.0
-WORKDIR="$HOME/bin/sync_scripts"
-source "$WORKDIR"/config.sh
+version=2.0
+workdir="/home/$username/bin/sync_scripts"
+source "$workdir"/config.sh
 #
 ######################
 ## Define Functions ##
