@@ -6,7 +6,7 @@
 ########################
 ## "Global Settings" ###
 ########################
-user="" #user who will be running the script
+username="" #user who will be running the script
 rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
 rsync_variable1="--protect-args" #default destination set, change as appropriate
 rsync_variable2="--remove-source-files" #default destination set, change as appropriate
@@ -14,6 +14,7 @@ rsync_variable3="-p" #tell rsync you explicitly want to set Directory & File Per
 rsync_variable4="-og" #tell rsync you explicity want to specify the "user" & "group"
 rsync_variable5="--chmod=Dug+rwx,Fug+rwx,o+rx,o-w" #set the permissions, D=directory, F=file
 rsync_variable6="--chown="$user":group" #set the ownership
+rsync_variable7="--prune-empty-dirs"
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
 rsync_altswitch="-vzr"
 logfolder="/home/"$user"/bin/scriptlogs"
