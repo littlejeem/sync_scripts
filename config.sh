@@ -13,8 +13,8 @@ rsync_variable2="--remove-source-files" #default destination set, change as appr
 rsync_variable3="-p" #tell rsync you explicitly want to set Directory & File Permissions
 rsync_variable4="-og" #tell rsync you explicity want to specify the "user" & "group"
 rsync_variable5="--chmod=Dug+rwx,Fug+rwx,o+rx,o-w" #set the permissions, D=directory, F=file
-rsync_variable6="--chown="$user":group" #set the ownership
-rsync_variable7="--prune-empty-dirs"
+rsync_variable6="--chown="$fileowner":group" #set the ownership
+rsync_variable7="--prune-empty-dirs" #tell rsync not to transfer 'empty' folders during sync
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
 rsync_altswitch="-vzr"
 logfolder="/home/"$user"/bin/scriptlogs"
@@ -82,8 +82,9 @@ nfl_dest=""
 # MUSIC SERVER
 $musicserver_source=""
 $musicserver_dest=""
-# Umask
-umask_syncmedia="" #umask set prior to an rsync, 0000 is the default for 777 equiv permissions
+# file transfers
+fileowner="" #file owner of the files desired on the destination location
+groupowner="" #group owner of the files desired on the destination location
 #############################
 ## "MusicSync.sh Settings" ##
 #############################
