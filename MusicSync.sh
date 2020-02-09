@@ -12,15 +12,17 @@
 ## Import settings data from file ##
 ####################################
 #
-VERSION=1.0
-WORKDIR="$HOME/bin/sync_scripts"
-source "$WORKDIR"/config.sh
+version=2.0
+workdir="/home/$username/bin/sync_scripts"
+source "$workdir"/config.sh
 #
 ######################
 ## Define Functions ##
 ######################
 #
 # clean Audiolibrary
+if [[ "$musicserver" -eq 0 ]]
+then
 clean_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
@@ -28,6 +30,9 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 update_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
 }
+else
+  echo "no kodi library functions defined as needed"
+fi
 #
 # deleting if
 delete_if () {
@@ -111,6 +116,26 @@ delete_if
 # tidy up upload directory
 cd "$upload_mp3"
 delete_if
+#
+#
+#########################
+### MUSIC SERVER sync ###
+#########################
+if [[ "$musicserver" -eq 1 ]]
+then
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $logfolder/$logname.log
+  rsync "$rsync_altswitch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished" >> $logfolder/$logname.log
+else
+  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync" >> $logfolder/$logname.log
+fi
+update_KodiAudioServer
+sleep 5s
+clean_KodiAudioServer
+sleep 5s
+#
 #
 # all done
 exit
