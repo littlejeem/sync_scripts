@@ -43,6 +43,19 @@ clean_musiclibrary () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
 }
 #
+rsync_error_catch () {
+  if [ $? == "0" ]
+   then
+    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` $section rsync completed successfully" >> $logfolder/$logname
+   else
+    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` $section produced an error" >> $logfolder/$logname
+  fi
+}
+#
+#
+#######################
+## Start Main Script ##
+#######################
 echo "#####################################################################################################################" > $logfolder/$logname
 echo " - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
 echo "Directory being used is "$workdir"" >> $logfolder/$logname# for error checking
@@ -52,11 +65,13 @@ sleep 15s #sleep for cron @reboot to allow tine for network to start
 ################
 ## MUSIC sync ##
 ################
-if [[ "$music" -eq 1 ]]
+section="music"
+if [[ "$section" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
   rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
+  rsync_error_catch
   "$workdir"/MusicSync.sh #run seperate 'tagger' script
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
 else
@@ -68,14 +83,16 @@ fi
 ##############################
 ## start "MUSICSERVER" sync ##
 ##############################
-if [[ "$musicserver" -eq 1 ]]
+section="musicserver"
+if [[ "$section" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync SELECTED, sync started" >> $logfolder/$logname
   rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_source" >> $logfolder/$logname
+  rsync_error_catch
   update_musiclibrary
   clean_musiclibrary
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync finished" >> $logfolder/$logname
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER section finished" >> $logfolder/$logname
 else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync DESELECTED, no sync" >> $logfolder/$logname
@@ -90,11 +107,13 @@ echo "##########################################################################
 ###############
 ## FILM sync ##
 ###############
-if [[ "$movies" -eq 1 ]]
+section="movies"
+if [[ "section" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync SELECTED, sync started" >> $logfolder/$logname
   rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest" >> $logfolder/$logname
+  rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync COMPLETE" >> $logfolder/$logname
 else
@@ -106,11 +125,13 @@ fi
 #############
 ## TV sync ##
 #############
-if [[ "$tv" -eq 1 ]]
+section="tv"
+if [[ "$section" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
   rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest" >> $logfolder/$logname
+  rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
 else
@@ -122,11 +143,13 @@ fi
 ####################
 ## start NFL sync ##
 ####################
-if [[ "$nfl" -eq 1 ]]
+section="nfl"
+if [[ "$section" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync SELECTED, sync started" >> $logfolder/$logname
   rsync "$rsync_variable7" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
+  rsync_error_catch
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
 else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
