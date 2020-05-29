@@ -22,7 +22,6 @@ stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 #####################################
 ## Import sensitive data from file ##
 #####################################
-#source /home/"$username"/.config/ScriptSettings/config.sh
 source "$config_file"
 #
 #
@@ -61,7 +60,7 @@ rsync_error_catch () {
 mkdir -p "$logfolder"
 echo "#####################################################################################################################" > $logfolder/$logname
 echo " - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
-echo 'User is "$username" and config file is "$config_file"' >> $logfolder/$logname #for error checking
+echo "User is $username and config file is $config_file" >> $logfolder/$logname #for error checking
 sleep 15s #sleep for cron @reboot to allow tine for network to start
 #
 #
