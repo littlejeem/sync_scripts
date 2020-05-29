@@ -29,7 +29,7 @@ downloadbox_ip="" #IP address of the remote system
 musicserver_ip="" #username for the rsync remote system (push to)
 mediapc_user="" #username for the rsync local (pull too)
 downloadbox_user="" #username for the rsync remote system (pull from)
-musicserver_user= "" #username for the rsync local (push too)
+musicserver_user="" #username for the rsync local (push too)
 #
 #
 ####################
