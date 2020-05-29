@@ -14,14 +14,16 @@ version="v2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
-workdir="/home/"$username"/bin/sync_scripts"
+username="jlivin25"
+config_file="/home/"$username"/.config/ScriptSettings/config.sh"
 stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 #
 #
 #####################################
 ## Import sensitive data from file ##
 #####################################
-source "$workdir"/config.sh
+#source /home/"$username"/.config/ScriptSettings/config.sh
+source "$config_file"
 #
 #
 ##############################################################
@@ -56,9 +58,10 @@ rsync_error_catch () {
 #######################
 ## Start Main Script ##
 #######################
+mkdir -p "$logfolder"
 echo "#####################################################################################################################" > $logfolder/$logname
 echo " - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
-echo "Directory being used is "$workdir"" >> $logfolder/$logname# for error checking
+echo 'User is "$username" and config file is "$config_file"' >> $logfolder/$logname #for error checking
 sleep 15s #sleep for cron @reboot to allow tine for network to start
 #
 #
