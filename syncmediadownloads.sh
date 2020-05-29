@@ -15,7 +15,7 @@ scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
 username="jlivin25"
-config_file="/home/"$username"/.config/ScriptSettings/config.sh"
+config_file="/home/$username/.config/ScriptSettings/config.sh"
 stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 #
 #
