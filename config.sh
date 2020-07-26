@@ -6,7 +6,6 @@
 ########################
 ## "Global Settings" ###
 ########################
-username="" #user who will be running the script
 rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
 rsync_variable1="--protect-args" #default destination set, change as appropriate
 rsync_variable2="--remove-source-files" #default destination set, change as appropriate
@@ -17,7 +16,7 @@ rsync_variable6="--chown=$fileowner:$group" #set the ownership
 rsync_variable7="--prune-empty-dirs" #tell rsync not to transfer 'empty' folders during sync
 rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
 rsync_altswitch="-vzr"
-logfolder="/home/"$user"/bin/scriptlogs"
+logfolder="$HOME/bin/scriptlogs"
 rsync_port="ssh -p 0000" #IN DEVELOPMENT NOT YET IN USE
 #
 #
