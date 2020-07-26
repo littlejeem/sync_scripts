@@ -14,8 +14,7 @@ version="v2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
-username="jlivin25"
-config_file="/home/$username/.config/ScriptSettings/config.sh"
+config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
 #
@@ -23,6 +22,12 @@ stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
 #####################################
 ## Import sensitive data from file ##
 #####################################
+#check for config file
+if [[ ! -f "$config_file" ]]; then
+    echo "config file $config_file does not exist, script exiting"
+    exit 1
+fi
+#source config file
 source "$config_file"
 #
 #
