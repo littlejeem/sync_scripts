@@ -57,19 +57,19 @@ mkdir -p $logfolder
 #
 # start MUSIC Import
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge
-"$beets_path" "$beets_switch" "$beets_alac_path"/config.yaml import -q "$download_flac"
+"$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$download_flac"
 rm "$beets_alac_path"/musiclibrary.blb
-"$beets_path" "$beets_switch" "$beets_alac_path"/config.yaml import -q "$rip_flac"
+"$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$rip_flac"
 rm "$beets_alac_path"/musiclibrary.blb
 # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
-"$beets_path" "$beets_switch" "$beets_upload_path"/config.yaml import -q "$download_flac"
+"$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$download_flac"
 rm "$beets_upload_path"/musiclibrary.blb
-"$beets_path" "$beets_switch" "$beets_upload_path"/config.yaml import -q "$rip_flac"
+"$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$rip_flac"
 rm "$beets_upload_path"/musiclibrary.blb
 # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
-"$beets_path" "$beets_switch" "$beets_flac_path"/config.yaml import -q "$download_flac"
+"$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$download_flac"
 rm "$beets_flac_path"/musiclibrary.blb
-"$beets_path" "$beets_switch" "$beets_flac_path"/config.yaml import -q "$rip_flac"
+"$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$rip_flac"
 rm "$beets_flac_path"/musiclibrary.blb
 #
 #
