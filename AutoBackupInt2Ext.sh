@@ -55,7 +55,7 @@ function exit_segment ()
 ####################
 ## import scripts ##
 ####################
-source "INSERTYOURSCRIPTDIR"/config.sh
+source $HOME/.config/ScriptSettings/sync_config.sh
 #
 #
 ##################
