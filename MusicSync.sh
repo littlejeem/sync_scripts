@@ -23,11 +23,11 @@ config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 if [[ "$musicserver" -eq 0 ]]
 then
 clean_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
 }
 # update AudioLibrary
 update_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $KODIASSEMBLY
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
 }
 else
   echo "no kodi library functions defined as needed"
