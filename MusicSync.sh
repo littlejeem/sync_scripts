@@ -13,8 +13,7 @@
 ####################################
 #
 version=2.0
-workdir="/home/$username/bin/sync_scripts"
-source "$workdir"/config.sh
+config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 #
 ######################
 ## Define Functions ##
@@ -48,8 +47,19 @@ delete_if () {
 ##################
 # Initial Setup ##
 ##################
+#check for config file
+if [[ ! -f "$config_file" ]]; then
+    echo "config file $config_file does not exist, script exiting"
+    exit 1
+fi
+#source config file
+source "$HOME/.config/ScriptSettings/sync_config.sh"
+#check if log folder exists
+if [[ ! -f "$logfolder" ]]; then
+    echo "log folder $logfolder does not exist, attempting to create..."
+    mkdir -p $logfolder
+fi
 #
-mkdir -p $logfolder
 #
 #######################
 ## Start Main Script ##
