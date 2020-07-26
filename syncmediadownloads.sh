@@ -17,6 +17,7 @@ logname=$lockname.log # Uses the script name to create the log
 config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
+dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #
 #
 #####################################
@@ -80,7 +81,7 @@ then
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
   rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
   rsync_error_catch
-  "$workdir"/MusicSync.sh #run seperate 'tagger' script
+  "$dir_name"/MusicSync.sh #run seperate 'tagger' script
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
 else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
