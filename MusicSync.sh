@@ -108,10 +108,6 @@ else
     sleep 5s
     cp -rpv "$alaclibrary_source"/* "$M4A_musicdest"
     rm -r *
-    update_KodiAudio
-    sleep 5s
-    clean_KodiAudio
-    sleep 5s
 fi
 #
 #
@@ -141,10 +137,9 @@ else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync" >> $logfolder/$logname.log
 fi
-update_KodiAudioServer
-sleep 5s
-clean_KodiAudioServer
-sleep 5s
+update_KodiAudio
+sleep 30s
+clean_KodiAudio
 #
 #
 # all done
