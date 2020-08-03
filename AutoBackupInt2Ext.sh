@@ -55,7 +55,7 @@ function exit_segment ()
 ####################
 ## import scripts ##
 ####################
-source $HOME/.config/ScriptSettings/sync_config.sh
+source /home/jlivin25/.config/ScriptSettings/sync_config.sh
 #
 #
 ##################
