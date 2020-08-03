@@ -21,7 +21,7 @@ function Timestamp ()
 #
 function Pushover ()
 {
-  curl -s --form-string token="$app_token" --form-string user="$user_token" --form-string message="$message_form" https://api.pushover.net/1/messages.json
+  curl -s --form-string token="$backup_app_token" --form-string user="$user_token" --form-string message="$message_form" https://api.pushover.net/1/messages.json
 }
 #
 function rsync_command ()
