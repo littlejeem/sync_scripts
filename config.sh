@@ -107,18 +107,17 @@ beets_upload_path="" #path to beets config & library file directory (upload)
 #########################
 ## "Pushover" Settings ##
 #########################
-app_token=""
-user_token=""
+user_token="" #<--Main user key from your pushover account
 #
 #
 #######################
 ## "Backup" Settings ##
 #######################
-mount=""
-uuid=""
-scriptlocation=""
+mount="" #<--Desired mount point
+uuid="" #<--UUID of the backup drive
+backup_app_token="" #<--Script specific token from pushover, which needs setting up first.
 loglocation=""
-rsyncsource=""
-rsyncdestination=""
+rsyncsource="" #<--Backup from... (trailing slash for "contents of")
+rsyncdestination="" #<--Backup too... (no trailing slash to copy INTO trailing folder)
 #
 #
