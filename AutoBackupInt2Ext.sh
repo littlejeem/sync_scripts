@@ -36,7 +36,7 @@ function rsync_command ()
   Timestamp "$Timestamp_message"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
   Pushover
-  rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$logdir"/"$Timestamp".log
+  rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$loglocation"/"$Timestamp".log
 }
 #
 function exit_segment ()
