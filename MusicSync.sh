@@ -104,9 +104,9 @@ fi
 #source config file
 source "$HOME/.config/ScriptSettings/sync_config.sh"
 #check if log folder exists
-if [[ ! -f "$logfolder" ]]; then
+if [[ ! -d "$logfolder" ]]; then
     echo "log folder $logfolder does not exist, attempting to create..."
-    mkdir -p $logfolder
+    #mkdir -p $logfolder
     script_log="$logfolder/MusicSync.log"
     touch $script_log
 fi
