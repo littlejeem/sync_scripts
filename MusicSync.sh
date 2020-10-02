@@ -25,6 +25,7 @@ then
 clean_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
 }
+#
 # update AudioLibrary
 update_KodiAudio () {
 curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
@@ -44,6 +45,54 @@ delete_if () {
       rm -r *
   fi
 }
+#
+# Logging functions
+SCRIPTENTRY () {
+ timeAndDate=`date`
+ script_name=`basename "$0"`
+ script_name="${script_name%.*}"
+ echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $script_log
+}
+#
+SCRIPTEXIT () {
+ script_name=`basename "$0"`
+ script_name="${script_name%.*}"
+ echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $script_log
+}
+#
+ENTRY () {
+ local cfn="${FUNCNAME[1]}"
+ timeAndDate=`date`
+ echo "[$timeAndDate] [DEBUG]  > $cfn $FUNCNAME" >> $script_log
+}
+#
+EXIT () {
+ local cfn="${FUNCNAME[1]}"
+ timeAndDate=`date`
+ echo "[$timeAndDate] [DEBUG]  < $cfn $FUNCNAME" >> $script_log
+}
+#
+INFO () {
+ local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    echo "[$timeAndDate] [INFO]  $msg" >> $script_log
+}
+#
+DEBUG () {
+ local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+ echo "[$timeAndDate] [DEBUG]  $msg" >> $script_log
+}
+#
+ERROR () {
+ local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    echo "[$timeAndDate] [ERROR]  $msg" >> $script_log
+}
+#
 ##################
 # Initial Setup ##
 ##################
@@ -58,6 +107,8 @@ source "$HOME/.config/ScriptSettings/sync_config.sh"
 if [[ ! -f "$logfolder" ]]; then
     echo "log folder $logfolder does not exist, attempting to create..."
     mkdir -p $logfolder
+    script_log="$logfolder/MusicSync.log"
+    touch $script_log
 fi
 #
 #
