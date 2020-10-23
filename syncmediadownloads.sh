@@ -156,7 +156,7 @@ if [[ "$section" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
+  rsync "$rsync_variable7" "$rsync_variable1" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
   rsync_error_catch
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
 else
