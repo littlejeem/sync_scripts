@@ -93,17 +93,17 @@ ERROR () {
     echo "[$timeAndDate] [ERROR]  $msg" >> $script_log
 }
 #
-##################
-# Initial Setup ##
-##################
-#check for config file
+#+-------------------+
+#+---Initial Setup---+
+#+-------------------+
+# check for config file
 if [[ ! -f "$config_file" ]]; then
     echo "config file $config_file does not exist, script exiting"
     exit 1
 fi
-#source config file
+# source config file
 source "$HOME/.config/ScriptSettings/sync_config.sh"
-#check if log folder exists
+# check if log folder exists
 if [[ ! -d "$logfolder" ]]; then
     echo "log folder $logfolder does not exist, attempting to create..."
     #mkdir -p $logfolder
@@ -112,27 +112,53 @@ if [[ ! -d "$logfolder" ]]; then
 fi
 #
 #
-#######################
-## Start Main Script ##
-#######################
+#+---------------------------+
+#+---Start Conversion Work---+
+#+---------------------------+
+# ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
+if [[ "$music_alac" -eq 1 ]]
+then
+  echo "ALAC conversion started"
+  "$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$download_flac"
+  rm "$beets_alac_path"/musiclibrary.blb
+  "$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$rip_flac"
+  rm "$beets_alac_path"/musiclibrary.blb
+  echo "ALAC conversion finished"
+else
+  echo "ALAC conversion not selected"
+fi
 #
-# start MUSIC Import
-# ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge
-"$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$download_flac"
-rm "$beets_alac_path"/musiclibrary.blb
-"$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$rip_flac"
-rm "$beets_alac_path"/musiclibrary.blb
+#
 # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
-"$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$download_flac"
-rm "$beets_upload_path"/musiclibrary.blb
-"$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$rip_flac"
-rm "$beets_upload_path"/musiclibrary.blb
-# FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
-"$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$download_flac"
-rm "$beets_flac_path"/musiclibrary.blb
-"$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$rip_flac"
-rm "$beets_flac_path"/musiclibrary.blb
+if [[ "$music_google" -eq 1 ]]
+then
+  echo ".mp3 UPLOAD started"
+  "$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$download_flac"
+  rm "$beets_upload_path"/musiclibrary.blb
+  "$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$rip_flac"
+  rm "$beets_upload_path"/musiclibrary.blb
+  echo ".mp3 UPLOAD finished"
+else
+  echo ".mp3 UPLOAD not selected"
+fi
 #
+#
+# FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
+if [[ "$music_flac" -eq 1 ]]
+then
+  echo "FLAC conversion started"
+  "$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$download_flac"
+  rm "$beets_flac_path"/musiclibrary.blb
+  "$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$rip_flac"
+  rm "$beets_flac_path"/musiclibrary.blb
+  echo "FLAC conversion finished"
+else
+  echo "FLAC conversion not selected"
+fi
+
+
+
+
 #
 # sync tagged flac files next
 cd "$flaclibrary_source"
