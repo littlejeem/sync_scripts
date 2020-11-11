@@ -25,11 +25,13 @@ dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #####################################
 #check for config file
 if [[ ! -f "$config_file" ]]; then
-    echo "config file $config_file does not exist, script exiting"
-    exit 1
+  echo "config file $config_file does not exist, script exiting"
+  exit 1
+else
+  #source config file
+  echo "config file found, using"
+  source "$config_file"
 fi
-#source config file
-source "$config_file"
 #
 #
 ##############################################################
@@ -66,7 +68,7 @@ rsync_error_catch () {
 #######################
 mkdir -p "$logfolder"
 echo "#####################################################################################################################" > $logfolder/$logname
-echo " - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
+echo " - $scriptlong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
 echo "User is $username and config file is $config_file" >> $logfolder/$logname #for error checking
 sleep 15s #sleep for cron @reboot to allow tine for network to start
 #
@@ -87,29 +89,6 @@ else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync DESELECTED, no sync" >> $logfolder/$logname
 fi
-#
-#
-##############################
-## start "MUSICSERVER" sync ##
-##############################
-section="musicserver"
-if [[ "$section" -eq 1 ]]
-then
-  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_source" >> $logfolder/$logname
-  rsync_error_catch
-  update_musiclibrary
-  clean_musiclibrary
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER section finished" >> $logfolder/$logname
-else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync DESELECTED, no sync" >> $logfolder/$logname
-fi
-#
-#
-echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
 #
 #
 ###############
@@ -163,6 +142,9 @@ else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync DESELECTED, no sync" >> $logfolder/$logname
 fi
+#
+echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
+echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $scriptlong complete" >> $logfolder/$logname
 #
 #
 echo "#####################################################################################################################" > $logfolder/$logname
