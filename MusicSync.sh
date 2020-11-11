@@ -33,6 +33,9 @@
 #+---Initial Setup---+
 #+-------------------+
 #
+#
+#########SOMETHING TO CHECK IF VARIABLES ARE EMPTY????###########
+#
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
   echo "config file $config_file does not exist, script exiting"
@@ -65,6 +68,7 @@ fi
 #+---------------------------+
 #+---Start Conversion Work---+
 #+---------------------------+
+#
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
 if [[ "$music_alac" -eq 1 ]]
 then
@@ -105,55 +109,32 @@ then
 else
   echo "FLAC conversion not selected"
 fi
-
-
-
-
-
-
-
-
-
-#
-# sync tagged flac files next
-cd "$flaclibrary_source"
-DIR=${PWD}
-if [ ! "$(ls -A "$DIR")" ]
-then
-    echo ""$DIR" is empty, no action" >> "$logfolder"/"$logname".log
-else
-    echo ""$DIR" is not empty, copying then deleting files"
-    sleep 5s
-    cp -rpv "$flaclibrary_source"/* "$FLAC_musicdest"
-    rm -r *
-fi
 #
 #
-# sync alac music files next
-cd "$alaclibrary_source"
-DIR=${PWD}
-if [ ! "$(ls -A "$DIR")" ]
-then
-    echo ""$DIR" is empty, no action"
-else
-    echo ""$DIR" is not empty, copying then deleting files"
-    sleep 5s
-    cp -rpv "$alaclibrary_source"/* "$M4A_musicdest"
-    rm -r *
-fi
+#+--------------------------+
+#+---Sync converted media---+
+#+--------------------------+
+# rsync prune -vrc source dest
 #
+# Sync FLACs
+rsync $rsync_variable2 $rsync_variable7 $rsync_altswitch $flaclibrary_source $FLAC_musicdest
+# Sync ALACs
+rsync $rsync_variable2 $rsync_variable7 $rsync_altswitch $alaclibrary_source $M4A_musicdest
+#
+#
+##########DO WE NEED TO CHECK SUCCESS OF THE RSYNC BEFORE DELETION OF DIRECTORIES###########
 #
 # tidy up source download directory
-cd "$download_flac"
-delete_if
+#cd "$download_flac"
+#delete_if
 #
 # tidy up source rip directory
-cd "$rip_flac"
-delete_if
+#cd "$rip_flac"
+#delete_if
 #
 # tidy up upload directory
-cd "$upload_mp3"
-delete_if
+#cd "$upload_mp3"
+#delete_if
 #
 #
 #########################
@@ -165,13 +146,13 @@ then
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $logfolder/$logname.log
   rsync "$rsync_altswitch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished" >> $logfolder/$logname.log
+  update_KodiAudio
+  sleep 30s
+  clean_KodiAudio
 else
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync" >> $logfolder/$logname.log
 fi
-update_KodiAudio
-sleep 30s
-clean_KodiAudio
 #
 #
 # all done
