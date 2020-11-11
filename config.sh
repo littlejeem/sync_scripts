@@ -50,7 +50,10 @@ kodi_MUSIC_assembly="http://"$kodiMUSICuser":"$kodiMUSICpass"@"$musicserver_ip":
 ## "Sync Choices" ##
 ####################
 music="0" #1 to include, 0 to ignore. 0 is set as default
-musicserver="0" #1 to include, 0 to ignore. 0 is set as default
+music_google="0" #1 to upload a .mp3 version to gmusic, 0 to ignore. 0 is set as default
+music_alac="0" #1 to create a lossless M4A files and transfer to Data_1, 0 to ignore. 0 is set as default
+music_flac="0" #1 to move FLAC files to a backup folder on Data_1, 0 to ignore. 0 is set as default
+musicserver="0" #1 to backup from media server to music server and update host kodi, 0 to ignore. 0 is set as default
 tv="0" #1 to include, 0 to ignore. 0 is set as default
 movies="0" #1 to include, 0 to ignore. 0 is set as default
 nfl="0" #1 to include, 0 to ignore. 0 is set as default
