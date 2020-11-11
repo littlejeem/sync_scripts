@@ -8,107 +8,57 @@
 ## script is in $HOME/scripts/control_scripts folder                                                               ##
 #################################################################################################
 #
-####################################
-## Import settings data from file ##
-####################################
 #
-version=2.0
-config_file="$HOME/.config/ScriptSettings/sync_config.sh"
-#
-######################
-## Define Functions ##
-######################
+#+------------------------+
+#+--- Define Functions ---+
+#+------------------------+
 #
 # clean Audiolibrary
-if [[ "$musicserver" -eq 0 ]]
-then
-clean_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-}
+#if [[ "$musicserver" -eq 0 ]]
+#then
+#clean_KodiAudio () {
+#curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+#}
 #
 # update AudioLibrary
-update_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-}
-else
-  echo "no kodi library functions defined as needed"
-fi
+#update_KodiAudio () {
+#curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+#}
+#else
+#  echo "no kodi library functions defined as needed"
+#fi
 #
-# deleting if
-delete_if () {
-  DIR=${PWD}
-  if [ ! "$(ls -A "$DIR")" ]
-  then
-      echo ""$DIR" is empty, no action"
-  else
-      echo ""$DIR" is not empty, deleting files"
-      rm -r *
-  fi
-}
-#
-# Logging functions
-SCRIPTENTRY () {
- timeAndDate=`date`
- script_name=`basename "$0"`
- script_name="${script_name%.*}"
- echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $script_log
-}
-#
-SCRIPTEXIT () {
- script_name=`basename "$0"`
- script_name="${script_name%.*}"
- echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $script_log
-}
-#
-ENTRY () {
- local cfn="${FUNCNAME[1]}"
- timeAndDate=`date`
- echo "[$timeAndDate] [DEBUG]  > $cfn $FUNCNAME" >> $script_log
-}
-#
-EXIT () {
- local cfn="${FUNCNAME[1]}"
- timeAndDate=`date`
- echo "[$timeAndDate] [DEBUG]  < $cfn $FUNCNAME" >> $script_log
-}
-#
-INFO () {
- local function_name="${FUNCNAME[1]}"
-    local msg="$1"
-    timeAndDate=`date`
-    echo "[$timeAndDate] [INFO]  $msg" >> $script_log
-}
-#
-DEBUG () {
- local function_name="${FUNCNAME[1]}"
-    local msg="$1"
-    timeAndDate=`date`
- echo "[$timeAndDate] [DEBUG]  $msg" >> $script_log
-}
-#
-ERROR () {
- local function_name="${FUNCNAME[1]}"
-    local msg="$1"
-    timeAndDate=`date`
-    echo "[$timeAndDate] [ERROR]  $msg" >> $script_log
-}
 #
 #+-------------------+
 #+---Initial Setup---+
 #+-------------------+
-# check for config file
+#
+# check for config file existance
 if [[ ! -f "$config_file" ]]; then
-    echo "config file $config_file does not exist, script exiting"
-    exit 1
+  echo "config file $config_file does not exist, script exiting"
+  exit 1
+else
+  # source config file
+  echo "Config file found, using"
+  source $config_file
 fi
-# source config file
-source "$HOME/.config/ScriptSettings/sync_config.sh"
+#
 # check if log folder exists
 if [[ ! -d "$logfolder" ]]; then
     echo "log folder $logfolder does not exist, attempting to create..."
     #mkdir -p $logfolder
     script_log="$logfolder/MusicSync.log"
     touch $script_log
+else
+  echo "log directory exists, using this location"
+fi
+#
+# check if beets is intalled
+if [[ ! -f "/home/jlivin25/.local/bin/beet" ]]; then
+    echo "a beets install at $beets_path not detected, please install and re-run"
+    exit 1
+else
+  source "$beets_path"
 fi
 #
 #
@@ -155,6 +105,11 @@ then
 else
   echo "FLAC conversion not selected"
 fi
+
+
+
+
+
 
 
 
