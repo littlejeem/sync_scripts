@@ -25,7 +25,7 @@ update_KodiAudio () {
 #
 #
 fatal_missing_var () {
- if [ -z "${JAIL}" ]; then
+ if [ -z "${JAIL_FATAL}" ]; then
   echo "JAIL is unset or set to the empty string"
   exit 1
  else
@@ -34,7 +34,7 @@ fatal_missing_var () {
 }
 #
 debug_missing_var () {
- if [ -z "${JAIL}" ]; then
+ if [ -z "${JAIL_DEBUG}" ]; then
   echo "JAIL is unset or set to the empty string"
  else
   echo $JAIL
