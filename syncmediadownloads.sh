@@ -76,7 +76,7 @@ sleep 15s #sleep for cron @reboot to allow tine for network to start
 ################
 ## MUSIC sync ##
 ################
-section="music"
+section="music_sync"
 if [[ "$section" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
