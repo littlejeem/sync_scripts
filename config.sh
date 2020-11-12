@@ -21,15 +21,15 @@ audiobooks="0" #1 to include, 0 to ignore. 0 is set as default
 ## "Global Settings" ###
 ########################
 rsync_path="/usr/bin/rsync" #default destination set, change as appropriate
-rsync_variable1="--protect-args" #default destination set, change as appropriate
-rsync_variable2="--remove-source-files" #default destination set, change as appropriate
-rsync_variable3="-p" #tell rsync you explicitly want to set Directory & File Permissions
-rsync_variable4="-og" #tell rsync you explicity want to specify the "user" & "group"
-rsync_variable5="--chmod=Dug+rwx,Fug+rwx,o+rx,o-w" #set the permissions, D=directory, F=file
-rsync_variable6="--chown=$fileowner:$group" #set the ownership
-rsync_variable7="--prune-empty-dirs" #tell rsync not to transfer 'empty' folders during sync
-rsync_switch="-vzrc" #set to -vzrc by default, only change if you know what you are doing
-rsync_altswitch="-vzr"
+rsync_protect_args="--protect-args" #default destination set, change as appropriate
+rsync_remove_source="--remove-source-files" #default destination set, change as appropriate
+rsync_set_perms="-p" #tell rsync you explicitly want to set Directory & File Permissions
+rsync_set_OwnGrp="-og" #tell rsync you explicity want to specify the "user" & "group"
+rsync_set_chmod="--chmod=Dug+rwx,Fug+rwx,o+rx,o-w" #set the permissions, D=directory, F=file
+rsync_set_chown="--chown=$fileowner:$group" #set the ownership
+rsync_prune_empty="--prune-empty-dirs" #tell rsync not to transfer 'empty' folders during sync
+rsync_vzrc="-vzrc" #set to -vzrc by default, only change if you know what you are doing
+rsync_alt_vzr="-vzr"
 logfolder="$HOME/bin/scriptlogs"
 rsync_port="ssh -p 0000" #IN DEVELOPMENT NOT YET IN USE
 #
