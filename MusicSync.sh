@@ -15,22 +15,73 @@
 #
 # clean Audiolibrary
 clean_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
 }
 #
 # update AudioLibrary
 update_KodiAudio () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
 }
-
+#
+#
+fatal_missing_var () {
+ if [ -z "${JAIL}" ]; then
+  echo "JAIL is unset or set to the empty string"
+  exit 1
+ else
+  echo $JAIL
+ fi
+}
+#
+debug_missing_var () {
+ if [ -z "${JAIL}" ]; then
+  echo "JAIL is unset or set to the empty string"
+ else
+  echo $JAIL
+ fi
+}
 #
 #
 #+-------------------+
 #+---Initial Setup---+
 #+-------------------+
 #
+#check that necessary variables are set
+JAIL_FATAL="${music_alac}"
+fatal_missing_var
 #
-#########SOMETHING TO CHECK IF VARIABLES ARE EMPTY????###########
+JAIL_FATAL="${download_flac}"
+fatal_missing_var
+#
+JAIL_FATAL="${rip_flac}"
+fatal_missing_var
+#
+JAIL_FATAL="${alaclibrary_source}"
+fatal_missing_var
+#
+JAIL_FATAL="${flaclibrary_source}"
+fatal_missing_var
+#
+JAIL_FATAL="${upload_mp3}"
+fatal_missing_var
+#
+JAIL_FATAL="${FLAC_musicdest}"
+fatal_missing_var
+#
+JAIL_FATAL="${M4A_musicdest}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_switch}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_flac_path}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_alac_path}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_upload_path}"
+fatal_missing_var
 #
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
@@ -53,7 +104,7 @@ else
 fi
 #
 # check if beets is intalled
-if [[ ! -f "/home/jlivin25/.local/bin/beet" ]]; then
+if [[ ! -f "$beets_path" ]]; then
     echo "a beets install at $beets_path not detected, please install and re-run"
     exit 1
 else
