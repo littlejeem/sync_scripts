@@ -81,7 +81,7 @@ if [[ "$section" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
   rsync_error_catch
   "$dir_name"/MusicSync.sh #run seperate 'tagger' script
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
@@ -99,7 +99,7 @@ if [[ "section" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest" >> $logfolder/$logname
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest" >> $logfolder/$logname
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync COMPLETE" >> $logfolder/$logname
@@ -117,7 +117,7 @@ if [[ "$section" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest" >> $logfolder/$logname
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest" >> $logfolder/$logname
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
@@ -135,7 +135,7 @@ if [[ "$section" -eq 1 ]]
 then
   echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable1" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
+  rsync "$rsync_prune_empty" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
   rsync_error_catch
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
 else

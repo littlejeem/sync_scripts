@@ -14,19 +14,15 @@
 #+------------------------+
 #
 # clean Audiolibrary
-#if [[ "$musicserver" -eq 0 ]]
-#then
-#clean_KodiAudio () {
-#curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-#}
+clean_KodiAudio () {
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+}
 #
 # update AudioLibrary
-#update_KodiAudio () {
-#curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-#}
-#else
-#  echo "no kodi library functions defined as needed"
-#fi
+update_KodiAudio () {
+curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
+}
+
 #
 #
 #+-------------------+
@@ -117,9 +113,9 @@ fi
 # rsync prune -vrc source dest
 #
 # Sync FLACs
-rsync $rsync_variable2 $rsync_variable7 $rsync_altswitch $flaclibrary_source $FLAC_musicdest
+rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
 # Sync ALACs
-rsync $rsync_variable2 $rsync_variable7 $rsync_altswitch $alaclibrary_source $M4A_musicdest
+rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
 #
 #
 ##########DO WE NEED TO CHECK SUCCESS OF THE RSYNC BEFORE DELETION OF DIRECTORIES###########
@@ -144,7 +140,7 @@ if [[ "$musicserver_sync" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $logfolder/$logname.log
-  rsync "$rsync_altswitch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
+  rsync "$rsync_alt_vzr" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished" >> $logfolder/$logname.log
   update_KodiAudio
   sleep 30s
