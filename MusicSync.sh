@@ -140,7 +140,7 @@ rsync $rsync_variable2 $rsync_variable7 $rsync_altswitch $alaclibrary_source $M4
 #########################
 ### MUSIC SERVER sync ###
 #########################
-if [[ "$musicserver" -eq 1 ]]
+if [[ "$musicserver_sync" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
   echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $logfolder/$logname.log
