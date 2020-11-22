@@ -41,47 +41,40 @@ debug_missing_var () {
  fi
 }
 #
+beets_function_alac () {
+ config_yaml="alac_config.yaml"
+ echo "ALAC conversion started"
+ "$beets_path" "$beets_switch" "$beets_alac_path"/"$config_yaml" import -q "$download_flac"
+ rm "$beets_alac_path"/musiclibrary.blb
+ "$beets_path" "$beets_switch" "$beets_alac_path"/"$config_yaml" import -q "$rip_flac"
+ rm "$beets_alac_path"/musiclibrary.blb
+ echo "ALAC conversion finished"
+}
+#
+beets_function_upload () {
+ config_yaml="uploads_config.yaml"
+ echo ".mp3 UPLOAD started"
+ "$beets_path" "$beets_switch" "$beets_upload_path"/"$config_yaml" import -q "$download_flac"
+ rm "$beets_upload_path"/musiclibrary.blb
+ "$beets_path" "$beets_switch" "$beets_upload_path"/"$config_yaml" import -q "$rip_flac"
+ rm "$beets_upload_path"/musiclibrary.blb
+ echo ".mp3 UPLOAD finished"
+}
+#
+beets_function_flac () {
+ config_yaml="flac_config.yaml"
+ echo "FLAC conversion started"
+ "$beets_path" "$beets_switch" "$beets_flac_path"/"$config_yaml" import -q "$download_flac"
+ rm "$beets_flac_path"/musiclibrary.blb
+ "$beets_path" "$beets_switch" "$beets_flac_path"/"$config_yaml" import -q "$rip_flac"
+ rm "$beets_flac_path"/musiclibrary.blb
+ echo "FLAC conversion finished"
+}
+#
 #
 #+-------------------+
 #+---Initial Setup---+
 #+-------------------+
-#
-#check that necessary variables are set
-JAIL_FATAL="${music_alac}"
-fatal_missing_var
-#
-JAIL_FATAL="${download_flac}"
-fatal_missing_var
-#
-JAIL_FATAL="${rip_flac}"
-fatal_missing_var
-#
-JAIL_FATAL="${alaclibrary_source}"
-fatal_missing_var
-#
-JAIL_FATAL="${flaclibrary_source}"
-fatal_missing_var
-#
-JAIL_FATAL="${upload_mp3}"
-fatal_missing_var
-#
-JAIL_FATAL="${FLAC_musicdest}"
-fatal_missing_var
-#
-JAIL_FATAL="${M4A_musicdest}"
-fatal_missing_var
-#
-JAIL_FATAL="${beets_switch}"
-fatal_missing_var
-#
-JAIL_FATAL="${beets_flac_path}"
-fatal_missing_var
-#
-JAIL_FATAL="${beets_alac_path}"
-fatal_missing_var
-#
-JAIL_FATAL="${beets_upload_path}"
-fatal_missing_var
 #
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
@@ -112,6 +105,44 @@ else
 fi
 #
 #
+#check that necessary variables are set
+JAIL_FATAL="${music_alac}"
+fatal_missing_var
+#
+JAIL_FATAL="${download_flac}"
+fatal_missing_var
+#
+JAIL_FATAL="${rip_flac}"
+fatal_missing_var
+#
+JAIL_FATAL="${alaclibrary_source}"
+fatal_missing_var
+#
+JAIL_FATAL="${flaclibrary_source}"
+fatal_missing_var
+#
+JAIL_FATAL="${upload_mp3}"
+debug_missing_var
+#
+JAIL_FATAL="${FLAC_musicdest}"
+fatal_missing_var
+#
+JAIL_FATAL="${M4A_musicdest}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_switch}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_flac_path}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_alac_path}"
+fatal_missing_var
+#
+JAIL_FATAL="${beets_upload_path}"
+debug_missing_var
+#
+#
 #+---------------------------+
 #+---Start Conversion Work---+
 #+---------------------------+
@@ -119,12 +150,7 @@ fi
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
 if [[ "$music_alac" -eq 1 ]]
 then
-  echo "ALAC conversion started"
-  "$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$download_flac"
-  rm "$beets_alac_path"/musiclibrary.blb
-  "$beets_path" "$beets_switch" "$beets_alac_path"/alac_config.yaml import -q "$rip_flac"
-  rm "$beets_alac_path"/musiclibrary.blb
-  echo "ALAC conversion finished"
+  beets_function_alac
 else
   echo "ALAC conversion not selected"
 fi
@@ -133,12 +159,7 @@ fi
 # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
 if [[ "$music_google" -eq 1 ]]
 then
-  echo ".mp3 UPLOAD started"
-  "$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$download_flac"
-  rm "$beets_upload_path"/musiclibrary.blb
-  "$beets_path" "$beets_switch" "$beets_upload_path"/uploads_config.yaml import -q "$rip_flac"
-  rm "$beets_upload_path"/musiclibrary.blb
-  echo ".mp3 UPLOAD finished"
+  beets_function_google
 else
   echo ".mp3 UPLOAD not selected"
 fi
