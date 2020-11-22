@@ -41,6 +41,15 @@ debug_missing_var () {
  fi
 }
 #
+#SINGLE BEETS FUNCTION
+beets_function () {
+ "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac"
+ rm "$beets_config_path"/musiclibrary.blb
+ "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac"
+ rm "$beets_config_path"/musiclibrary.blb
+}
+#
+#INDIVIDUAL BEETS FUNCTIONS IF SINGLE DOESNT WORK
 beets_function_alac () {
  config_yaml="alac_config.yaml"
  echo "ALAC conversion started"
@@ -150,7 +159,11 @@ debug_missing_var
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
 if [[ "$music_alac" -eq 1 ]]
 then
-  beets_function_alac
+  config_yaml="alac_config.yaml"
+  beets_config_path=$($beets_alac_path)
+  echo "ALAC conversion started"
+  beets_function
+  echo "ALAC conversion finished"
 else
   echo "ALAC conversion not selected"
 fi
@@ -159,7 +172,11 @@ fi
 # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
 if [[ "$music_google" -eq 1 ]]
 then
-  beets_function_google
+  config_yaml="uploads_config.yaml"
+  beets_config_path=$($beets_upload_path)
+  echo ".mp3 UPLOAD started"
+  beets_function
+  echo ".mp3 UPLOAD finished"
 else
   echo ".mp3 UPLOAD not selected"
 fi
@@ -168,11 +185,10 @@ fi
 # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
 if [[ "$music_flac" -eq 1 ]]
 then
+  config_yaml="flac_config.yaml"
+  beets_config_path=$($beets_flac_path)
   echo "FLAC conversion started"
-  "$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$download_flac"
-  rm "$beets_flac_path"/musiclibrary.blb
-  "$beets_path" "$beets_switch" "$beets_flac_path"/flac_config.yaml import -q "$rip_flac"
-  rm "$beets_flac_path"/musiclibrary.blb
+  beets_function
   echo "FLAC conversion finished"
 else
   echo "FLAC conversion not selected"
