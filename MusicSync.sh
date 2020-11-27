@@ -85,6 +85,10 @@ beets_function_flac () {
 #+---Initial Setup---+
 #+-------------------+
 #
+#SET TEMPORARY VARIABLE FOR TESTING
+config_file="$HOME/.config/ScriptSettings/sync_config.sh"
+#
+#
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
   echo "config file $config_file does not exist, script exiting"
