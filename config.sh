@@ -30,7 +30,7 @@ rsync_set_chown="--chown=$fileowner:$group" #set the ownership
 rsync_prune_empty="--prune-empty-dirs" #tell rsync not to transfer 'empty' folders during sync
 rsync_vzrc="-vzrc" #set to -vzrc by default, only change if you know what you are doing
 rsync_alt_vzr="-vzr"
-logfolder="$HOME/bin/scriptlogs"
+logfolder="$HOME/bin/logs"
 rsync_port="ssh -p 0000" #IN DEVELOPMENT NOT YET IN USE
 #
 #
@@ -100,7 +100,7 @@ upload_mp3="" #Beets library where the mp3 uploads are stored
 FLAC_musicdest="" #where the FLAC files are stored
 M4A_musicdest="" #where the M4A files are stored
 # Beets
-beets_path="/home/$user/.local/bin/beet" #default destination set change as appropriate
+beets_path="/home/$USER/.local/bin/beet" #default destination set change as appropriate
 beets_switch=""
 beets_flac_path="" #path to beets config & library file directory (FLAC)
 beets_alac_path="" #path to beets config & library file directory (alac)
