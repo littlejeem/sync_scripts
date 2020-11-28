@@ -109,15 +109,17 @@ fi
 #
 # check if log folder exists
 if [[ ! -d "$logfolder" ]]; then
-    echo "log folder $logfolder does not exist, attempting to create..."
-    #mkdir -p $logfolder
-    script_log="$logfolder/MusicSync.log"
-    touch $script_log
+  echo "log folder $logfolder does not exist, attempting to create..."
+  mkdir -p $logfolder
+  script_log="$logfolder/MusicSync.log"
+  touch $script_log
 else
-  echo "log directory exists, using this location"
+  echo "log directory exists, using this location: $logfolder"
+  script_log="$logfolder/MusicSync.log"
   if [[ ! -f "$script_log" ]]; then
         echo "log file found, using: $script_log"
   else
+    echo "no log found, creating: $script_log"
     touch $script_log
   fi
 fi
