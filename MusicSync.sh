@@ -115,7 +115,6 @@ if [[ ! -f "$beets_path" ]]; then
     exit 1
 else
   echo "Beets install detected, using $beets_path"
-  source "$beets_path"
 fi
 #
 #
