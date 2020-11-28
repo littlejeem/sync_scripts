@@ -80,6 +80,14 @@ beets_function_flac () {
  echo "FLAC conversion finished"
 }
 #
+rsync_error_catch () {
+  if [ $? == "0" ]
+   then
+    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync completed successfully" >> $script_log
+   else
+    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync produced an error" >> $script_log
+  fi
+}
 #
 #+-------------------+
 #+---Initial Setup---+
@@ -104,14 +112,14 @@ if [[ ! -d "$logfolder" ]]; then
     echo "log folder $logfolder does not exist, attempting to create..."
     #mkdir -p $logfolder
     script_log="$logfolder/MusicSync.log"
-    if [[ ! -f "$script_log" ]]; then
-      echo "log file found, using: $script_log"
-    else
     touch $script_log
-  fi
 else
   echo "log directory exists, using this location"
-  touch $script_log
+  if [[ ! -f "$script_log" ]]; then
+        echo "log file found, using: $script_log"
+  else
+    touch $script_log
+  fi
 fi
 #
 # check if beets is intalled
@@ -176,6 +184,7 @@ then
   sleep 1
   echo "ALAC sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
+  rsync_error_catch
   echo "ALAC sync finished"
 else
   echo "ALAC conversion not selected"
@@ -206,6 +215,7 @@ then
   sleep 1
   echo "FLAC sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
+  rsync_error_catch
   echo "FLAC sync finished"
 else
   echo "FLAC conversion not selected"
