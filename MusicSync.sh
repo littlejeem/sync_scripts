@@ -104,9 +104,13 @@ if [[ ! -d "$logfolder" ]]; then
     echo "log folder $logfolder does not exist, attempting to create..."
     #mkdir -p $logfolder
     script_log="$logfolder/MusicSync.log"
+    if [[ ! -f "$script_log" ]]; then
+      echo "log file found, using: $script_log"
+    else
     touch $script_log
 else
   echo "log directory exists, using this location"
+  touch $script_log
 fi
 #
 # check if beets is intalled
@@ -164,7 +168,7 @@ debug_missing_var
 if [[ "$music_alac" -eq 1 ]]
 then
   config_yaml="alac_config.yaml"
-  beets_config_path=$($beets_alac_path)
+  beets_config_path=$(echo $beets_alac_path)
   echo "ALAC conversion started"
   beets_function
   echo "ALAC conversion finished"
@@ -182,6 +186,7 @@ if [[ "$music_google" -eq 1 ]]
 then
   config_yaml="uploads_config.yaml"
   beets_config_path=$($beets_upload_path)
+  beets_config_path=$(echo $beets_upload_path)
   echo ".mp3 UPLOAD started"
   beets_function
   echo ".mp3 UPLOAD finished"
@@ -194,7 +199,7 @@ fi
 if [[ "$music_flac" -eq 1 ]]
 then
   config_yaml="flac_config.yaml"
-  beets_config_path=$($beets_flac_path)
+  beets_config_path=$(echo $beets_flac_path)
   echo "FLAC conversion started"
   beets_function
   echo "FLAC conversion finished"
@@ -238,16 +243,16 @@ fi
 #########################
 if [[ "$musicserver_sync" -eq 1 ]]
 then
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $logfolder/$logname.log
+  echo "-------------------------------------------------------------------------------------" >> $script_log
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $script_log
   rsync "$rsync_alt_vzr" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished" >> $logfolder/$logname.log
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished" >> $script_log
   update_KodiAudio
   sleep 30s
   clean_KodiAudio
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname.log
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync" >> $logfolder/$logname.log
+  echo "-------------------------------------------------------------------------------------" >> $script_log
+  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync" >> $script_log
 fi
 #
 #
