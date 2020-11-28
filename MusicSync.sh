@@ -26,18 +26,18 @@ update_KodiAudio () {
 #
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
-  echo "JAIL is unset or set to the empty string"
+  echo "JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   exit 1
  else
-  echo $JAIL
+  echo "JAIL_FATAL variable found, using: $JAIL_FATAL"
  fi
 }
 #
 debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
-  echo "JAIL is unset or set to the empty string"
+  echo "JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  echo $JAIL
+  echo "JAIL_DEBUG variable found, using: $JAIL_DEBUG"
  fi
 }
 #
@@ -114,6 +114,7 @@ if [[ ! -f "$beets_path" ]]; then
     echo "a beets install at $beets_path not detected, please install and re-run"
     exit 1
 else
+  echo "Beets install detected, using"
   source "$beets_path"
 fi
 #
@@ -168,6 +169,10 @@ then
   echo "ALAC conversion started"
   beets_function
   echo "ALAC conversion finished"
+  sleep 1
+  echo "ALAC sync started"
+  rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
+  echo "ALAC sync finished"
 else
   echo "ALAC conversion not selected"
 fi
@@ -194,6 +199,10 @@ then
   echo "FLAC conversion started"
   beets_function
   echo "FLAC conversion finished"
+  sleep 1
+  echo "FLAC sync started"
+  rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
+  echo "FLAC sync finished"
 else
   echo "FLAC conversion not selected"
 fi
@@ -205,9 +214,9 @@ fi
 # rsync prune -vrc source dest
 #
 # Sync FLACs
-rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
+
 # Sync ALACs
-rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
+
 #
 #
 ##########DO WE NEED TO CHECK SUCCESS OF THE RSYNC BEFORE DELETION OF DIRECTORIES###########
