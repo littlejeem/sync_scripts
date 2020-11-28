@@ -206,7 +206,6 @@ then
   sleep 1
   echo "FLAC sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
-#rsync /home/jlivin25/Music/Library/flacimports/ /media/Data_1/Music/FLAC_Backups
   echo "FLAC sync finished"
 else
   echo "FLAC conversion not selected"
