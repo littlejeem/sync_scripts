@@ -29,7 +29,7 @@ fatal_missing_var () {
   echo "JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   exit 1
  else
-  echo "JAIL_FATAL variable found, using: $JAIL_FATAL"
+  echo "variable found, using: $JAIL_FATAL"
  fi
 }
 #
@@ -37,7 +37,7 @@ debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
   echo "JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  echo "JAIL_DEBUG variable found, using: $JAIL_DEBUG"
+  echo "variable found, using: $JAIL_DEBUG"
  fi
 }
 #
@@ -95,7 +95,7 @@ if [[ ! -f "$config_file" ]]; then
   exit 1
 else
   # source config file
-  echo "Config file found, using"
+  echo "Config file found, using $config_file"
   source $config_file
 fi
 #
@@ -114,7 +114,7 @@ if [[ ! -f "$beets_path" ]]; then
     echo "a beets install at $beets_path not detected, please install and re-run"
     exit 1
 else
-  echo "Beets install detected, using"
+  echo "Beets install detected, using $beets_path"
   source "$beets_path"
 fi
 #
