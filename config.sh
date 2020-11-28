@@ -7,10 +7,10 @@
 ## "Sync Choices" ##
 ####################
 music_sync="0" #1 to include a transfer from download box to media_server, 0 to ignore. 0 is set as default
+ music_google="0" #1 to upload a .mp3 version to gmusic, 0 to ignore. 0 is set as default
+ music_alac="0" #1 to create a lossless M4A files and transfer to Data_1, 0 to ignore. 0 is set as default
+ music_flac="0" #1 to move FLAC files to a backup folder on Data_1, 0 to ignore. 0 is set as default
 musicserver_sync="0" #1 to include a sync from media_server to to music server and update host kodi, 0 to ignore. 0 is set as default
-  music_google="0" #1 to upload a .mp3 version to gmusic, 0 to ignore. 0 is set as default
-  music_alac="0" #1 to create a lossless M4A files and transfer to Data_1, 0 to ignore. 0 is set as default
-  music_flac="0" #1 to move FLAC files to a backup folder on Data_1, 0 to ignore. 0 is set as default
 tv="0" #1 to include, 0 to ignore. 0 is set as default
 movies="0" #1 to include, 0 to ignore. 0 is set as default
 nfl="0" #1 to include, 0 to ignore. 0 is set as default
