@@ -185,7 +185,6 @@ fi
 if [[ "$music_google" -eq 1 ]]
 then
   config_yaml="uploads_config.yaml"
-  beets_config_path=$($beets_upload_path)
   beets_config_path=$(echo $beets_upload_path)
   echo ".mp3 UPLOAD started"
   beets_function
