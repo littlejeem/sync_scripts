@@ -108,6 +108,7 @@ if [[ ! -d "$logfolder" ]]; then
       echo "log file found, using: $script_log"
     else
     touch $script_log
+  fi
 else
   echo "log directory exists, using this location"
   touch $script_log
