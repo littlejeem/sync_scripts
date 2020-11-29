@@ -67,6 +67,15 @@ rsync_error_catch () {
 config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 #
 #
+#Check for existance FFMPEG
+if ! command -v ffmpeg &> /dev/null
+then
+  echo "FFMPEG could not be found, script won't function wihout it"
+  exit 1
+else
+  echo "FFMPEG command located, continuing"
+fi
+#
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
   echo "config file $config_file does not exist, script exiting"
