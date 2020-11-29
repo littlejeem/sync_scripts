@@ -49,36 +49,6 @@ beets_function () {
  rm "$beets_config_path"/musiclibrary.blb
 }
 #
-#INDIVIDUAL BEETS FUNCTIONS IF SINGLE DOESNT WORK
-beets_function_alac () {
- config_yaml="alac_config.yaml"
- echo "ALAC conversion started"
- "$beets_path" "$beets_switch" "$beets_alac_path"/"$config_yaml" import -q "$download_flac"
- rm "$beets_alac_path"/musiclibrary.blb
- "$beets_path" "$beets_switch" "$beets_alac_path"/"$config_yaml" import -q "$rip_flac"
- rm "$beets_alac_path"/musiclibrary.blb
- echo "ALAC conversion finished"
-}
-#
-beets_function_upload () {
- config_yaml="uploads_config.yaml"
- echo ".mp3 UPLOAD started"
- "$beets_path" "$beets_switch" "$beets_upload_path"/"$config_yaml" import -q "$download_flac"
- rm "$beets_upload_path"/musiclibrary.blb
- "$beets_path" "$beets_switch" "$beets_upload_path"/"$config_yaml" import -q "$rip_flac"
- rm "$beets_upload_path"/musiclibrary.blb
- echo ".mp3 UPLOAD finished"
-}
-#
-beets_function_flac () {
- config_yaml="flac_config.yaml"
- echo "FLAC conversion started"
- "$beets_path" "$beets_switch" "$beets_flac_path"/"$config_yaml" import -q "$download_flac"
- rm "$beets_flac_path"/musiclibrary.blb
- "$beets_path" "$beets_switch" "$beets_flac_path"/"$config_yaml" import -q "$rip_flac"
- rm "$beets_flac_path"/musiclibrary.blb
- echo "FLAC conversion finished"
-}
 #
 rsync_error_catch () {
   if [ $? == "0" ]
