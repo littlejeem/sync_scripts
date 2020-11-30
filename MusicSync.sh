@@ -10,6 +10,7 @@
 #
 #
 # Source helper script
+PATH=/sbin:/bin:/usr/bin:/home/jlivin25
 source $HOME/bin/standalone_scripts/helper_script.sh
 #+------------------------+
 #+--- Define Functions ---+
