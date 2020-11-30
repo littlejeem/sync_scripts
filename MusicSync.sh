@@ -9,6 +9,8 @@
 #################################################################################################
 #
 #
+# Source helper script
+source $HOME/bin/standalone_scripts/helper_script.sh
 #+------------------------+
 #+--- Define Functions ---+
 #+------------------------+
@@ -26,18 +28,18 @@ update_KodiAudio () {
 #
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
-  echo "JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+  log_err "JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   exit 1
  else
-  echo "variable found, using: $JAIL_FATAL"
+  log "variable found, using: $JAIL_FATAL"
  fi
 }
 #
 debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
-  echo "JAIL_DEBUG is unset or set to the empty string, may cause issues"
+  log_err "JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  echo "variable found, using: $JAIL_DEBUG"
+  log "variable found, using: $JAIL_DEBUG"
  fi
 }
 #
@@ -49,13 +51,12 @@ beets_function () {
  rm "$beets_config_path"/musiclibrary.blb
 }
 #
-#
 rsync_error_catch () {
   if [ $? == "0" ]
    then
-    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync completed successfully" >> $script_log
+    log "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync completed successfully"
    else
-    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync produced an error" >> $script_log
+    log_err "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync produced an error"
   fi
 }
 #
@@ -70,45 +71,45 @@ config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 #Check for existance FFMPEG
 if ! command -v ffmpeg &> /dev/null
 then
-  echo "FFMPEG could not be found, script won't function wihout it"
+  log_err "FFMPEG could not be found, script won't function wihout it"
   exit 1
 else
-  echo "FFMPEG command located, continuing"
+  log "FFMPEG command located, continuing"
 fi
 #
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
-  echo "config file $config_file does not exist, script exiting"
+  log_err "config file $config_file does not exist, script exiting"
   exit 1
 else
   # source config file
-  echo "Config file found, using $config_file"
+  log "Config file found, using $config_file"
   source $config_file
 fi
 #
 # check if log folder exists
 if [[ ! -d "$logfolder" ]]; then
-  echo "log folder $logfolder does not exist, attempting to create..."
+  log "log folder $logfolder does not exist, attempting to create..."
   mkdir -p $logfolder
   script_log="$logfolder/MusicSync.log"
   touch $script_log
 else
-  echo "log directory exists, using this location: $logfolder"
+  log "log directory exists, using this location: $logfolder"
   script_log="$logfolder/MusicSync.log"
   if [[ ! -f "$script_log" ]]; then
-        echo "log file found, using: $script_log"
+    log "log file found, using: $script_log"
   else
-    echo "no log found, creating: $script_log"
+    log "no log found, creating: $script_log"
     touch $script_log
   fi
 fi
 #
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
-    echo "a beets install at $beets_path not detected, please install and re-run"
+    log_err "a beets install at $beets_path not detected, please install and re-run"
     exit 1
 else
-  echo "Beets install detected, using $beets_path"
+  log "Beets install detected, using $beets_path"
 fi
 #
 #
@@ -159,16 +160,16 @@ if [[ "$music_alac" -eq 1 ]]
 then
   config_yaml="alac_config.yaml"
   beets_config_path=$(echo $beets_alac_path)
-  echo "ALAC conversion started"
+  log "ALAC conversion started"
   beets_function
-  echo "ALAC conversion finished"
+  log "ALAC conversion finished"
   sleep 1
-  echo "ALAC sync started"
+  log "ALAC sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
   rsync_error_catch
-  echo "ALAC sync finished"
+  log "ALAC sync finished"
 else
-  echo "ALAC conversion not selected"
+  log "ALAC conversion not selected"
 fi
 #
 #
@@ -177,11 +178,11 @@ if [[ "$music_google" -eq 1 ]]
 then
   config_yaml="uploads_config.yaml"
   beets_config_path=$(echo $beets_upload_path)
-  echo ".mp3 UPLOAD started"
+  log ".mp3 UPLOAD started"
   beets_function
-  echo ".mp3 UPLOAD finished"
+  log ".mp3 UPLOAD finished"
 else
-  echo ".mp3 UPLOAD not selected"
+  log ".mp3 UPLOAD not selected"
 fi
 #
 #
@@ -190,16 +191,16 @@ if [[ "$music_flac" -eq 1 ]]
 then
   config_yaml="flac_config.yaml"
   beets_config_path=$(echo $beets_flac_path)
-  echo "FLAC conversion started"
+  log "FLAC conversion started"
   beets_function
-  echo "FLAC conversion finished"
+  log "FLAC conversion finished"
   sleep 1
-  echo "FLAC sync started"
+  log "FLAC sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
   rsync_error_catch
-  echo "FLAC sync finished"
+  log "FLAC sync finished"
 else
-  echo "FLAC conversion not selected"
+  log "FLAC conversion not selected"
 fi
 #
 #
@@ -234,16 +235,17 @@ fi
 #########################
 if [[ "$musicserver_sync" -eq 1 ]]
 then
-  echo "-------------------------------------------------------------------------------------" >> $script_log
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started" >> $script_log
+  echo "-------------------------------------------------------------------------------------"
+  log "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started"
   rsync "$rsync_alt_vzr" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished" >> $script_log
+  rsync_error_catch
+  log "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished"
   update_KodiAudio
   sleep 30s
   clean_KodiAudio
 else
-  echo "-------------------------------------------------------------------------------------" >> $script_log
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync" >> $script_log
+  echo "-------------------------------------------------------------------------------------"
+  log "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync"
 fi
 #
 #
