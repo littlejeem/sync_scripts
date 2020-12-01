@@ -38,7 +38,7 @@ fatal_missing_var () {
 #
 debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
-  log_err "JAIL_DEBUG is unset or set to the empty string, may cause issues"
+  log_deb "JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
   log "variable found, using: $JAIL_DEBUG"
  fi
@@ -46,18 +46,28 @@ debug_missing_var () {
 #
 #SINGLE BEETS FUNCTION
 beets_function () {
- "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac"
- rm "$beets_config_path"/musiclibrary.blb
- "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac"
- rm "$beets_config_path"/musiclibrary.blb
+ if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
+  log "files located in $download_flac"
+  "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac"
+  rm "$beets_config_path"/musiclibrary.blb
+ else
+  log_deb "$download_flac is empty, no conversion needed"
+ fi
+ if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
+  log "files located in $rip_flac"
+  "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac"
+  rm "$beets_config_path"/musiclibrary.blb
+ else
+  log_deb "$rip_flac is empty, no conversion needed"
+ fi
 }
 #
 rsync_error_catch () {
   if [ $? == "0" ]
    then
-    log "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync completed successfully"
+    log "rsync completed successfully"
    else
-    log_err "`date +%d/%m/%Y` - `date +%H:%M:%S` rsync produced an error"
+    log_err "rsync produced an error"
   fi
 }
 #
