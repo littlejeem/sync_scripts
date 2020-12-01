@@ -88,22 +88,23 @@ else
   source $config_file
 fi
 #
-# check if log folder exists
-if [[ ! -d "$logfolder" ]]; then
-  log "log folder $logfolder does not exist, attempting to create..."
-  mkdir -p $logfolder
-  script_log="$logfolder/MusicSync.log"
-  touch $script_log
-else
-  log "log directory exists, using this location: $logfolder"
-  script_log="$logfolder/MusicSync.log"
-  if [[ ! -f "$script_log" ]]; then
-    log "log file found, using: $script_log"
-  else
-    log "no log found, creating: $script_log"
-    touch $script_log
-  fi
-fi
+#NOW REDUNDANT?
+## check if log folder exists
+#if [[ ! -d "$logfolder" ]]; then
+#  log "log folder $logfolder does not exist, attempting to create..."
+#  mkdir -p $logfolder
+#  script_log="$logfolder/MusicSync.log"
+#  touch $script_log
+#else
+#  log "log directory exists, using this location: $logfolder"
+#  script_log="$logfolder/MusicSync.log"
+#  if [[ ! -f "$script_log" ]]; then
+#    log "log file found, using: $script_log"
+#  else
+#    log "no log found, creating: $script_log"
+#    touch $script_log
+#  fi
+#fi
 #
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
