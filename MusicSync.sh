@@ -237,16 +237,16 @@ fi
 if [[ "$musicserver_sync" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------"
-  log "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync SELECTED, sync started"
+  log "MUSIC SERVER sync SELECTED, sync started"
   rsync "$rsync_alt_vzr" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
   rsync_error_catch
-  log "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync finished"
+  log "MUSIC SERVER sync finished"
   update_KodiAudio
   sleep 30s
   clean_KodiAudio
 else
   echo "-------------------------------------------------------------------------------------"
-  log "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC SERVER sync DESELECTED, no sync"
+  log "MUSIC SERVER sync DESELECTED, no sync"
 fi
 #
 #
