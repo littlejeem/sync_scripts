@@ -46,6 +46,7 @@ debug_missing_var () {
 #
 #SINGLE BEETS FUNCTION
 beets_function () {
+ log "$section processing started"
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   log "files located in $download_flac"
   "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac"
@@ -60,6 +61,7 @@ beets_function () {
  else
   log_deb "$rip_flac is empty, no conversion needed"
  fi
+  log "$section processing finished"
 }
 #
 rsync_error_catch () {
@@ -118,8 +120,8 @@ fi
 #
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
-    log_err "a beets install at $beets_path not detected, please install and re-run"
-    exit 1
+  log_err "a beets install at $beets_path not detected, please install and re-run"
+  exit 1
 else
   log "Beets install detected, using $beets_path"
 fi
@@ -172,9 +174,8 @@ if [[ "$music_alac" -eq 1 ]]
 then
   config_yaml="alac_config.yaml"
   beets_config_path=$(echo $beets_alac_path)
-  log "ALAC conversion started"
+  section=${config_yaml::-12}
   beets_function
-  log "ALAC conversion finished"
   sleep 1
   log "ALAC sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
@@ -190,9 +191,8 @@ if [[ "$music_google" -eq 1 ]]
 then
   config_yaml="uploads_config.yaml"
   beets_config_path=$(echo $beets_upload_path)
-  log ".mp3 UPLOAD started"
+  section=${config_yaml::-12}
   beets_function
-  log ".mp3 UPLOAD finished"
 else
   log ".mp3 UPLOAD not selected"
 fi
@@ -203,9 +203,8 @@ if [[ "$music_flac" -eq 1 ]]
 then
   config_yaml="flac_config.yaml"
   beets_config_path=$(echo $beets_flac_path)
-  log "FLAC conversion started"
+  section=${config_yaml::-12}
   beets_function
-  log "FLAC conversion finished"
   sleep 1
   log "FLAC sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
@@ -213,6 +212,33 @@ then
   log "FLAC sync finished"
 else
   log "FLAC conversion not selected"
+fi
+#
+# Delete files remaining in source folders
+find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .
+# Command above returns 0 for contents found, or 1 if nothing found
+if [[ "$?" = "0" ]]; then
+  echo "stuff in directory"
+  test1="y"
+else
+  echo "nothing to see here"
+  test1="n"
+fi
+
+find "$flaclibrary_source" -mindepth 1 -print -quit 2>/dev/null | grep -q .
+# Command above returns 0 for contents found, or 1 if nothing found
+if [[ "$?" = "0" ]]; then
+  echo "stuff in directory"
+  test2="y"
+else
+  echo "nothing to see here"
+  test2="n"
+fi
+
+if [ "$test1" == "y" ] && [ "$test2" == 'y' ]; then
+  echo "I would delete"
+else
+  echo "I wouldnt delete"
 fi
 #
 #
@@ -262,4 +288,4 @@ fi
 #
 #
 # all done
-exit
+exit 0
