@@ -177,12 +177,12 @@ then
   section=${config_yaml::-12}
   beets_function
   sleep 1
-  log "ALAC sync started"
+  log "$section sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
   rsync_error_catch
-  log "ALAC sync finished"
+  log "$section sync finished"
 else
-  log "ALAC conversion not selected"
+  log "$section conversion not selected"
 fi
 #
 #
@@ -194,7 +194,7 @@ then
   section=${config_yaml::-12}
   beets_function
 else
-  log ".mp3 UPLOAD not selected"
+  log "$section not selected"
 fi
 #
 #
@@ -206,12 +206,12 @@ then
   section=${config_yaml::-12}
   beets_function
   sleep 1
-  log "FLAC sync started"
+  log "$section sync started"
   rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
   rsync_error_catch
-  log "FLAC sync finished"
+  log "$section sync finished"
 else
-  log "FLAC conversion not selected"
+  log "$section conversion not selected"
 fi
 #
 # Delete files remaining in source folders
@@ -224,7 +224,7 @@ else
   echo "nothing to see here"
   test1="n"
 fi
-
+#
 find "$flaclibrary_source" -mindepth 1 -print -quit 2>/dev/null | grep -q .
 # Command above returns 0 for contents found, or 1 if nothing found
 if [[ "$?" = "0" ]]; then
@@ -234,7 +234,7 @@ else
   echo "nothing to see here"
   test2="n"
 fi
-
+#
 if [ "$test1" == "y" ] && [ "$test2" == 'y' ]; then
   echo "I would delete"
 else
