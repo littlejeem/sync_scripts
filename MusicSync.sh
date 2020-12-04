@@ -61,7 +61,7 @@ beets_function () {
  else
   log_deb "$rip_flac is empty, no conversion needed"
  fi
-  log "$section processing finished"
+ log "$section processing finished"
 }
 #
 rsync_error_catch () {
@@ -182,7 +182,7 @@ then
   rsync_error_catch
   log "$section sync finished"
 else
-  log "$section conversion not selected"
+  log "$section conversion not selected" #<---I think this is the issue with the spurious logging name error
 fi
 #
 #
