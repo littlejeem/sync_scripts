@@ -9,13 +9,16 @@
 #################################################################################################
 #
 #
-# Source helper script
+#+--------------------------+
+#+---Source helper script---+
+#+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
 source $HOME/bin/standalone_scripts/helper_script.sh
+#
+#
 #+------------------------+
 #+--- Define Functions ---+
 #+------------------------+
-#
 # clean Audiolibrary
 clean_KodiAudio () {
  curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
@@ -25,7 +28,6 @@ clean_KodiAudio () {
 update_KodiAudio () {
  curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
 }
-#
 #
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
@@ -76,10 +78,8 @@ rsync_error_catch () {
 #+-------------------+
 #+---Initial Setup---+
 #+-------------------+
-#
 #SET TEMPORARY VARIABLE FOR TESTING
 config_file="$HOME/.config/ScriptSettings/sync_config.sh"
-#
 #
 #Check for existance FFMPEG
 if ! command -v ffmpeg &> /dev/null
@@ -100,24 +100,6 @@ else
   source $config_file
 fi
 #
-#NOW REDUNDANT?
-## check if log folder exists
-#if [[ ! -d "$logfolder" ]]; then
-#  log "log folder $logfolder does not exist, attempting to create..."
-#  mkdir -p $logfolder
-#  script_log="$logfolder/MusicSync.log"
-#  touch $script_log
-#else
-#  log "log directory exists, using this location: $logfolder"
-#  script_log="$logfolder/MusicSync.log"
-#  if [[ ! -f "$script_log" ]]; then
-#    log "log file found, using: $script_log"
-#  else
-#    log "no log found, creating: $script_log"
-#    touch $script_log
-#  fi
-#fi
-#
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
   log_err "a beets install at $beets_path not detected, please install and re-run"
@@ -127,7 +109,9 @@ else
 fi
 #
 #
-#check that necessary variables are set
+#+--------------------------------------------+
+#+---Check that necessary variables are set---+
+#+--------------------------------------------+
 JAIL_FATAL="${music_alac}"
 fatal_missing_var
 #
@@ -168,7 +152,6 @@ debug_missing_var
 #+---------------------------+
 #+---Start Conversion Work---+
 #+---------------------------+
-#
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
 if [[ "$music_alac" -eq 1 ]]
 then
@@ -185,7 +168,6 @@ else
   log "$section conversion not selected" #<---I think this is the issue with the spurious logging name error
 fi
 #
-#
 # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
 if [[ "$music_google" -eq 1 ]]
 then
@@ -196,7 +178,6 @@ then
 else
   log "$section not selected"
 fi
-#
 #
 # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
 if [[ "$music_flac" -eq 1 ]]
@@ -215,62 +196,36 @@ else
 fi
 #
 # Delete files remaining in source folders
-find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .
-# Command above returns 0 for contents found, or 1 if nothing found
+find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
 if [[ "$?" = "0" ]]; then
-  echo "stuff in directory"
+  log "Located files in directory $download_flac"
   test1="y"
 else
-  echo "nothing to see here"
+  log "no files located in directory $download_flac"
   test1="n"
 fi
 #
-find "$flaclibrary_source" -mindepth 1 -print -quit 2>/dev/null | grep -q .
-# Command above returns 0 for contents found, or 1 if nothing found
+find "$flaclibrary_source" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
 if [[ "$?" = "0" ]]; then
-  echo "stuff in directory"
+  log "Located files in directory $rip_flac"
   test2="y"
 else
-  echo "nothing to see here"
+  log "no files located in directory $rip_flac"
   test2="n"
 fi
 #
 if [ "$test1" == "y" ] && [ "$test2" == 'y' ]; then
-  echo "I would delete"
+  log "Test conditions met, I would delete..."
+  find "$download_flac" -mindepth 1 -type d -print
+  find "$rip_flac" -mindepth 1 -type d -print
 else
-  echo "I wouldnt delete"
+  echo "Test conditions not me, I wouldnt delete"
 fi
 #
 #
-#+--------------------------+
-#+---Sync converted media---+
-#+--------------------------+
-# rsync prune -vrc source dest
-#
-# Sync FLACs
-
-# Sync ALACs
-
-#
-#
-##########DO WE NEED TO CHECK SUCCESS OF THE RSYNC BEFORE DELETION OF DIRECTORIES###########
-#
-# tidy up source download directory
-#cd "$download_flac"
-#delete_if
-#
-# tidy up source rip directory
-#cd "$rip_flac"
-#delete_if
-#
-# tidy up upload directory
-#cd "$upload_mp3"
-#delete_if
-#
-#
-#########################
-### MUSIC SERVER sync ###
-#########################
+#+-----------------------+
+#+---MUSIC SERVER sync---+
+#+-----------------------+
 if [[ "$musicserver_sync" -eq 1 ]]
 then
   echo "-------------------------------------------------------------------------------------"
