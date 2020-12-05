@@ -72,6 +72,7 @@ rsync_error_catch () {
     log "rsync completed successfully"
    else
     log_err "rsync produced an error"
+    rsync_error_flag="y"
   fi
 }
 #
@@ -195,7 +196,10 @@ else
   log "$section conversion not selected"
 fi
 #
-# Delete files remaining in source folders
+#+-------------------------------+
+#+---Begin deletion constructs---+
+#+-------------------------------+
+# 1: Check if source folders contain files
 find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
 if [[ "$?" = "0" ]]; then
   log "Located files in directory $download_flac"
@@ -207,19 +211,29 @@ fi
 #
 find "$flaclibrary_source" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
 if [[ "$?" = "0" ]]; then
-  log "Located files in directory $rip_flac"
+  log "Located files in directory $flaclibrary_source"
   test2="y"
 else
-  log "no files located in directory $rip_flac"
+  log "no files located in directory $flaclibrary_source"
   test2="n"
 fi
 #
-if [ "$test1" == "y" ] && [ "$test2" == 'y' ]; then
+# 2: Set test conditions necessary for deletion, logic here if there are no rsync errors and files in flac source and flac library, deletion can be carried out
+if [ "$test1" == "y" ] && [ "$test2" == 'y' ] && [ -z "$rsync_error_flag" ]; then
   log "Test conditions met, I would delete..."
   find "$download_flac" -mindepth 1 -type d -print
   find "$rip_flac" -mindepth 1 -type d -print
+  if [[ "$music_alac" -eq 1 ]]; then
+    find "$alaclibrary_source" -mindepth 1 -type d -print
+  fi
+  if [[ "$music_google" -eq 1 ]]; then
+    find "$upload_mp3" -mindepth 1 -type d -print
+  fi
+  if [[ "$music_flac" -eq 1 ]]; then
+    find "$flaclibrary_source" -mindepth 1 -type d -print
+  fi
 else
-  echo "Test conditions not me, I wouldnt delete"
+  echo "Test conditions not met, I wouldnt delete"
 fi
 #
 #
