@@ -222,19 +222,28 @@ fi
 if [ "$test1" == "y" ] && [ "$test2" == 'y' ] && [ -z "$rsync_error_flag" ]; then
   log "Test conditions met, I would delete..."
   find "$download_flac" -mindepth 1 -type f -delete
+  sleep 2
   find "$download_flac" -mindepth 1 -type d -delete
+  sleep 2
   find "$rip_flac" -mindepth 1 -type f -delete
+  sleep 2
   find "$rip_flac" -mindepth 1 -type d -delete
+  sleep 2
   if [[ "$music_alac" -eq 1 ]]; then
     find "$alaclibrary_source" -mindepth 1 -type f -delete
+    sleep 2
     find "$alaclibrary_source" -mindepth 1 -type d -delete
+    sleep 2
   fi
   if [[ "$music_google" -eq 1 ]]; then
     find "$upload_mp3" -mindepth 1 -type f -delete
+    sleep 2
     find "$upload_mp3" -mindepth 1 -type d -delete
+    sleep 2
   fi
   if [[ "$music_flac" -eq 1 ]]; then
     find "$flaclibrary_source" -mindepth 1 -type f -delete
+    sleep 2
     find "$flaclibrary_source" -mindepth 1 -type d -delete
   fi
 else
