@@ -53,6 +53,7 @@ beets_function () {
   log "files located in $download_flac"
   "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac"
   rm "$beets_config_path"/musiclibrary.blb
+  should_sync="y"
  else
   log_deb "$download_flac is empty, no conversion needed"
  fi
@@ -60,6 +61,7 @@ beets_function () {
   log "files located in $rip_flac"
   "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac"
   rm "$beets_config_path"/musiclibrary.blb
+  should_sync="y"
  else
   log_deb "$rip_flac is empty, no conversion needed"
  fi
@@ -168,11 +170,16 @@ then
   beets_config_path=$(echo $beets_alac_path)
   section=${config_yaml::-12}
   beets_function
-  sleep 1
-  log "$section sync started"
-  rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
-  rsync_error_catch
-  log "$section sync finished"
+  sleep 1s
+  if [[ "$should_sync" == "y" ]]
+  then
+    log "$section sync started"
+    rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
+    rsync_error_catch
+    log "$section sync finished"
+  else
+    log "no $section conversions, so no sync"
+  fi
 else
   log "$section conversion not selected" #<---I think this is the issue with the spurious logging name error
 fi
@@ -195,11 +202,16 @@ then
   beets_config_path=$(echo $beets_flac_path)
   section=${config_yaml::-12}
   beets_function
-  sleep 1
-  log "$section sync started"
-  rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
-  rsync_error_catch
-  log "$section sync finished"
+  sleep 1s
+  if [[ "$should_sync" == "y" ]]
+  then
+    log "$section sync started"
+    rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
+    rsync_error_catch
+    log "$section sync finished"
+  else
+    log "no $section conversions, so no sync"
+  fi
 else
   log "$section conversion not selected"
 fi
