@@ -164,11 +164,11 @@ debug_missing_var
 #+---Start Conversion Work---+
 #+---------------------------+
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
+config_yaml="alac_config.yaml"
+beets_config_path=$(echo $beets_alac_path)
+section=${config_yaml::-12}
 if [[ "$music_alac" -eq 1 ]]
 then
-  config_yaml="alac_config.yaml"
-  beets_config_path=$(echo $beets_alac_path)
-  section=${config_yaml::-12}
   beets_function
   sleep 1s
   if [[ "$should_sync" == "y" ]]
@@ -185,22 +185,22 @@ else
 fi
 #
 # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
+config_yaml="uploads_config.yaml"
+beets_config_path=$(echo $beets_upload_path)
+section=${config_yaml::-12}
 if [[ "$music_google" -eq 1 ]]
 then
-  config_yaml="uploads_config.yaml"
-  beets_config_path=$(echo $beets_upload_path)
-  section=${config_yaml::-12}
   beets_function
 else
   log "$section not selected"
 fi
 #
 # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
+config_yaml="flac_config.yaml"
+beets_config_path=$(echo $beets_flac_path)
+section=${config_yaml::-12}
 if [[ "$music_flac" -eq 1 ]]
 then
-  config_yaml="flac_config.yaml"
-  beets_config_path=$(echo $beets_flac_path)
-  section=${config_yaml::-12}
   beets_function
   sleep 1s
   if [[ "$should_sync" == "y" ]]
