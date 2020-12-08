@@ -79,6 +79,8 @@ rsync_error_catch () {
 }
 #
 delete_function () {
+  find "$location" -mindepth 1 -type f -print
+  sleep $sleep_time
   find "$location" -mindepth 1 -type f -delete
   sleep $sleep_time
   find "$location" -mindepth 1 -type d -delete
@@ -240,7 +242,7 @@ fi
 #
 # 2: Set test conditions necessary for deletion, logic here if there are no rsync errors and files in flac source and flac library, deletion can be carried out
 if [ "$test1" == "y" ] && [ "$test2" == 'y' ] && [ -z "$rsync_error_flag" ]; then
-  log "Test conditions met, I would delete..."
+  log "Test conditions met, I am deleting..."
   sleep_time="2s"
   location=$(echo $download_flac)
   delete_function
