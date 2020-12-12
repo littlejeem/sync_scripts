@@ -87,6 +87,26 @@ delete_function () {
   sleep $sleep_time
 }
 #
+function Logic1 () {
+  if [ "$test_flac_down" = "y" ] || [ "$test_flac_rip" = "y" ] && [ -z "$rsync_error_flag" ]; then
+    find "$location2" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
+    if [[ "$?" = "0" ]]; then
+      log "Test conditions met, I am deleting..."
+      location="$download_flac"
+      sleep_time="2s"
+      delete_function
+      location="$rip_flac"
+      delete_function
+      location="$location2"
+    else
+      log_deb "Test codition not met, found files in $test_flac_down or $test_flac_rip but none in $location2, possible failed conversion"
+    fi
+  else
+    log_err "Expected files in $test_flac_down or $test_flac_rip but none found"
+    exit 1
+  fi
+}
+
 #
 #+-------------------+
 #+---Initial Setup---+
@@ -221,47 +241,46 @@ fi
 #+-------------------------------+
 #+---Begin deletion constructs---+
 #+-------------------------------+
-# 1: Check if source folders contain files
-find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-if [[ "$?" = "0" ]]; then
-  log "Located files in directory $download_flac"
-  test1="y"
-else
-  log "no files located in directory $download_flac"
-  test1="n"
+#
+# Check if source folders contain files
+function check_source() {
+  find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
+  if [[ "$?" = "0" ]]; then
+    log "Located files in directory $download_flac"
+    test_flac_down="y"
+  else
+    log "no files located in directory $download_flac"
+    test_flac_down="n"
+  fi
+  find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
+  if [[ "$?" = "0" ]]; then
+    log "Located files in directory $rip_flac"
+    test_flac_rip="y"
+  else
+    log "no files located in directory $rip_flac"
+    test_flac_rip="n"
+  fi
+}
+#
+# 1: Check if only ALAC conversion is selected
+if [ "$music_alac" = "1" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "0" ]; then
+  check_source
+  location2="$alaclibrary_source"
+  Logic1
 fi
 #
-find "$flaclibrary_source" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-if [[ "$?" = "0" ]]; then
-  log "Located files in directory $flaclibrary_source"
-  test2="y"
-else
-  log "no files located in directory $flaclibrary_source"
-  test2="n"
+# 2: Check if only FLAC conversion is selected
+if [ "$music_alac" = "0" ] && [ "$music_flac" = "1"] && [ "$music_google" = "0" ]; then
+  check_source
+  location2="$flaclibrary_source"
+  Logic1
 fi
 #
-# 2: Set test conditions necessary for deletion, logic here if there are no rsync errors and files in flac source and flac library, deletion can be carried out
-if [ "$test1" == "y" ] && [ "$test2" == 'y' ] && [ -z "$rsync_error_flag" ]; then
-  log "Test conditions met, I am deleting..."
-  sleep_time="2s"
-  location=$(echo $download_flac)
-  delete_function
-  location=$(echo $rip_flac)
-  delete_function
-  if [[ "$music_alac" -eq 1 ]]; then
-    location=$(echo $alaclibrary_source)
-    delete_function
-  fi
-  if [[ "$music_google" -eq 1 ]]; then
-    location=$(echo $upload_mp3)
-    delete_function
-  fi
-  if [[ "$music_flac" -eq 1 ]]; then
-    location=$(echo $flaclibrary_source)
-    delete_function
-  fi
-else
-  echo "Test conditions not met, I wouldnt delete"
+# 3: Check if only MP3 Upload is selected
+if [ "$music_alac" = "0" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "1" ]; then
+  check_source
+  location2="$upload_mp3"
+  Logic1
 fi
 #
 #
