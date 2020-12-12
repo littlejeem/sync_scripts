@@ -270,7 +270,7 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "0"
 fi
 #
 # 2: Check if only FLAC conversion is selected
-if [ "$music_alac" = "0" ] && [ "$music_flac" = "1"] && [ "$music_google" = "0" ]; then
+if [[ "$music_alac" = "0" ] && [ "$music_flac" = "1"] && [ "$music_google" = "0" ]]; then
   check_source
   location2="$flaclibrary_source"
   Logic1
@@ -280,6 +280,16 @@ fi
 if [ "$music_alac" = "0" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "1" ]; then
   check_source
   location2="$upload_mp3"
+  Logic1
+fi
+#
+#
+# 3: Check if both ALAC & FLAC are selected
+if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "1" ]; then
+  check_source
+  location2="$alaclibrary_source"
+  Logic1
+  location2="$flaclibrary_source"
   Logic1
 fi
 #
