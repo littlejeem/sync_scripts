@@ -93,7 +93,6 @@ function Logic1 () {
     if [[ "$?" = "0" ]]; then
       log "Test conditions met, I am deleting..."
       location="$download_flac"
-      sleep_time="2s"
       delete_function
       location="$rip_flac"
       delete_function
@@ -103,17 +102,11 @@ function Logic1 () {
       else
        delete_function
       fi
-      location="$location3"
-      if [ -z "$location3" ]; then
-       log_deb "No third delete location set"
-      else
-       delete_function
-      fi
     else
-      log_deb "Test codition not met, found files in $test_flac_down or $test_flac_rip but none in $location2, possible failed conversion"
+      log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
     fi
   else
-    log_err "Expected files in $test_flac_down or $test_flac_rip but none found"
+    log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failes"
     exit 1
   fi
 }
@@ -295,14 +288,17 @@ if [ "$music_alac" = "0" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "1"
 fi
 #
 #
-# 3: Check if both ALAC & FLAC are selected
+# 4: Check if both ALAC & FLAC are selected
 if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0" ]; then
   check_source
   location2="$alaclibrary_source"
   Logic1
   location3="$flaclibrary_source"
-  Logic1
-fi
+  find "$location3" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
+  if [[ "$?" = "0" ]]; then
+    location="$location3"
+    delete_function
+  fi
 #
 #
 #+-----------------------+
