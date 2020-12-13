@@ -275,7 +275,7 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "0"
 fi
 #
 # 2: Check if only FLAC conversion is selected
-if [ "$music_alac" = "0" ] && [ "$music_flac" = "1"] && [ "$music_google" = "0" ]; then
+if [ "$music_alac" = "0" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0" ]; then
   check_source
   location2="$flaclibrary_source"
   sleep_time="2s"
