@@ -98,6 +98,17 @@ function Logic1 () {
       location="$rip_flac"
       delete_function
       location="$location2"
+      if [ -z "$location2" ]; then
+       log_deb "No second delete location set"
+      else
+       delete_function
+      fi
+      location="$location3"
+      if [ -z "$location3" ]; then
+       log_deb "No third delete location set"
+      else
+       delete_function
+      fi
     else
       log_deb "Test codition not met, found files in $test_flac_down or $test_flac_rip but none in $location2, possible failed conversion"
     fi
@@ -289,7 +300,7 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0"
   check_source
   location2="$alaclibrary_source"
   Logic1
-  location2="$flaclibrary_source"
+  location3="$flaclibrary_source"
   Logic1
 fi
 #
