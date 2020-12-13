@@ -110,7 +110,7 @@ function Logic1 () {
     exit 1
   fi
 }
-
+#
 #
 #+-------------------+
 #+---Initial Setup---+
@@ -278,7 +278,7 @@ fi
 if [ "$music_alac" = "0" ] && [ "$music_flac" = "1"] && [ "$music_google" = "0" ]; then
   check_source
   location2="$flaclibrary_source"
-  sleep_time=
+  sleep_time="2s"
   Logic1
 fi
 #
