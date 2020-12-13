@@ -299,6 +299,7 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0"
     location="$location3"
     delete_function
   fi
+fi
 #
 #
 #+-----------------------+
