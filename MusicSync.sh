@@ -285,7 +285,7 @@ fi
 #
 #
 # 3: Check if both ALAC & FLAC are selected
-if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "1" ]; then
+if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0" ]; then
   check_source
   location2="$alaclibrary_source"
   Logic1
