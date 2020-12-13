@@ -270,6 +270,7 @@ function check_source() {
 if [ "$music_alac" = "1" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "0" ]; then
   check_source
   location2="$alaclibrary_source"
+  sleep_time="2s"
   Logic1
 fi
 #
@@ -277,6 +278,7 @@ fi
 if [ "$music_alac" = "0" ] && [ "$music_flac" = "1"] && [ "$music_google" = "0" ]; then
   check_source
   location2="$flaclibrary_source"
+  sleep_time=
   Logic1
 fi
 #
@@ -284,6 +286,7 @@ fi
 if [ "$music_alac" = "0" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "1" ]; then
   check_source
   location2="$upload_mp3"
+  sleep_time="2s"
   Logic1
 fi
 #
@@ -292,6 +295,7 @@ fi
 if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0" ]; then
   check_source
   location2="$alaclibrary_source"
+  sleep_time="2s"
   Logic1
   location3="$flaclibrary_source"
   find "$location3" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
