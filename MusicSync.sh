@@ -191,8 +191,11 @@ debug_missing_var
 #+---------------------------+
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
 config_yaml="alac_config.yaml"
+log "config.yaml set as $config_yaml"
 beets_config_path=$(echo $beets_alac_path)
+log "beets_config_path set as $beets_config_path"
 section=${config_yaml::-12}
+log "section running is $section"
 if [[ "$music_alac" -eq 1 ]]
 then
   beets_function
@@ -223,8 +226,11 @@ fi
 #
 # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
 config_yaml="flac_config.yaml"
+log "config.yaml set as $config_yaml"
 beets_config_path=$(echo $beets_flac_path)
+log "beets_config_path set as $beets_config_path"
 section=${config_yaml::-12}
+log "section running is $section"
 if [[ "$music_flac" -eq 1 ]]
 then
   beets_function
