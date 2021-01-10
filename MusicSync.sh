@@ -31,7 +31,7 @@ update_KodiAudio () {
 #
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
-  log_err "JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+  log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   exit 1
  else
   log "variable found, using: $JAIL_FATAL"
@@ -87,7 +87,7 @@ delete_function () {
   sleep $sleep_time
 }
 #
-function Logic1 () {
+Logic1 () {
   if [ "$test_flac_down" = "y" ] || [ "$test_flac_rip" = "y" ] && [ -z "$rsync_error_flag" ]; then
     find "$location2" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
     if [[ "$?" = "0" ]]; then
@@ -106,7 +106,7 @@ function Logic1 () {
       log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
     fi
   else
-    log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failes"
+    log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
     exit 1
   fi
 }
@@ -200,6 +200,7 @@ if [[ "$music_alac" -eq 1 ]]
 then
   beets_function
   sleep 1s
+  log_deb "should sync is set to: $should_sync"
   if [[ "$should_sync" == "y" ]]
   then
     log "$section sync started"
@@ -253,7 +254,7 @@ fi
 #+-------------------------------+
 #
 # Check if source folders contain files
-function check_source() {
+check_source () {
   find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
   if [[ "$?" = "0" ]]; then
     log "Located files in directory $download_flac"
@@ -309,6 +310,16 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0"
     location="$location3"
     delete_function
   fi
+fi
+#
+#
+# TIDY UP IF SCRIPT RIPPED ENCODED BUT COULDNT TAG (Beets)
+timestamp=$(date +%a%R)
+if [[ -d "$rip_flac/Unknown Artist" ]]; then
+  unknown_artist="$rip_flac""Unknown Artist"
+  log_deb "$unknown_artist"
+  log_deb "Generic 'Unknown Artist' folder not deleted post main script, assuming non tagging by beets, keeping folder appended with timestamp"
+  mv "$unknown_artist" "$unknown_artist""-$timestamp"
 fi
 #
 #
