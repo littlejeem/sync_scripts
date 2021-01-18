@@ -79,6 +79,13 @@ rsync_error_catch () {
 }
 #
 delete_function () {
+  includeonly="/home/jlivin25/Music/Rips/Unknown Artist"
+  sleep $sleep_time
+  find "$location" -path "$location/Unknown\ Artist-*" -prune -o -type f -print
+  find "$location" -mindepth 1 -type d -wholename "$includeonly" -print -exec rm -rf '{}' \;
+}
+#
+old_delete_function () {
   find "$location" -mindepth 1 -type f -print
   sleep $sleep_time
   find "$location" -mindepth 1 -type f -delete
