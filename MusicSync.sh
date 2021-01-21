@@ -359,16 +359,6 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0"
 fi
 #
 #
-# TIDY UP IF SCRIPT RIPPED ENCODED BUT COULDNT TAG (Beets)
-timestamp=$(date +%a%R)
-if [[ -d "$rip_flac/Unknown Artist" ]]; then
-  unknown_artist="$rip_flac""Unknown Artist"
-  log_deb "$unknown_artist"
-  log_deb "Generic 'Unknown Artist' folder not deleted post main script, assuming non tagging by beets, keeping folder appended with timestamp"
-  mv "$unknown_artist" "$unknown_artist""-$timestamp"
-fi
-#
-#
 #+-----------------------+
 #+---MUSIC SERVER sync---+
 #+-----------------------+
