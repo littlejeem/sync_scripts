@@ -169,7 +169,7 @@ fi
 if [[ ! -f "$config_file" ]]; then
   log_err "config file $config_file does not appear to exist"
   log_deb "attempting to source config file from default location"
-  config_file="$USER/.config/ScriptSettings/sync_config.sh"
+  config_file="$HOME/.config/ScriptSettings/sync_config.sh"
   if [[ ! -f "$config_file" ]]; then
     log_err "config file still not located at $config_file, script exiting"
     exit 1
