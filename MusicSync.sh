@@ -46,8 +46,50 @@ debug_missing_var () {
  fi
 }
 #
-#SINGLE BEETS FUNCTION
 beets_function () {
+ log "$section processing started"
+ if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
+  log "files located in $download_flac"
+  OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
+  timestamp=$(date +%a%R)
+  echo $OUTPUT | grep "Skipping"
+  if [[ $? = 0 ]]; then
+    log_deb "detected beets skipping"
+    unknown_artist="$rip_flac""Unknown Artist"
+    log_deb "$unknown_artist"
+    log_deb "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
+    mv "$unknown_artist" "$unknown_artist""-$timestamp"
+  fi
+  rm "$beets_config_path"/musiclibrary.blb
+  should_sync="y"
+ else
+  log_deb "$download_flac is empty, no conversion needed"
+ fi
+ if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
+  log "files located in $rip_flac"
+  OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
+  timestamp=$(date +%a%R)
+  echo $OUTPUT | grep "Skipping"
+  if [[ $? = 0 ]]; then
+    log_deb "detected beets skipping"
+    unknown_artist="$rip_flac""Unknown Artist"
+    log_deb "$unknown_artist"
+    log_deb "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
+    mv "$unknown_artist" "$unknown_artist""-$timestamp"
+  fi
+  rm "$beets_config_path"/musiclibrary.blb
+  should_sync="y"
+ else
+  log_deb "$rip_flac is empty, no conversion needed"
+ fi
+ log "$section processing finished"
+}
+#
+#
+#
+#
+#OLD SINGLE BEETS FUNCTION
+old_beets_function () {
  log "$section processing started"
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   log "files located in $download_flac"
@@ -79,19 +121,10 @@ rsync_error_catch () {
 }
 #
 delete_function () {
-  includeonly="/home/jlivin25/Music/Rips/Unknown Artist"
   sleep $sleep_time
-  find "$location" -path "$location/Unknown\ Artist-*" -prune -o -type f -print
-  find "$location" -mindepth 1 -type d -wholename "$includeonly" -print -exec rm -rf '{}' \;
-}
-#
-old_delete_function () {
-  find "$location" -mindepth 1 -type f -print
+  find "$location" -path "$location"Unknown\ Artist-* -prune -o -type f -print
   sleep $sleep_time
-  find "$location" -mindepth 1 -type f -delete
-  sleep $sleep_time
-  find "$location" -mindepth 1 -type d -delete
-  sleep $sleep_time
+  find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename "$location"Unknown\ Artist-* -prune -exec rm -rf '{}' \;
 }
 #
 Logic1 () {
@@ -122,8 +155,6 @@ Logic1 () {
 #+-------------------+
 #+---Initial Setup---+
 #+-------------------+
-#SET TEMPORARY VARIABLE FOR TESTING
-config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 #
 #Check for existance FFMPEG
 if ! command -v ffmpeg &> /dev/null
@@ -136,8 +167,16 @@ fi
 #
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
-  log_err "config file $config_file does not exist, script exiting"
-  exit 1
+  log_err "config file $config_file does not appear to exist"
+  log_deb "attempting to source config file from default location"
+  config_file="$USER/.config/ScriptSettings/sync_config.sh"
+  if [[ ! -f "$config_file" ]]; then
+    log_err "config file still not located at $config_file, script exiting"
+    exit 1
+  else
+    log_deb "located default config file at $config_file, continuing"
+    source $config_file
+  fi
 else
   # source config file
   log "Config file found, using $config_file"
