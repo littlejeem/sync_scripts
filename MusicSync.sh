@@ -121,10 +121,11 @@ rsync_error_catch () {
 }
 #
 delete_function () {
+  includeonly="/home/jlivin25/Music/Rips/Unknown Artist"
   sleep $sleep_time
-  find "$location" -path "$location"Unknown\ Artist-* -prune -o -type f -print
+  find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec echo '{}' \;
   sleep $sleep_time
-  find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename "$location"Unknown\ Artist-* -prune -exec rm -rf '{}' \;
+  find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec rm -rf '{}' \;
 }
 #
 Logic1 () {
