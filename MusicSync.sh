@@ -86,6 +86,7 @@ beets_function () {
   should_sync="y"
  else
   log_deb "$download_flac is empty, no conversion needed"
+  download_flac_empty="1"
  fi
  if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   log "files located in $rip_flac"
@@ -103,6 +104,7 @@ beets_function () {
   should_sync="y"
  else
   log_deb "$rip_flac is empty, no conversion needed"
+  rip_flac_empty="1"
  fi
  log "$section processing finished"
 }
@@ -167,9 +169,12 @@ Logic1 () {
       log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
       rm -r $temp_dir
     fi
-  else
-    log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
-    exit 1
+  elif [ "$rip_flac_empty" ="y" ] && [ "$download_flac_empty" ="y" ]; then
+    log "no input files detected, exiting"
+    exit 0
+    else
+      log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
+      exit 1
   fi
 }
 #
