@@ -53,6 +53,7 @@ update_KodiAudio () {
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
   log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+  rm -r $temp_dir
   exit 1
  else
   log "variable found, using: $JAIL_FATAL"
@@ -105,8 +106,6 @@ beets_function () {
  fi
  log "$section processing finished"
 }
-#
-#
 #
 #
 #OLD SINGLE BEETS FUNCTION
@@ -166,6 +165,7 @@ Logic1 () {
       fi
     else
       log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
+      rm -r $temp_dir
     fi
   else
     log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
@@ -195,6 +195,7 @@ if [[ ! -f "$config_file" ]]; then
   if [[ ! -f "$config_file" ]]; then
     log_err "config file still not located at $config_file, script exiting"
     exit 1
+    rm -r $temp_dir
   else
     log_deb "located default config file at $config_file, continuing"
     source $config_file
@@ -208,6 +209,7 @@ fi
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
   log_err "a beets install at $beets_path not detected, please install and re-run"
+  rm -r $temp_dir
   exit 1
 else
   log "Beets install detected, using $beets_path"
