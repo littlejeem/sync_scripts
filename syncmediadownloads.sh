@@ -28,7 +28,7 @@ temp_dir="/tmp/syncmediadownloads"
 if [[ -d "$temp_dir" ]]; then
   while [[ -d "$temp_dir" ]]; do
     log "previous script still running"
-    sleep 30; done
+    sleep 2m; done
   else
     log "no previously running script detected"
 fi
@@ -166,5 +166,5 @@ fi
 log "$scriptlong complete"
 #
 #
-"$temp_dir"
+rm -r "$temp_dir"
 exit 0
