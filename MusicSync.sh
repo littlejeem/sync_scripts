@@ -23,7 +23,7 @@ temp_dir="/tmp/MusicSync"
 if [[ -d "$temp_dir" ]]; then
   while [[ -d "$temp_dir" ]]; do
     log "previous script still running"
-    sleep 1; done
+    sleep 30; done
   else
     log "no previously running script detected"
 fi
