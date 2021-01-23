@@ -19,6 +19,7 @@ stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
 dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source /home/jlivin25/bin/standalone_scripts/helper_script.sh
+script_pid=$(echo $$)
 #
 #
 #+---------------------------------------+
@@ -79,9 +80,9 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 rsync_error_catch () {
   if [ $? == "0" ]
    then
-    log "`date +%d/%m/%Y` - `date +%H:%M:%S` $section rsync completed successfully"
+    log "section: $section rsync completed successfully"
    else
-    log "`date +%d/%m/%Y` - `date +%H:%M:%S` $section produced an error"
+    log "Section: $section produced an error"
   fi
 }
 #
@@ -90,8 +91,9 @@ rsync_error_catch () {
 ## Start Main Script ##
 #######################
 mkdir -p "$logfolder"
-log " - $scriptlong Started, sleeping for 1min to allow network to start"
+log "$scriptlong Started, sleeping for 1min to allow network to start"
 log_deb "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
+log_deb "syncmediadownloads PID is: $script_pid"
 sleep 15s #sleep for cron @reboot to allow tine for network to start
 #
 #
@@ -105,7 +107,7 @@ then
   rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
   rsync_error_catch
   log "Starting MusicSync.sh"
-  "$dir_name"/MusicSync.sh #run seperate 'tagger' script
+  sudo -u jlivin25 /home/$USER/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
   if [[ $? = 0 ]]; then
     log "MusicSync.sh exited gracefully"
   else
