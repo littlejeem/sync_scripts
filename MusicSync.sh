@@ -178,6 +178,9 @@ Logic1 () {
 #+---Initial Setup---+
 #+-------------------+
 #
+#Grab PID
+script_pid=$(echo $$)
+log_deb "MusicSync scripts PID is: $script_pid"
 #Check for existance FFMPEG
 if ! command -v ffmpeg &> /dev/null
 then
