@@ -171,10 +171,11 @@ Logic1 () {
     fi
   elif [ "$rip_flac_empty" ="y" ] && [ "$download_flac_empty" ="y" ]; then
     log "no input files detected, exiting"
+    rm -r $temp_dir
     exit 0
-    else
-      log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
-      exit 1
+  else
+    log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
+    exit 1
   fi
 }
 #
