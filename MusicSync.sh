@@ -86,7 +86,6 @@ beets_function () {
   should_sync="y"
  else
   log_deb "$download_flac is empty, no conversion needed"
-  download_flac_empty="1"
  fi
  if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   log "files located in $rip_flac"
@@ -104,7 +103,6 @@ beets_function () {
   should_sync="y"
  else
   log_deb "$rip_flac is empty, no conversion needed"
-  rip_flac_empty="1"
  fi
  log "$section processing finished"
 }
@@ -169,13 +167,28 @@ Logic1 () {
       log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
       rm -r $temp_dir
     fi
-  elif [ "$rip_flac_empty" = "y" ] && [ "$download_flac_empty" = "y" ]; then
-    log "no input files detected, exiting"
-    rm -r $temp_dir
-    exit 0
   else
     log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
     exit 1
+  fi
+}
+#
+check_source () {
+  find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
+  if [[ "$?" = "0" ]]; then
+    log "Located files in directory $download_flac"
+    test_flac_down="y"
+  else
+    log "no files located in directory $download_flac"
+    test_flac_down="n"
+  fi
+  find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
+  if [[ "$?" = "0" ]]; then
+    log "Located files in directory $rip_flac"
+    test_flac_rip="y"
+  else
+    log "no files located in directory $rip_flac"
+    test_flac_rip="n"
   fi
 }
 #
@@ -265,6 +278,13 @@ JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
 #
 #
+#Check if source folders are empty, if they are bail gracefully, if not continue
+check_source
+if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
+  log "no input files detected, exiting"
+  rm -r $temp_dir
+  exit 0
+fi
 #+---------------------------+
 #+---Start Conversion Work---+
 #+---------------------------+
@@ -333,24 +353,6 @@ fi
 #+-------------------------------+
 #
 # Check if source folders contain files
-check_source () {
-  find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-  if [[ "$?" = "0" ]]; then
-    log "Located files in directory $download_flac"
-    test_flac_down="y"
-  else
-    log "no files located in directory $download_flac"
-    test_flac_down="n"
-  fi
-  find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-  if [[ "$?" = "0" ]]; then
-    log "Located files in directory $rip_flac"
-    test_flac_rip="y"
-  else
-    log "no files located in directory $rip_flac"
-    test_flac_rip="n"
-  fi
-}
 #
 # 1: Check if only ALAC conversion is selected
 if [ "$music_alac" = "1" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "0" ]; then
