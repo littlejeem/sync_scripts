@@ -18,6 +18,28 @@ config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
 dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source /home/jlivin25/bin/standalone_scripts/helper_script.sh
+#
+#
+#+---------------------------------------+
+#+---"check if script already running"---+
+#+---------------------------------------+
+temp_dir="/tmp/syncmediadownloads"
+if [[ -d "$temp_dir" ]]; then
+  while [[ -d "$temp_dir" ]]; do
+    log "previous script still running"
+    sleep 30; done
+  else
+    log "no previously running script detected"
+fi
+log_deb "temp dir is set as: $temp_dir"
+mkdir "$temp_dir"
+if [[ $? = 0 ]]; then
+  log "temp directory set successfully"
+else
+  log_err "temp directory NOT set successfully, exiting"
+  exit 1
+fi
 #
 #
 #####################################
@@ -25,11 +47,12 @@ dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #####################################
 #check for config file
 if [[ ! -f "$config_file" ]]; then
-  echo "config file $config_file does not exist, script exiting"
+  log "config file $config_file does not exist, script exiting"
   exit 1
+  rm -r "$temp_dir"
 else
   #source config file
-  echo "config file found, using"
+  log "config file found, using"
   source "$config_file"
 fi
 #
@@ -56,9 +79,9 @@ curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "m
 rsync_error_catch () {
   if [ $? == "0" ]
    then
-    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` $section rsync completed successfully" >> $logfolder/$logname
+    log "`date +%d/%m/%Y` - `date +%H:%M:%S` $section rsync completed successfully"
    else
-    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` $section produced an error" >> $logfolder/$logname
+    log "`date +%d/%m/%Y` - `date +%H:%M:%S` $section produced an error"
   fi
 }
 #
@@ -67,9 +90,8 @@ rsync_error_catch () {
 ## Start Main Script ##
 #######################
 mkdir -p "$logfolder"
-echo "#####################################################################################################################" > $logfolder/$logname
-echo " - $scriptlong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
-echo "User is $username and config file is $config_file" >> $logfolder/$logname #for error checking
+log " - $scriptlong Started, sleeping for 1min to allow network to start"
+log_deb "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
 sleep 15s #sleep for cron @reboot to allow tine for network to start
 #
 #
@@ -79,15 +101,19 @@ sleep 15s #sleep for cron @reboot to allow tine for network to start
 section="music_sync"
 if [[ "$section" -eq 1 ]]
 then
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
+  log "MUSIC sync SELECTED, sync started"
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
   rsync_error_catch
+  log "Starting MusicSync.sh"
   "$dir_name"/MusicSync.sh #run seperate 'tagger' script
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
+  if [[ $? = 0 ]]; then
+    log "MusicSync.sh exited gracefully"
+  else
+    log_deb "MusicSync.sh exited with error"
+  fi
+  log "MUSIC sync finished"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync DESELECTED, no sync" >> $logfolder/$logname
+  log "MUSIC sync DESELECTED, no sync"
 fi
 #
 #
@@ -97,15 +123,13 @@ fi
 section="movies"
 if [[ "section" -eq 1 ]]
 then
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest" >> $logfolder/$logname
+  log "MOVIES sync SELECTED, sync started"
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync COMPLETE" >> $logfolder/$logname
+  log "MOVIES sync COMPLETE"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync DESELECTED, no sync" >> $logfolder/$logname
+  log "MOVIES sync DESELECTED, no sync"
 fi
 #
 #
@@ -115,15 +139,13 @@ fi
 section="tv"
 if [[ "$section" -eq 1 ]]
 then
-  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest" >> $logfolder/$logname
+  log "TV sync SELECTED, sync started"
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
+  log "TV sync finished"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync DESELECTED, no sync" >> $logfolder/$logname
+  log "TV sync DESELECTED, no sync"
 fi
 #
 #
@@ -133,19 +155,16 @@ fi
 section="nfl"
 if [[ "$section" -eq 1 ]]
 then
-  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_prune_empty" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
+  log "NFL sync SELECTED, sync started"
+  rsync "$rsync_prune_empty" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
   rsync_error_catch
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
+  log "NFL sync finished"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync DESELECTED, no sync" >> $logfolder/$logname
+  log "NFL sync DESELECTED, no sync"
 fi
 #
-echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $scriptlong complete" >> $logfolder/$logname
+log "$scriptlong complete"
 #
 #
-echo "#####################################################################################################################" > $logfolder/$logname
+"$temp_dir"
 exit 0
