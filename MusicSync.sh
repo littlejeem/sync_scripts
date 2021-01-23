@@ -169,7 +169,7 @@ Logic1 () {
       log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
       rm -r $temp_dir
     fi
-  elif [ "$rip_flac_empty" ="y" ] && [ "$download_flac_empty" ="y" ]; then
+  elif [ "$rip_flac_empty" = "y" ] && [ "$download_flac_empty" = "y" ]; then
     log "no input files detected, exiting"
     rm -r $temp_dir
     exit 0
