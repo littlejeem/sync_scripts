@@ -5,8 +5,18 @@
 ## This script is to import music transferred from the a remote location into Beets Librtary   ##
 ## Once imported and converted it moves the fies to my music library, this is also done with   ##
 ## any ripped music                                                                            ##
-## script is in $HOME/scripts/control_scripts folder                                                               ##
+## script is in $HOME/scripts/control_scripts folder                                           ##
 #################################################################################################
+#
+#
+#+------------------+
+#+---"Exit Codes"---+
+#+------------------+
+# exit 0 = Success
+# exit 1 = Variable Error
+# exit 2 = Sourcing file error
+# exit 3 = Processing Error
+# exit 4 = Required Program Missing
 #
 #
 #+--------------------------+
@@ -33,7 +43,7 @@ if [[ $? = 0 ]]; then
   log "temp directory set successfully"
 else
   log_err "temp directory NOT set successfully, exiting"
-  exit 1
+  exit 2
 fi
 #
 #
@@ -53,7 +63,7 @@ update_KodiAudio () {
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
   log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
-  rm -r $temp_dir
+  rm -r "$temp_dir"
   exit 1
  else
   log "variable found, using: $JAIL_FATAL"
@@ -62,7 +72,7 @@ fatal_missing_var () {
 #
 debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
-  log_deb "JAIL_DEBUG is unset or set to the empty string, may cause issues"
+  log_deb "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
   log "variable found, using: $JAIL_DEBUG"
  fi
@@ -165,11 +175,11 @@ Logic1 () {
       fi
     else
       log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
-      rm -r $temp_dir
+      rm -r "$temp_dir"
     fi
   else
     log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
-    exit 1
+    exit 3
   fi
 }
 #
@@ -204,7 +214,7 @@ log_deb "MusicSync scripts PID is: $script_pid"
 if ! command -v ffmpeg &> /dev/null
 then
   log_err "FFMPEG could not be found, script won't function wihout it"
-  exit 1
+  exit 4
 else
   log "FFMPEG command located, continuing"
 fi
@@ -216,23 +226,23 @@ if [[ ! -f "$config_file" ]]; then
   config_file="$HOME/.config/ScriptSettings/sync_config.sh"
   if [[ ! -f "$config_file" ]]; then
     log_err "config file still not located at $config_file, script exiting"
-    exit 1
-    rm -r $temp_dir
+    rm -r "$temp_dir"
+    exit 4
   else
     log_deb "located default config file at $config_file, continuing"
-    source $config_file
+    source "$config_file"
   fi
 else
   # source config file
   log "Config file found, using $config_file"
-  source $config_file
+  source "$config_file"
 fi
 #
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
   log_err "a beets install at $beets_path not detected, please install and re-run"
-  rm -r $temp_dir
-  exit 1
+  rm -r "$temp_dir"
+  exit 4
 else
   log "Beets install detected, using $beets_path"
 fi
@@ -282,8 +292,8 @@ debug_missing_var
 check_source
 if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
   log "no input files detected, exiting"
-  rm -r $temp_dir
-  exit 0
+  rm -r "$temp_dir"
+  exit 3
 fi
 #+---------------------------+
 #+---Start Conversion Work---+
@@ -303,7 +313,7 @@ then
   if [[ "$should_sync" == "y" ]]
   then
     log "$section sync started"
-    rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $alaclibrary_source $M4A_musicdest
+    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
     rsync_error_catch
     log "$section sync finished"
   else
@@ -338,7 +348,7 @@ then
   if [[ "$should_sync" == "y" ]]
   then
     log "$section sync started"
-    rsync $rsync_remove_source $rsync_prune_empty $rsync_alt_vzr $flaclibrary_source $FLAC_musicdest
+    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
     rsync_error_catch
     log "$section sync finished"
   else
@@ -415,4 +425,5 @@ fi
 #
 # all done
 rm -r "$temp_dir"
+log "MusicSync.sh completed successfully"
 exit 0
