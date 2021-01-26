@@ -121,7 +121,7 @@ then
   rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
   rsync_error_catch
   log "Starting MusicSync.sh"
-  sudo -u jlivin25 /home/$USER/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
+  sudo -u jlivin25 $HOME/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
   if [[ $? = 0 ]]; then
     log "MusicSync.sh exited gracefully"
   else
