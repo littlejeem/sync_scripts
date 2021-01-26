@@ -6,6 +6,22 @@
 ## script is in user bin folder but run from sudo or su cron not user                      ##
 #############################################################################################
 #
+#+--------------------------+
+#+---Source helper script---+
+#+--------------------------+
+PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
+source $HOME/bin/standalone_scripts/helper_script.sh
+#
+#
+#+------------------+
+#+---"Exit Codes"---+
+#+------------------+
+# exit 0 = Success
+# exit 1 = Variable Error
+# exit 2 = Sourcing file error
+# exit 3 = Processing Error
+# exit 4 = Required Program Missing
+#
 #
 ####################
 ## set variables  ##
@@ -14,33 +30,32 @@ version="v2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 logname=$lockname.log # Uses the script name to create the log
-config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
 stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
 dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source /home/jlivin25/bin/standalone_scripts/helper_script.sh
+config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 script_pid=$(echo $$)
 #
 #
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
-temp_dir="/tmp/syncmediadownloads"
-if [[ -d "$temp_dir" ]]; then
-  while [[ -d "$temp_dir" ]]; do
-    log "previous script still running"
-    sleep 2m; done
-  else
-    log "no previously running script detected"
-fi
-log_deb "temp dir is set as: $temp_dir"
-mkdir "$temp_dir"
-if [[ $? = 0 ]]; then
-  log "temp directory set successfully"
-else
-  log_err "temp directory NOT set successfully, exiting"
-  exit 1
-fi
+#temp_dir="/tmp/syncmediadownloads"
+#if [[ -d "$temp_dir" ]]; then
+#  while [[ -d "$temp_dir" ]]; do
+#    log "previous script still running"
+#    sleep 2m; done
+#  else
+#    log "no previously running script detected"
+#fi
+#log_deb "temp dir is set as: $temp_dir"
+#mkdir "$temp_dir"
+#if [[ $? = 0 ]]; then
+#  log "temp directory set successfully"
+#else
+#  log_err "temp directory NOT set successfully, exiting"
+#  exit 2
+#fi
 #
 #
 #####################################
@@ -49,10 +64,9 @@ fi
 #check for config file
 if [[ ! -f "$config_file" ]]; then
   log "config file $config_file does not exist, script exiting"
-  exit 1
+  exit 2
   rm -r "$temp_dir"
 else
-  #source config file
   log "config file found, using"
   source "$config_file"
 fi
@@ -111,6 +125,7 @@ then
   if [[ $? = 0 ]]; then
     log "MusicSync.sh exited gracefully"
   else
+    log_err "Exit code: $?"
     log_deb "MusicSync.sh exited with error"
   fi
   log "MUSIC sync finished"
@@ -158,7 +173,7 @@ section="nfl"
 if [[ "$section" -eq 1 ]]
 then
   log "NFL sync SELECTED, sync started"
-  rsync "$rsync_prune_empty" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
+  rsync "$rsync_prune_empty" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
   rsync_error_catch
   log "NFL sync finished"
 else
@@ -168,5 +183,5 @@ fi
 log "$scriptlong complete"
 #
 #
-rm -r "$temp_dir"
+#rm -r "$temp_dir"
 exit 0
