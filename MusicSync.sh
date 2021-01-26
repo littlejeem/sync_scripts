@@ -13,7 +13,7 @@
 #+---"Exit Codes"---+
 #+------------------+
 # exit 0 = Success
-# exit 1 = Variable Error
+# exit 5 = Variable Error
 # exit 2 = Sourcing file error
 # exit 3 = Processing Error
 # exit 4 = Required Program Missing
@@ -64,7 +64,7 @@ fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
   log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   rm -r "$temp_dir"
-  exit 1
+  exit 5
  else
   log "variable found, using: $JAIL_FATAL"
  fi
