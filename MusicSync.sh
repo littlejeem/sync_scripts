@@ -12,11 +12,12 @@
 #+------------------+
 #+---"Exit Codes"---+
 #+------------------+
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
 # exit 0 = Success
-# exit 5 = Variable Error
-# exit 2 = Sourcing file error
-# exit 3 = Processing Error
-# exit 4 = Required Program Missing
+# exit 64 = Variable Error
+# exit 65 = Sourcing file error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
 #
 #
 #+--------------------------+
@@ -43,7 +44,7 @@ if [[ $? = 0 ]]; then
   log "temp directory set successfully"
 else
   log_err "temp directory NOT set successfully, exiting"
-  exit 2
+  exit 65
 fi
 #
 #
@@ -64,7 +65,7 @@ fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
   log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   rm -r "$temp_dir"
-  exit 5
+  exit 64
  else
   log "variable found, using: $JAIL_FATAL"
  fi
@@ -179,7 +180,7 @@ Logic1 () {
     fi
   else
     log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
-    exit 3
+    exit 66
   fi
 }
 #
@@ -214,7 +215,7 @@ log_deb "MusicSync scripts PID is: $script_pid"
 if ! command -v ffmpeg &> /dev/null
 then
   log_err "FFMPEG could not be found, script won't function wihout it"
-  exit 4
+  exit 67
 else
   log "FFMPEG command located, continuing"
 fi
@@ -227,7 +228,7 @@ if [[ ! -f "$config_file" ]]; then
   if [[ ! -f "$config_file" ]]; then
     log_err "config file still not located at $config_file, script exiting"
     rm -r "$temp_dir"
-    exit 4
+    exit 65
   else
     log_deb "located default config file at $config_file, continuing"
     source "$config_file"
@@ -242,7 +243,7 @@ fi
 if [[ ! -f "$beets_path" ]]; then
   log_err "a beets install at $beets_path not detected, please install and re-run"
   rm -r "$temp_dir"
-  exit 4
+  exit 67
 else
   log "Beets install detected, using $beets_path"
 fi
