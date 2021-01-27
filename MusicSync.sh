@@ -293,7 +293,7 @@ check_source
 if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
   log "no input files detected, exiting"
   rm -r "$temp_dir"
-  exit 3
+  exit 0
 fi
 #+---------------------------+
 #+---Start Conversion Work---+
