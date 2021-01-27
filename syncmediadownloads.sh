@@ -122,14 +122,15 @@ then
   rsync_error_catch
   log "Starting MusicSync.sh"
   sudo -u jlivin25 $HOME/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
-  reply=$?
-  if [[ "$reply" = 0 ]]; then
-    log "MusicSync.sh exited gracefully"
-  else
-    log_err "Exit code: $reply received"
-    log_deb "MusicSync.sh exited with error"
-  fi
-  log "MUSIC sync finished"
+  script_exit
+#  reply=$?
+#  if [[ "$reply" = 0 ]]; then
+#    log "MusicSync.sh exited gracefully"
+#  else
+#    log_err "Exit code: $reply received"
+#    log_deb "MusicSync.sh exited with error"
+#  fi
+#  log "MUSIC sync finished"
 else
   log "MUSIC sync DESELECTED, no sync"
 fi
