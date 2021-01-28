@@ -16,11 +16,12 @@ source $HOME/bin/standalone_scripts/helper_script.sh
 #+------------------+
 #+---"Exit Codes"---+
 #+------------------+
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
 # exit 0 = Success
-# exit 1 = Variable Error
-# exit 2 = Sourcing file error
-# exit 3 = Processing Error
-# exit 4 = Required Program Missing
+# exit 64 = Variable Error
+# exit 65 = Sourcing file error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
 #
 #
 ####################
