@@ -52,14 +52,6 @@ fi
 #+--- Define Functions ---+
 #+------------------------+
 # clean Audiolibrary
-clean_KodiAudio () {
- curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-}
-#
-# update AudioLibrary
-update_KodiAudio () {
- curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-}
 #
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
@@ -415,9 +407,9 @@ then
   rsync "$rsync_alt_vzr" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
   rsync_error_catch
   log "MUSIC SERVER sync finished"
-  update_KodiAudio
+  update_musiclibrary
   sleep 30s
-  clean_KodiAudio
+  clean_musiclibrary
 else
   echo "-------------------------------------------------------------------------------------"
   log "MUSIC SERVER sync DESELECTED, no sync"
