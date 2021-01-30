@@ -2,12 +2,16 @@
 #
 #
 #################################################################################################
-## This script is to import music transferred from the a remote location into Beets Librtary   ##
+## This script is to import music transferred from the a remote location into Beets Library    ##
 ## Once imported and converted it moves the fies to my music library, this is also done with   ##
 ## any ripped music                                                                            ##
-## script is in $HOME/scripts/control_scripts folder                                           ##
+## script is in $HOME/bin/sync_cripts                                                          ##
 #################################################################################################
 #
+#+-----------------+
+#+---Set Version---+
+#+-----------------+
+version="2.0"
 #
 #+------------------+
 #+---"Exit Codes"---+
@@ -203,6 +207,8 @@ check_source () {
 #Grab PID
 script_pid=$(echo $$)
 log_deb "MusicSync scripts PID is: $script_pid"
+#display version
+log_deb "Version is: $version"
 #Check for existance FFMPEG
 if ! command -v ffmpeg &> /dev/null
 then
