@@ -68,7 +68,7 @@ fi
 #check for config file
 if [[ ! -f "$config_file" ]]; then
   log "config file $config_file does not exist, script exiting"
-  exit 2
+  exit 65
   rm -r "$lockname"
 else
   log "config file found, using"
