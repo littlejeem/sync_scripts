@@ -19,63 +19,66 @@ source $HOME/bin/standalone_scripts/helper_script.sh
 # pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
 # exit 0 = Success
 # exit 64 = Variable Error
-# exit 65 = Sourcing file error
+# exit 65 = Sourcing file/folder error
 # exit 66 = Processing Error
 # exit 67 = Required Program Missing
 #
 #
-####################
-## set variables  ##
-####################
-version="v2.0"
+#+---------------------+
+#+---"Set Variables"---+
+#+---------------------+
+version="2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
-logname=$lockname.log # Uses the script name to create the log
-stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
-stamplog=$(echo "`date +%d%m%Y`-`date +%H_%M_%S`")
-dir_name="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 config_file="$HOME/.config/ScriptSettings/sync_config.sh"
 script_pid=$(echo $$)
+#
+#
+#+--------------------------------------+
+#+---"Display some info about script"---+
+#+--------------------------------------+
+log_deb "Version of $scriptlong is: $version"
+log_deb "PID is $script_pid"
 #
 #
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
-#temp_dir="/tmp/syncmediadownloads"
-#if [[ -d "$temp_dir" ]]; then
-#  while [[ -d "$temp_dir" ]]; do
-#    log "previous script still running"
-#    sleep 2m; done
-#  else
-#    log "no previously running script detected"
-#fi
-#log_deb "temp dir is set as: $temp_dir"
-#mkdir "$temp_dir"
-#if [[ $? = 0 ]]; then
-#  log "temp directory set successfully"
-#else
-#  log_err "temp directory NOT set successfully, exiting"
-#  exit 2
-#fi
+temp_dir="$lockname"
+if [[ -d "$lockname" ]]; then
+  while [[ -d "$lockname" ]]; do
+    log "previous script still running"
+    sleep 2m; done
+    #  else
+    log "no previously running script detected"
+fi
+log_deb "temp dir is set as: $lockname"
+mkdir /tmp/"$lockname"
+if [[ $? = 0 ]]; then
+  log "temp directory set successfully"
+else
+  log_err "setting temp directory unsuccessfull, exiting"
+  exit 65
+fi
 #
 #
-#####################################
-## Import sensitive data from file ##
-#####################################
+#+---------------------------------------+
+#+---"Import sensitive data from file"---+
+#+---------------------------------------+
 #check for config file
 if [[ ! -f "$config_file" ]]; then
   log "config file $config_file does not exist, script exiting"
   exit 2
-  rm -r "$temp_dir"
+  rm -r "$lockname"
 else
   log "config file found, using"
   source "$config_file"
 fi
 #
 #
-##############################################################
-## set FUNCTIONS - tested on KODI 17/18 for library actions ##
-##############################################################
+#+-----------------+
+#+---"Functions"---+
+#+-----------------+
 rsync_error_catch () {
   if [ $? == "0" ]
    then
@@ -86,19 +89,18 @@ rsync_error_catch () {
 }
 #
 #
-#######################
-## Start Main Script ##
-#######################
-mkdir -p "$logfolder"
+#+-------------------------+
+#+---"Start Main Script"---+
+#+-------------------------+
 log "$scriptlong Started, sleeping for 1min to allow network to start"
 log_deb "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
 log_deb "syncmediadownloads PID is: $script_pid"
-sleep 15s #sleep for cron @reboot to allow tine for network to start
+sleep 15s #sleep for cron @reboot to allow time for network to start
 #
 #
-################
-## MUSIC sync ##
-################
+#+------------------+
+#+---"MUSIC Sync"---+
+#+------------------+
 section="music_sync"
 if [[ "$section" -eq 1 ]]
 then
@@ -108,22 +110,14 @@ then
   log "Starting MusicSync.sh"
   sudo -u jlivin25 $HOME/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
   script_exit
-#  reply=$?
-#  if [[ "$reply" = 0 ]]; then
-#    log "MusicSync.sh exited gracefully"
-#  else
-#    log_err "Exit code: $reply received"
-#    log_deb "MusicSync.sh exited with error"
-#  fi
-#  log "MUSIC sync finished"
 else
   log "MUSIC sync DESELECTED, no sync"
 fi
 #
 #
-###############
-## FILM sync ##
-###############
+#+-----------------+
+#+---"FILM Sync"---+
+#+-----------------+
 section="movies"
 if [[ "section" -eq 1 ]]
 then
@@ -137,9 +131,9 @@ else
 fi
 #
 #
-#############
-## TV sync ##
-#############
+#+---------------+
+#+---"TV Sync"---+
+#+---------------+
 section="tv"
 if [[ "$section" -eq 1 ]]
 then
@@ -153,9 +147,9 @@ else
 fi
 #
 #
-####################
-## start NFL sync ##
-####################
+#+----------------+
+#+---"NFL Sync"---+
+#+----------------+
 section="nfl"
 if [[ "$section" -eq 1 ]]
 then
@@ -170,5 +164,5 @@ fi
 log "$scriptlong complete"
 #
 #
-#rm -r "$temp_dir"
+rm -r "$lockname"
 exit 0
