@@ -34,22 +34,7 @@ source $HOME/bin/standalone_scripts/helper_script.sh
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
-temp_dir="/tmp/MusicSync"
-if [[ -d "$temp_dir" ]]; then
-  while [[ -d "$temp_dir" ]]; do
-    log "previous script still running"
-    sleep 30; done
-  else
-    log "no previously running script detected"
-fi
-log_deb "temp dir is set as: $temp_dir"
-mkdir "$temp_dir"
-if [[ $? = 0 ]]; then
-  log "temp directory set successfully"
-else
-  log_err "temp directory NOT set successfully, exiting"
-  exit 65
-fi
+check_running
 #
 #
 #+------------------------+

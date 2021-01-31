@@ -71,6 +71,12 @@ log_deb "Script $scriptname running, PID is: $script_pid"
 log_deb "Version is: $version"
 #
 #
+#+---------------------------------------+
+#+---"Check if script running already"---+
+#+---------------------------------------+
+check_running
+#
+#
 #+--------------------------------------------+
 #+---Check that necessary variables are set---+
 #+--------------------------------------------+

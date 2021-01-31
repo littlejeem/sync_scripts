@@ -44,22 +44,7 @@ log_deb "PID is $script_pid"
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
-temp_dir="$lockname"
-if [[ -d "$lockname" ]]; then
-  while [[ -d "$lockname" ]]; do
-    log "previous script still running"
-    sleep 2m; done
-    #  else
-    log "no previously running script detected"
-fi
-log_deb "temp dir is set as: $lockname"
-mkdir /tmp/"$lockname"
-if [[ $? = 0 ]]; then
-  log "temp directory set successfully"
-else
-  log_err "setting temp directory unsuccessfull, exiting"
-  exit 65
-fi
+check_running
 #
 #
 #+---------------------------------------+
