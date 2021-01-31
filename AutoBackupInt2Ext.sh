@@ -90,38 +90,26 @@ fatal_missing_var
 #+--------------------+
 #+---"Start Script"---+
 #+--------------------+
-log "script name = $scriptname"
-if mkdir "$lockdir"
-then   # lock directory did not exist, but was created successfully
- grep -qs "$mount" /proc/mounts #if grep sees the mount then it will return a silent 0 if not seen a silent 1
-   if [[ $? -eq 0 ]]
-   then
-     log_deb "Hard Drive already mounted"
-     mountpoint=$(grep "$mount" /proc/mounts | cut -c 1-9)
-     log "mountpoint is $mountpoint"
-     rsync_command
-     exit_segment
-   else
-     if [[ $? -eq 1 ]]
-     then
-     log_deb "Hard Drive NOT currently mounted."
-       if mount -U "$uuid" "$mount"
-       then
-        log "Hard Drive mounted successfully"
-        rsync_command
-        exit_segment
-       else
-        log_err "Something went wrong with the mount..."
-        message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - ERROR - Something went wrong with the mount...")
-        pushover
-        exit 66
-       fi
-     fi
-   fi
+grep -qs "$mount" /proc/mounts #if grep sees the mount then it will return a silent 0 if not seen a silent 1
+if [[ $? -eq 0 ]]; then
+  log_deb "Hard Drive already mounted"
+  mountpoint=$(grep "$mount" /proc/mounts | cut -c 1-9)
+  log "mountpoint is $mountpoint"
+  rsync_command
+  exit_segment
 else
-  log_err "Another instance of this script tried to run, $lockdir"
-  message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - ERROR - Another instance of this script tried to run...")
-  pushover
-  exit 66
+  if [[ $? -eq 1 ]]; then
+    log_deb "Hard Drive NOT currently mounted."
+    if mount -U "$uuid" "$mount"; then
+      log "Hard Drive mounted successfully"
+      rsync_command
+      exit_segment
+    else
+      log_err "Something went wrong with the mount..."
+      message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - ERROR - Something went wrong with the mount...")
+      pushover
+      exit 66
+    fi
+  fi
 fi
 exit 0
