@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # script is kept in /usr/local/bin and should be made executable with 0755 or 0766 perms
 #
@@ -38,7 +38,7 @@ rsync_command ()
   log "lock dir will be = $lockdir"
   log "sync started"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
-  Pushover
+  pushover
 #  rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$loglocation"/"$timestamp".log
 }
 #
@@ -49,7 +49,7 @@ exit_segment ()
   log "SUCCESS - sync completed"
   log "Hard Drive $mountpoint unmounted"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed, unplug the drive")
-  Pushover
+  pushover
   exit 0
 }
 #
@@ -69,6 +69,16 @@ script_pid=$(echo $$)
 log_deb "Script $scriptname running, PID is: $script_pid"
 #display version
 log_deb "Version is: $version"
+#
+#
+#+--------------------------------------------+
+#+---Check that necessary variables are set---+
+#+--------------------------------------------+
+JAIL_FATAL="${scriptname}"
+fatal_missing_var
+#
+JAIL_FATAL="${lockdir}"
+fatal_missing_var
 #
 #
 #+--------------------+
@@ -97,7 +107,7 @@ then   # lock directory did not exist, but was created successfully
        else
         log_err "Something went wrong with the mount..."
         message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - ERROR - Something went wrong with the mount...")
-        Pushover
+        pushover
         exit 66
        fi
      fi
@@ -105,7 +115,7 @@ then   # lock directory did not exist, but was created successfully
 else
   log_err "Another instance of this script tried to run, $lockdir"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - ERROR - Another instance of this script tried to run...")
-  Pushover
+  pushover
   exit 66
 fi
 exit 0
