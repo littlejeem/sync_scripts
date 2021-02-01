@@ -10,7 +10,14 @@
 #+---Source helper script---+
 #+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-source $HOME/bin/standalone_scripts/helper_script.sh
+helper_file="$HOME/bin/standalone_scripts/helper_script.sh"
+if [[ ! -f "$helper_file" ]]; then
+  echo "config file $config_file does not exist, script exiting"
+  exit 65
+else
+  echo "config file found, using"
+  source "$HOME/bin/standalone_scripts/helper_script.sh"
+fi
 #
 #
 #+------------------+
