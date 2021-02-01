@@ -13,6 +13,15 @@
 #+-----------------+
 version="2.0"
 #
+#
+#+---------------------+
+#+---"Set Variables"---+
+#+---------------------+
+scriptlong="MusicSync.sh" # imports the name of this script
+lockname=${scriptlong::-3} # reduces the name to remove .sh
+script_pid=$(echo $$)
+#
+#
 #+------------------+
 #+---"Exit Codes"---+
 #+------------------+
