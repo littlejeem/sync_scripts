@@ -10,13 +10,13 @@
 #+---Source helper script---+
 #+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-helper_file="$HOME/bin/standalone_scripts/helper_script.sh"
+helper_file="/home/jlivin25/bin/standalone_scripts/helper_script.sh"
 if [[ ! -f "$helper_file" ]]; then
-  echo "config file $config_file does not exist, script exiting"
+  echo "helper script $config_file does not exist, script exiting"
   exit 65
 else
-  echo "config file found, using"
-  source "$HOME/bin/standalone_scripts/helper_script.sh"
+  echo "helper script found, using"
+  source "$helper_file"
 fi
 #
 #
@@ -37,7 +37,7 @@ fi
 version="2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
-config_file="$HOME/.config/ScriptSettings/sync_config.sh"
+config_file="/home/jlivin25/.config/ScriptSettings/sync_config.sh"
 script_pid=$(echo $$)
 #
 #
