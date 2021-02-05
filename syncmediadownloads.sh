@@ -90,6 +90,41 @@ log_deb "syncmediadownloads PID is: $script_pid"
 sleep 15s #sleep for cron @reboot to allow time for network to start
 #
 #
+#+-----------------------+
+#+---"AUDIOBOOKS Sync"---+
+#+-----------------------+
+section="audiobooks"
+if [[ "$section" -eq 1 ]]
+then
+  log "AUDIOBOOKS sync SELECTED, sync started"
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$audiobook_source" "$audiobook_dest"
+  rsync_error_catch
+  update_audiolibrary # update Audio Library on Kodi Video Server
+  log "AUDIOBOOKS sync finished"
+else
+  log "AUDIOBOOKS sync DESELECTED, no sync"
+fi
+#
+#
+#+-------------------+
+#+---"EBOOKS Sync"---+
+#+-------------------+
+section="ebooks"
+if [[ "$section" -eq 1 ]]
+then
+  log "EBOOKS sync SELECTED, sync started"
+  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$ebook_source" "$ebook_dest"
+  rsync_error_catch
+  update_audiolibrary # update Audio Library on Kodi Video Server
+  log "EBOOKS sync finished"
+else
+  log "EBOOKS sync DESELECTED, no sync"
+fi
+#
+#
+
+
+
 #+------------------+
 #+---"MUSIC Sync"---+
 #+------------------+
