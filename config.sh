@@ -64,26 +64,26 @@ kodi_MUSIC_assembly="http://"$kodiMUSICuser":"$kodiMUSICpass"@"$musicserver_ip":
 ## "syncmediadownloads.sh Settings" ##
 ######################################
 # LOSSLESS AUDIO
-lossless_source=""
+lossless_source="/"
 lossless_dest=""
 # MUSICSERVER AUDIO
-musicserver_source=""
+musicserver_source="/"
 musicserver_dest=""
 # AUDIOBOOKS
-audiobook_source=""
+ebook_source="/"
+ebook_dest=""
+# AUDIOBOOKS
+audiobook_source="/"
 audiobook_dest=""
 # TV
-tv_source=""
+tv_source="/"
 tv_dest=""
 # MOVIES
-movie_source=""
+movie_source="/"
 movie_dest=""
 # NFL
-nfl_source=""
+nfl_source="/"
 nfl_dest=""
-# MUSIC SERVER
-$musicserver_source=""
-$musicserver_dest=""
 # file transfers
 fileowner="" #file owner of the files desired on the destination location
 groupowner="" #group owner of the files desired on the destination location
