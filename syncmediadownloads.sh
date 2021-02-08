@@ -61,7 +61,7 @@ check_running
 if [[ ! -f "$config_file" ]]; then
   log "config file $config_file does not exist, script exiting"
   exit 65
-  rm -r "$lockname"
+  rm -r /tmp/"$lockname"
 else
   log "config file found, using"
   source "$config_file"
@@ -191,5 +191,5 @@ fi
 log "$scriptlong complete"
 #
 #
-rm -r "$lockname"
+rm -r /tmp/"$lockname"
 exit 0
