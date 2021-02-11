@@ -291,11 +291,11 @@ cd2=${names[1]}
 cd3=${names[2]}
 cd4=${names[3]}
 #
-if [[ ! -z $cd1 && ! -z $cd2 ]]; then
+if [[ -z $cd3 && -z $cd4 ]]; then
   echo "CD1 is $cd1, CD2 is $cd2"
-elif [[ ! -z $cd1 && ! -z $cd2 && ! -z $cd3 ]]; then
+elif [[ -z $cd4 ]]; then
   echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
-elif [[ ! -z $cd1 && ! -z $cd2 && ! -z $cd3 && ! -z $cd4 ]]; then
+else
   echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
 fi
 #
