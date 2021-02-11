@@ -296,7 +296,7 @@ if [ ! -z $cd1 ] && [ ! -z $cd2 ]; then
 elif [ ! -z $cd1 ] && [ ! -z $cd2 ] && [ ! -z $cd3 ]; then
   echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
 elif [ ! -z cd1 ] && [ ! -z cd2 ] && [ ! -z cd3 ] && [ ! -z cd4 ]; then
-  echo "CD1 is $cd1, CD2 is $cd2", CD3 is $cd3, CD4 is $cd4"
+  echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
 #
 #
 rm -r /tmp/$lockname
