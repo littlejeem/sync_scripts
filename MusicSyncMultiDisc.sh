@@ -281,23 +281,40 @@ JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
 #
 #
-echo "Enter Folder Names in CD order; spaces seperate values, escape spaces as normal:"
-read -a names
-#
-echo "${names[0]}, ${names[1]}, ${names[2]} ${names[3]}"
-#
-cd1=${names[0]}
-cd2=${names[1]}
-cd3=${names[2]}
-cd4=${names[3]}
-#
-if [[ -z $cd3 && -z $cd4 ]]; then
-  echo "CD1 is $cd1, CD2 is $cd2"
-elif [[ -z $cd4 ]]; then
-  echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
-else
-  echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
-fi
+#if [[ $flagA = "1" ]]; then
+  echo "Enter Folder Names in CD order; spaces seperate values, escape spaces as normal:"
+  read -a names
+  #
+  echo "${names[0]}, ${names[1]}, ${names[2]} ${names[3]}"
+  #
+  cd1=${names[0]}
+  cd2=${names[1]}
+  cd3=${names[2]}
+  cd4=${names[3]}
+  #
+  if [[ -z $cd3 && -z $cd4 ]]; then
+    echo "CD1 is $cd1, CD2 is $cd2"
+    mkdir "$rip_flac"/unknown_artist1
+    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2"
+  elif [[ -z $cd4 ]]; then
+    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
+    mkdir "$rip_flac"/unknown_artist1
+    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
+    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3"
+  else
+    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
+    mkdir "$rip_flac"/unknown_artist1
+    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
+    mv "$rip_flac"/"$cd4"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd4
+    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3" "$rip_flac"/"$cd4"
+  fi
+#fi
 #
 #
 rm -r /tmp/$lockname
