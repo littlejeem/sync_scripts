@@ -109,28 +109,6 @@ beets_function () {
 }
 #
 #
-#OLD SINGLE BEETS FUNCTION
-old_beets_function () {
- log "$section processing started"
- if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  log "files located in $download_flac"
-  "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac"
-  rm "$beets_config_path"/musiclibrary.blb
-  should_sync="y"
- else
-  log_deb "$download_flac is empty, no conversion needed"
- fi
- if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  log "files located in $rip_flac"
-  "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac"
-  rm "$beets_config_path"/musiclibrary.blb
-  should_sync="y"
- else
-  log_deb "$rip_flac is empty, no conversion needed"
- fi
- log "$section processing finished"
-}
-#
 rsync_error_catch () {
   if [ $? == "0" ]
    then
@@ -317,4 +295,71 @@ debug_missing_var
 #fi
 #
 #
+
+#+---------------------------+
+#+---Start Conversion Work---+
+#+---------------------------+
+# ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
+config_yaml="alac_config.yaml"
+log "config.yaml set as $config_yaml"
+beets_config_path=$(echo $beets_alac_path)
+log "beets_config_path set as $beets_config_path"
+section=${config_yaml::-12}
+log "section running is $section"
+if [[ "$music_alac" -eq 1 ]]
+then
+  beets_function
+  sleep 1s
+  log_deb "should sync is set to: $should_sync"
+  if [[ "$should_sync" == "y" ]]
+  then
+    log "$section sync started"
+    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
+    rsync_error_catch
+    log "$section sync finished"
+  else
+    log "no $section conversions, so no sync"
+  fi
+else
+  log "$section conversion not selected"
+fi
+
+
+
+
+# FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
+config_yaml="flac_config.yaml"
+log "config.yaml set as $config_yaml"
+beets_config_path=$(echo $beets_flac_path)
+log "beets_config_path set as $beets_config_path"
+section=${config_yaml::-12}
+log "section running is $section"
+if [[ "$music_flac" -eq 1 ]]
+then
+  beets_function
+  sleep 1s
+  if [[ "$should_sync" == "y" ]]
+  then
+    log "$section sync started"
+    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
+    rsync_error_catch
+    log "$section sync finished"
+  else
+    log "no $section conversions, so no sync"
+  fi
+else
+  log "$section conversion not selected"
+fi
+
+
+
+
+
+
+
+
+
+
+
+
 rm -r /tmp/$lockname
