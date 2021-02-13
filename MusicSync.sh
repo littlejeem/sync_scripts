@@ -71,6 +71,7 @@ debug_missing_var () {
 #
 beets_function () {
  log "$section processing started"
+# shellcheck source=../sync_config.sh
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   log "files located in $download_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
@@ -142,7 +143,6 @@ rsync_error_catch () {
 }
 #
 delete_function () {
-  includeonly="/home/jlivin25/Music/Rips/Unknown Artist"
   sleep "$sleep_time"
   find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec echo '{}' \;
   sleep "$sleep_time"
