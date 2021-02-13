@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 #
-#
 #################################################################################################
 ## This script is to import music transferred from the a remote location into Beets Library    ##
 ## Once imported and converted it moves the fies to my music library, this is also done with   ##
@@ -92,6 +91,7 @@ debug_missing_var () {
 #
 beets_function () {
  log "$section processing started"
+ # shellcheck source=../sync_config.sh
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   log "files located in $download_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
@@ -319,7 +319,7 @@ debug_missing_var
 if [[ $multi_choice = "" && $va_choice = "" ]]; then
   log_err "Running the script with no flags causes failure, either -m or -v must be set, refer to help"
   exit 1
-  rm -r /var/$lockname
+  rm -r /tmp/$lockname
 fi
 #
 if [[ $multi_choice = "1" ]]; then
