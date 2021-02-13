@@ -61,6 +61,15 @@ done
 #+------------------------+
 #+--- Define Functions ---+
 #+------------------------+
+helpFunction () {
+   echo ""
+   echo "Usage: $0 -u foo_user -d bar_drive"
+   echo "Usage: $0"
+   echo -e "\t Running the script with no flags causes failure, either -m or -v must be set"
+   echo -e "\t-m Use this flag to specify a single artist multi-disc, -m 1"
+   echo -e "\t-v Use this flag to specify a various artist multi-disc -v 1"
+   exit 1 # Exit script after printing help
+}
 # clean Audiolibrary
 #
 fatal_missing_var () {
@@ -183,6 +192,41 @@ check_source () {
   fi
 }
 #
+get_CD_dirs () {
+  echo "Enter Folder Names in CD order; spaces seperate values, escape spaces & charachters as normal:"
+  read -a names
+  #
+  echo "${names[0]}, ${names[1]}, ${names[2]} ${names[3]}"
+  #
+  cd1=${names[0]}
+  cd2=${names[1]}
+  cd3=${names[2]}
+  cd4=${names[3]}
+  #
+  if [[ -z $cd3 && -z $cd4 ]]; then
+    echo "CD1 is $cd1, CD2 is $cd2"
+    mkdir "$rip_flac"/Unknown\ Artist1
+    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2"
+  elif [[ -z $cd4 ]]; then
+    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
+    mkdir "$rip_flac"/Unknown\ Artist1
+    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
+    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3"
+  else
+    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
+    mkdir "$rip_flac"/Unknown\ Artist1
+    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
+    mv "$rip_flac"/"$cd4"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd4
+    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3" "$rip_flac"/"$cd4"
+  fi
+}
+#
 #
 #+-------------------+
 #+---Initial Setup---+
@@ -271,40 +315,18 @@ JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
 #
 #
+#check the script has a flag set, otherwise exit
+if [[ $multi_choice = "" && $va_choice = "" ]]; then
+  log_err "Running the script with no flags causes failure, either -m or -v must be set, refer to help"
+  exit 1
+  rm -r /var/$lockname
+fi
+#
 if [[ $multi_choice = "1" ]]; then
-  echo "Enter Folder Names in CD order; spaces seperate values, escape spaces as normal:"
-  read -a names
-  #
-  echo "${names[0]}, ${names[1]}, ${names[2]} ${names[3]}"
-  #
-  cd1=${names[0]}
-  cd2=${names[1]}
-  cd3=${names[2]}
-  cd4=${names[3]}
-  #
-  if [[ -z $cd3 && -z $cd4 ]]; then
-    echo "CD1 is $cd1, CD2 is $cd2"
-    mkdir "$rip_flac"/Unknown\ Artist1
-    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2"
-  elif [[ -z $cd4 ]]; then
-    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
-    mkdir "$rip_flac"/Unknown\ Artist1
-    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
-    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3"
-  else
-    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
-    mkdir "$rip_flac"/Unknown\ Artist1
-    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
-    mv "$rip_flac"/"$cd4"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd4
-    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3" "$rip_flac"/"$cd4"
-  fi
-  #
+  get_CD_dirs
+elif [[ $va_choice = "1" ]]; then
+  get_CD_dirs
+fi
   #
   #+---------------------------+
   #+---Start Conversion Work---+
