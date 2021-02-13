@@ -203,13 +203,44 @@ get_CD_dirs () {
   cd4=${names[3]}
   #
   if [[ -z $cd3 && -z $cd4 ]]; then
-    echo "CD1 is $cd1, CD2 is $cd2"
+    log "CD1 is $cd1, CD2 is $cd2"
+    log "checking names directory;s exist"
+    if [[ -d /"$rip_flac"/"$cd1" ]]; then
+      log "$cd1 found"
+    else
+      log_err "No directory found matching $cd1"
+      exit 65
+    fi
+    if [[ -d /"$rip_flac"/"$cd2" ]]; then
+      log "$cd2 found"
+    else
+      log_err "No directory found matching $cd2"
+      exit 65
+    fi
     mkdir "$rip_flac"/Unknown\ Artist1
     mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
     mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
     rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2"
   elif [[ -z $cd4 ]]; then
-    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
+    log "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
+    if [[ -d /"$rip_flac"/"$cd1" ]]; then
+      log "$cd1 found"
+    else
+      log_err "No directory found matching $cd1"
+      exit 65
+    fi
+    if [[ -d /"$rip_flac"/"$cd2" ]]; then
+      log "$cd2 found"
+    else
+      log_err "No directory found matching $cd2"
+      exit 65
+    fi
+    if [[ -d /"$rip_flac"/"$cd3" ]]; then
+      log "$cd3 found"
+    else
+      log_err "No directory found matching $cd3"
+      exit 65
+    fi
     mkdir "$rip_flac"/Unknown\ Artist1
     mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
     mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
@@ -217,6 +248,30 @@ get_CD_dirs () {
     rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3"
   else
     echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
+    if [[ -d /"$rip_flac"/"$cd1" ]]; then
+      log "$cd1 found"
+    else
+      log_err "No directory found matching $cd1"
+      exit 65
+    fi
+    if [[ -d /"$rip_flac"/"$cd2" ]]; then
+      log "$cd2 found"
+    else
+      log_err "No directory found matching $cd2"
+      exit 65
+    fi
+    if [[ -d /"$rip_flac"/"$cd3" ]]; then
+      log "$cd3 found"
+    else
+      log_err "No directory found matching $cd3"
+      exit 65
+    fi
+    if [[ -d /"$rip_flac"/"$cd4" ]]; then
+      log "$cd4 found"
+    else
+      log_err "No directory found matching $cd4"
+      exit 65
+    fi
     mkdir "$rip_flac"/Unknown\ Artist1
     mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
     mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
