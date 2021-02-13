@@ -37,7 +37,7 @@ script_pid=$(echo $$)
 #+---Source helper script---+
 #+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-source $HOME/bin/standalone_scripts/helper_script.sh
+source "$HOME"/bin/standalone_scripts/helper_script.sh
 #
 #
 #+---------------------------------------+
@@ -75,7 +75,7 @@ beets_function () {
   log "files located in $download_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
   timestamp=$(date +%a%R)
-  echo $OUTPUT | grep "Skipping"
+  echo "$OUTPUT" | grep "Skipping"
   if [[ $? = 0 ]]; then
     log_deb "detected beets skipping"
     unknown_artist="$rip_flac""Unknown Artist"
@@ -92,7 +92,7 @@ beets_function () {
   log "files located in $rip_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
   timestamp=$(date +%a%R)
-  echo $OUTPUT | grep "Skipping"
+  echo "$OUTPUT" | grep "Skipping"
   if [[ $? = 0 ]]; then
     log_deb "detected beets skipping"
     unknown_artist="$rip_flac""Unknown Artist"
@@ -143,9 +143,9 @@ rsync_error_catch () {
 #
 delete_function () {
   includeonly="/home/jlivin25/Music/Rips/Unknown Artist"
-  sleep $sleep_time
+  sleep "$sleep_time"
   find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec echo '{}' \;
-  sleep $sleep_time
+  sleep "$sleep_time"
   find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec rm -rf '{}' \;
 }
 #
@@ -294,7 +294,7 @@ fi
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
 config_yaml="alac_config.yaml"
 log "config.yaml set as $config_yaml"
-beets_config_path=$(echo $beets_alac_path)
+beets_config_path=$(echo "$beets_alac_path")
 log "beets_config_path set as $beets_config_path"
 section=${config_yaml::-12}
 log "section running is $section"
@@ -318,7 +318,7 @@ fi
 #
 # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
 config_yaml="uploads_config.yaml"
-beets_config_path=$(echo $beets_upload_path)
+beets_config_path=$(echo "$beets_upload_path")
 section=${config_yaml::-12}
 if [[ "$music_google" -eq 1 ]]
 then
@@ -330,7 +330,7 @@ fi
 # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
 config_yaml="flac_config.yaml"
 log "config.yaml set as $config_yaml"
-beets_config_path=$(echo $beets_flac_path)
+beets_config_path=$(echo "$beets_flac_path")
 log "beets_config_path set as $beets_config_path"
 section=${config_yaml::-12}
 log "section running is $section"
