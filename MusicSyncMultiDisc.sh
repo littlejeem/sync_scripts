@@ -91,7 +91,7 @@ debug_missing_var () {
 #
 beets_function () {
  log "$section processing started"
- # shellcheck source=../sync_config.sh
+# shellcheck source=../sync_config.sh
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   log "files located in $download_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
@@ -141,7 +141,6 @@ rsync_error_catch () {
 }
 #
 delete_function () {
-  includeonly="/home/jlivin25/Music/Rips/Unknown Artist"
   sleep $sleep_time
   find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec echo '{}' \;
   sleep $sleep_time
@@ -327,71 +326,70 @@ if [[ $multi_choice = "1" ]]; then
 elif [[ $va_choice = "1" ]]; then
   get_CD_dirs
 fi
-  #
-  #+---------------------------+
-  #+---Start Conversion Work---+
-  #+---------------------------+
-  # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
-  config_yaml="alac_config.yaml"
-  log "config.yaml set as $config_yaml"
-  beets_config_path=$(echo $beets_alac_path)
-  log "beets_config_path set as $beets_config_path"
-  section=${config_yaml::-12}
-  log "section running is $section"
-  if [[ "$music_alac" -eq 1 ]]
-  then
-    beets_function
-    sleep 1s
-    log_deb "should sync is set to: $should_sync"
-    if [[ "$should_sync" == "y" ]]
-    then
-      log "$section sync started"
-      rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
-      rsync_error_catch
-      log "$section sync finished"
-    else
-      log "no $section conversions, so no sync"
-    fi
-  else
-    log "$section conversion not selected"
-  fi
-  #
-  #
-  # UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
-  config_yaml="uploads_config.yaml"
-  beets_config_path=$(echo $beets_upload_path)
-  section=${config_yaml::-12}
-  if [[ "$music_google" -eq 1 ]]; then
-    beets_function
-  else
-    log "$section not selected"
-  fi
 #
-  # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
-  config_yaml="flac_config.yaml"
-  log "config.yaml set as $config_yaml"
-  beets_config_path=$(echo $beets_flac_path)
-  log "beets_config_path set as $beets_config_path"
-  section=${config_yaml::-12}
-  log "section running is $section"
-  if [[ "$music_flac" -eq 1 ]]
+#+---------------------------+
+#+---Start Conversion Work---+
+#+---------------------------+
+# ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
+config_yaml="alac_config.yaml"
+log "config.yaml set as $config_yaml"
+beets_config_path=$(echo $beets_alac_path)
+log "beets_config_path set as $beets_config_path"
+section=${config_yaml::-12}
+log "section running is $section"
+if [[ "$music_alac" -eq 1 ]]
+then
+  beets_function
+  sleep 1s
+  log_deb "should sync is set to: $should_sync"
+  if [[ "$should_sync" == "y" ]]
   then
-    beets_function
-    sleep 1s
-    if [[ "$should_sync" == "y" ]]
-    then
-      log "$section sync started"
-      rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
-      rsync_error_catch
-      log "$section sync finished"
-    else
-      log "no $section conversions, so no sync"
-    fi
+    log "$section sync started"
+    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
+    rsync_error_catch
+    log "$section sync finished"
   else
-    log "$section conversion not selected"
+    log "no $section conversions, so no sync"
   fi
-# END MULTI CD IF
+else
+  log "$section conversion not selected"
 fi
+#
+#
+# UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
+config_yaml="uploads_config.yaml"
+beets_config_path=$(echo $beets_upload_path)
+section=${config_yaml::-12}
+if [[ "$music_google" -eq 1 ]]; then
+  beets_function
+else
+  log "$section not selected"
+fi
+#
+# FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
+config_yaml="flac_config.yaml"
+log "config.yaml set as $config_yaml"
+beets_config_path=$(echo $beets_flac_path)
+log "beets_config_path set as $beets_config_path"
+section=${config_yaml::-12}
+log "section running is $section"
+if [[ "$music_flac" -eq 1 ]]
+then
+  beets_function
+  sleep 1s
+  if [[ "$should_sync" == "y" ]]
+  then
+    log "$section sync started"
+    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
+    rsync_error_catch
+    log "$section sync finished"
+  else
+    log "no $section conversions, so no sync"
+  fi
+else
+  log "$section conversion not selected"
+fi
+# END MULTI CD IF
 #+-------------------------------+
 #+---Begin deletion constructs---+
 #+-------------------------------+
@@ -436,14 +434,9 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0"
     delete_function
   fi
 fi
-
-
-
-
-
-
-
-
-
-
-rm -r /tmp/$lockname
+#
+#+-----------------------+
+#+---"Script Complete"---+
+#+-----------------------+
+rm -r /tmp/"$lockname"
+exit 0
