@@ -102,7 +102,7 @@ beets_function () {
     unknown_artist="$rip_flac""Unknown Artist"
     log_deb "$unknown_artist"
     log_deb "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
-    mv "$unknown_artist" "$unknown_artist""-$timestamp"
+    cp -r "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
@@ -119,7 +119,7 @@ beets_function () {
     unknown_artist="$rip_flac""Unknown Artist"
     log_deb "$unknown_artist"
     log_deb "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
-    mv "$unknown_artist" "$unknown_artist""-$timestamp"
+    cp -r "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
@@ -191,6 +191,16 @@ check_source () {
   fi
 }
 #
+check_command () {
+if [[ "$?" = "0" ]]; then
+  log "cd directory found, using"
+else
+  log_err "no files located in directory"
+  test_flac_down="n"
+  exit 65
+fi
+}
+#
 get_CD_dirs () {
   echo "Enter Folder Names in CD order; spaces seperate values, escape spaces & charachters as normal:"
   read -a names
@@ -205,80 +215,94 @@ get_CD_dirs () {
   if [[ -z $cd3 && -z $cd4 ]]; then
     log "CD1 is $cd1, CD2 is $cd2"
     log "checking names directory;s exist"
+    mkdir "$rip_flac"/Unknown\ Artist1
+    check_command
     if [[ -d /"$rip_flac"/"$cd1" ]]; then
       log "$cd1 found"
+      cp -r "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+      check_command
     else
       log_err "No directory found matching $cd1"
       exit 65
     fi
     if [[ -d /"$rip_flac"/"$cd2" ]]; then
       log "$cd2 found"
+      cp -r "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+      check_command
     else
       log_err "No directory found matching $cd2"
       exit 65
     fi
-    mkdir "$rip_flac"/Unknown\ Artist1
-    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2"
+    rm -r "${rip_flac:?}""${cd1:?}" "${rip_flac:?}""${cd2:?}"
   elif [[ -z $cd4 ]]; then
     log "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
+    log "checking names directory;s exist"
+    mkdir "$rip_flac"/Unknown\ Artist1
+    check_command
     if [[ -d /"$rip_flac"/"$cd1" ]]; then
       log "$cd1 found"
+      cp -r "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+      check_command
     else
       log_err "No directory found matching $cd1"
       exit 65
     fi
     if [[ -d /"$rip_flac"/"$cd2" ]]; then
       log "$cd2 found"
+      cp -r "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+      check_command
     else
       log_err "No directory found matching $cd2"
       exit 65
     fi
     if [[ -d /"$rip_flac"/"$cd3" ]]; then
       log "$cd3 found"
+      cp -r "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
+      check_command
     else
       log_err "No directory found matching $cd3"
       exit 65
     fi
-    mkdir "$rip_flac"/Unknown\ Artist1
-    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
-    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3"
+    rm -r "${rip_flac:?}""${cd1:?}" "${rip_flac:?}""${cd2:?}" "${rip_flac:?}""${cd3:?}"
   else
-    echo "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
+    log "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
+    log "checking names directory;s exist"
+    mkdir "$rip_flac"/Unknown\ Artist1
+    check_command
     if [[ -d /"$rip_flac"/"$cd1" ]]; then
       log "$cd1 found"
+      cp -r "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+      check_command
     else
       log_err "No directory found matching $cd1"
       exit 65
     fi
     if [[ -d /"$rip_flac"/"$cd2" ]]; then
       log "$cd2 found"
+      cp -r "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
+      check_command
     else
       log_err "No directory found matching $cd2"
       exit 65
     fi
     if [[ -d /"$rip_flac"/"$cd3" ]]; then
       log "$cd3 found"
+      cp -r "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
+      check_command
     else
       log_err "No directory found matching $cd3"
       exit 65
     fi
     if [[ -d /"$rip_flac"/"$cd4" ]]; then
       log "$cd4 found"
+      cp -r "$rip_flac"/"$cd4"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd4
+      check_command
     else
       log_err "No directory found matching $cd4"
       exit 65
     fi
-    mkdir "$rip_flac"/Unknown\ Artist1
-    mv "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-    mv "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-    mv "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
-    mv "$rip_flac"/"$cd4"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd4
-    rm -r "$rip_flac"/"$cd1" "$rip_flac"/"$cd2" "$rip_flac"/"$cd3" "$rip_flac"/"$cd4"
-  fi
+    rm -r "${rip_flac:?}""${cd1:?}" "${rip_flac:?}""${cd2:?}" "${rip_flac:?}""${cd3:?}" "${rip_flac:?}""${cd4:?}"
+fi
 }
 #
 #
