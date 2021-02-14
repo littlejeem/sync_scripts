@@ -48,11 +48,13 @@ check_running
 #+-----------------------+
 #+---Set up user flags---+
 #+-----------------------+
-while getopts m:v:h flag
+while getopts m:v:a:n:h flag
 do
     case "${flag}" in
         m) multi_choice=${OPTARG};;
         v) va_choice=${OPTARG};;
+        a) user_choice_auto=${OPTARG};;
+        n) user_choice_manual=${OPTARG};;
         h) helpFunction;;
         ?) helpFunction;;
     esac
@@ -67,6 +69,8 @@ helpFunction () {
    echo -e "\t Running the script with no flags causes failure, either -m or -v must be set"
    echo -e "\t-m Use this flag to specify a single artist multi-disc, -m 1"
    echo -e "\t-v Use this flag to specify a various artist multi-disc -v 1"
+   echo -e "\t-a Use this flag to tell the script to auto-combine all folders in rip_flac, eg. -a 1, can be combined with -m or -v"
+   echo -e "\t-n Use this flag to have the script prompt you for folders to include from rip_flac for combining, eg. -n 1, can be combined with -m or -v"
    exit 1 # Exit script after printing help
 }
 # clean Audiolibrary
@@ -199,6 +203,50 @@ else
   test_flac_down="n"
   exit 65
 fi
+}
+#
+get_CD_dirs_man () {
+  mkdir "$rip_flac"/Unknown\ Artist1
+  check_command
+  read -a names
+  log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
+  array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
+  log_deb "$array_count folders found"
+  for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
+    log "${names[$i]}" ;
+    if [[ -d "$rip_flac""${names[$i]}" ]]; then
+      echo "cd"$i" location found, continuing"
+      cp -r "$rip_flac""${names[$i]}" "$rip_flac"/Unknown\ Artist1
+      check_command
+      rm -r "$rip_flac""${names[$i]}"
+      check_command
+    else
+      echo "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
+      exit 65
+    fi
+  done
+}
+#
+get_CD_dirs_auto () {
+  mkdir "$rip_flac"/Unknown\ Artist1
+  check_command
+  # use nullglob in case there are no matching files
+  shopt -s nullglob
+  names=("$rip_flac"*)
+  array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
+  for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
+    echo "${names[$i]}" ;
+    if [[ -d "$rip_flac""${names[$i]}" ]]; then
+      echo "cd"$i" location found, continuing"
+      cp -r "$rip_flac""${names[$i]}" "$rip_flac"/Unknown\ Artist1
+      check_command
+      rm -r "$rip_flac""${names[$i]}"
+      check_command
+    else
+      echo "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
+      exit 65
+    fi
+  done
 }
 #
 get_CD_dirs () {
@@ -400,10 +448,20 @@ if [[ $multi_choice = "" && $va_choice = "" ]]; then
   rm -r /tmp/$lockname
 fi
 #
+#get single artist folder list to work on, automatic or manual as specified by user
 if [[ $multi_choice = "1" ]]; then
-  get_CD_dirs
+  if [[ $user_choice_auto = "1" ]]; then
+    get_CD_dirs_auto
+  else
+    get_folder_manual
+  fi
+#get VA folder list to work on, automatic or manual as specified by user
 elif [[ $va_choice = "1" ]]; then
-  get_CD_dirs
+  if [[ $user_choice_auto = "1" ]]; then
+    get_CD_dirs_auto
+  else
+    get_folder_manual
+  fi
 fi
 #
 #+---------------------------+
@@ -468,7 +526,6 @@ then
 else
   log "$section conversion not selected"
 fi
-# END MULTI CD IF
 #+-------------------------------+
 #+---Begin deletion constructs---+
 #+-------------------------------+
