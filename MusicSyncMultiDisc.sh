@@ -215,7 +215,7 @@ get_CD_dirs_man () {
     if [[ -d "$rip_flac""${names[$i]}" ]]; then
       mkdir -p "$rip_flac"/Unknown\ Artist1
       echo "cd"$i" location found, continuing"
-      cp -r "$rip_flac""${names[$i]}" "$rip_flac"/Unknown\ Artist1
+      cp -r "$rip_flac""${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
       check_command
       rm -r "$rip_flac""${names[$i]}"
       check_command
@@ -236,7 +236,7 @@ get_CD_dirs_auto () {
     if [[ -d "$rip_flac""${names[$i]}" ]]; then
       mkdir -p "$rip_flac"/Unknown\ Artist1
       echo "cd"$i" location found, continuing"
-      cp -r "$rip_flac""${names[$i]}" "$rip_flac"/Unknown\ Artist1
+      cp -r "$rip_flac""${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
       check_command
       rm -r "$rip_flac""${names[$i]}"
       check_command
