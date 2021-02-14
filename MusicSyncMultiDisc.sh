@@ -206,8 +206,6 @@ fi
 }
 #
 get_CD_dirs_man () {
-  mkdir "$rip_flac"/Unknown\ Artist1
-  check_command
   read -a names
   log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
   array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
@@ -215,6 +213,7 @@ get_CD_dirs_man () {
   for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
     log "${names[$i]}" ;
     if [[ -d "$rip_flac""${names[$i]}" ]]; then
+      mkdir -p "$rip_flac"/Unknown\ Artist1
       echo "cd"$i" location found, continuing"
       cp -r "$rip_flac""${names[$i]}" "$rip_flac"/Unknown\ Artist1
       check_command
@@ -228,8 +227,6 @@ get_CD_dirs_man () {
 }
 #
 get_CD_dirs_auto () {
-  mkdir "$rip_flac"/Unknown\ Artist1
-  check_command
   # use nullglob in case there are no matching files
   shopt -s nullglob
   names=("$rip_flac"*)
@@ -237,6 +234,7 @@ get_CD_dirs_auto () {
   for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
     echo "${names[$i]}" ;
     if [[ -d "$rip_flac""${names[$i]}" ]]; then
+      mkdir -p "$rip_flac"/Unknown\ Artist1
       echo "cd"$i" location found, continuing"
       cp -r "$rip_flac""${names[$i]}" "$rip_flac"/Unknown\ Artist1
       check_command
