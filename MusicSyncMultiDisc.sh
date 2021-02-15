@@ -205,156 +205,26 @@ else
 fi
 }
 #
-get_CD_dirs_man () {
-  read -a names
-  log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
-  array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
-  log_deb "$array_count folders found"
-  log_deb "Setting destination folder"
-  mkdir -p "$rip_flac"/Unknown\ Artist1
-  check_command
-  for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
-    log "${names[$i]}" ;
-    if [[ -d "${names[$i]}" ]]; then
-      log "cd"$i" location found, continuing"
-      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
-      check_command
-      rm -r "${names[$i]}"
-      check_command
-    else
-      log_err "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
-      exit 65
-    fi
-  done
-}
-#
-get_CD_dirs_auto () {
-  # use nullglob in case there are no matching files
-  shopt -s nullglob
-  log_deb "Grabbing contents of rip_flac $rip_flac into array"
-  names=("$rip_flac"*)
-  array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
-  log_deb "$array_count folders found"
-  log_deb "Setting destination folder"
-  mkdir -p "$rip_flac"/Unknown\ Artist1
-  check_command
-  for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
-    log "${names[$i]}" ;
-    if [[ -d "${names[$i]}" ]]; then
-      log "cd"$i" location found, continuing"
-      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
-      check_command
-      rm -r "${names[$i]}"
-      check_command
-    else
-      log_err "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
-      exit 65
-    fi
-  done
-}
 #
 get_CD_dirs () {
-  echo "Enter Folder Names in CD order; spaces seperate values, escape spaces & charachters as normal:"
-  read -a names
-  #
-  echo "${names[0]}, ${names[1]}, ${names[2]} ${names[3]}"
-  #
-  cd1=${names[0]}
-  cd2=${names[1]}
-  cd3=${names[2]}
-  cd4=${names[3]}
-  #
-  if [[ -z $cd3 && -z $cd4 ]]; then
-    log "CD1 is $cd1, CD2 is $cd2"
-    log "checking names directory;s exist"
-    mkdir "$rip_flac"/Unknown\ Artist1
-    check_command
-    if [[ -d /"$rip_flac"/"$cd1" ]]; then
-      log "$cd1 found"
-      cp -r "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
+  array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
+  log_deb "$array_count folders found"
+  log_deb "Setting destination folder"
+  mkdir -p "$rip_flac"/Unknown\ Artist1
+  check_command
+  for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
+    log "${names[$i]}" ;
+    if [[ -d "${names[$i]}" ]]; then
+      log "cd"$i" location found, continuing"
+      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
+      check_command
+      rm -r "${names[$i]}"
       check_command
     else
-      log_err "No directory found matching $cd1"
+      log_err "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
       exit 65
     fi
-    if [[ -d /"$rip_flac"/"$cd2" ]]; then
-      log "$cd2 found"
-      cp -r "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-      check_command
-    else
-      log_err "No directory found matching $cd2"
-      exit 65
-    fi
-    rm -r "${rip_flac:?}""${cd1:?}" "${rip_flac:?}""${cd2:?}"
-  elif [[ -z $cd4 ]]; then
-    log "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3"
-    log "checking names directory;s exist"
-    mkdir "$rip_flac"/Unknown\ Artist1
-    check_command
-    if [[ -d /"$rip_flac"/"$cd1" ]]; then
-      log "$cd1 found"
-      cp -r "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-      check_command
-    else
-      log_err "No directory found matching $cd1"
-      exit 65
-    fi
-    if [[ -d /"$rip_flac"/"$cd2" ]]; then
-      log "$cd2 found"
-      cp -r "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-      check_command
-    else
-      log_err "No directory found matching $cd2"
-      exit 65
-    fi
-    if [[ -d /"$rip_flac"/"$cd3" ]]; then
-      log "$cd3 found"
-      cp -r "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
-      check_command
-    else
-      log_err "No directory found matching $cd3"
-      exit 65
-    fi
-    rm -r "${rip_flac:?}""${cd1:?}" "${rip_flac:?}""${cd2:?}" "${rip_flac:?}""${cd3:?}"
-  else
-    log "CD1 is $cd1, CD2 is $cd2, CD3 is $cd3, CD4 is $cd4"
-    log "checking names directory;s exist"
-    mkdir "$rip_flac"/Unknown\ Artist1
-    check_command
-    if [[ -d /"$rip_flac"/"$cd1" ]]; then
-      log "$cd1 found"
-      cp -r "$rip_flac"/"$cd1"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd1
-      check_command
-    else
-      log_err "No directory found matching $cd1"
-      exit 65
-    fi
-    if [[ -d /"$rip_flac"/"$cd2" ]]; then
-      log "$cd2 found"
-      cp -r "$rip_flac"/"$cd2"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd2
-      check_command
-    else
-      log_err "No directory found matching $cd2"
-      exit 65
-    fi
-    if [[ -d /"$rip_flac"/"$cd3" ]]; then
-      log "$cd3 found"
-      cp -r "$rip_flac"/"$cd3"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd3
-      check_command
-    else
-      log_err "No directory found matching $cd3"
-      exit 65
-    fi
-    if [[ -d /"$rip_flac"/"$cd4" ]]; then
-      log "$cd4 found"
-      cp -r "$rip_flac"/"$cd4"/Unknown\ Album Unknown\ Artist1/Unknown\ Album\ cd4
-      check_command
-    else
-      log_err "No directory found matching $cd4"
-      exit 65
-    fi
-    rm -r "${rip_flac:?}""${cd1:?}" "${rip_flac:?}""${cd2:?}" "${rip_flac:?}""${cd3:?}" "${rip_flac:?}""${cd4:?}"
-fi
+  done
 }
 #
 #
@@ -455,16 +325,28 @@ fi
 #get single artist folder list to work on, automatic or manual as specified by user
 if [[ $multi_choice = "1" ]]; then
   if [[ $user_choice_auto = "1" ]]; then
-    get_CD_dirs_auto
+    # use nullglob in case there are no matching files
+    shopt -s nullglob
+    log_deb "Grabbing contents of rip_flac $rip_flac into array"
+    names=("$rip_flac"*)
+    get_CD_dirs
   else
-    get_folder_manual
+    read -a names
+    log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
+    get_CD_dirs
   fi
 #get VA folder list to work on, automatic or manual as specified by user
 elif [[ $va_choice = "1" ]]; then
   if [[ $user_choice_auto = "1" ]]; then
-    get_CD_dirs_auto
+    # use nullglob in case there are no matching files
+    shopt -s nullglob
+    log_deb "Grabbing contents of rip_flac $rip_flac into array"
+    names=("$rip_flac"*)
+    get_CD_dirs
   else
-    get_folder_manual
+    read -a names
+    log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
+    get_CD_dirs
   fi
 fi
 #
