@@ -210,17 +210,19 @@ get_CD_dirs_man () {
   log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
   array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
   log_deb "$array_count folders found"
+  log_deb "Setting destination folder"
+  mkdir -p "$rip_flac"/Unknown\ Artist1
+  check_command
   for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
     log "${names[$i]}" ;
-    if [[ -d "$rip_flac""${names[$i]}" ]]; then
-      mkdir -p "$rip_flac"/Unknown\ Artist1
-      echo "cd"$i" location found, continuing"
-      cp -r "$rip_flac""${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
+    if [[ -d "${names[$i]}" ]]; then
+      log "cd"$i" location found, continuing"
+      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
       check_command
-      rm -r "$rip_flac""${names[$i]}"
+      rm -r "${names[$i]}"
       check_command
     else
-      echo "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
+      log_err "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
       exit 65
     fi
   done
@@ -229,19 +231,23 @@ get_CD_dirs_man () {
 get_CD_dirs_auto () {
   # use nullglob in case there are no matching files
   shopt -s nullglob
+  log_err "Grabbing contents of rip_flac $rip_flac into array"
   names=("$rip_flac"*)
   array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
+  log_deb log_deb "$array_count folders found"
+  log_deb "Setting destination folder"
+  mkdir -p "$rip_flac"/Unknown\ Artist1
+  check_command
   for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
-    echo "${names[$i]}" ;
-    if [[ -d "$rip_flac""${names[$i]}" ]]; then
-      mkdir -p "$rip_flac"/Unknown\ Artist1
-      echo "cd"$i" location found, continuing"
-      cp -r "$rip_flac""${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
+    log "${names[$i]}" ;
+    if [[ -d "${names[$i]}" ]]; then
+      log "cd"$i" location found, continuing"
+      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
       check_command
-      rm -r "$rip_flac""${names[$i]}"
+      rm -r "${names[$i]}"
       check_command
     else
-      echo "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
+      log_err "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
       exit 65
     fi
   done
