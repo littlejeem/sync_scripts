@@ -231,10 +231,10 @@ get_CD_dirs_man () {
 get_CD_dirs_auto () {
   # use nullglob in case there are no matching files
   shopt -s nullglob
-  log_err "Grabbing contents of rip_flac $rip_flac into array"
+  log_deb "Grabbing contents of rip_flac $rip_flac into array"
   names=("$rip_flac"*)
   array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
-  log_deb log_deb "$array_count folders found"
+  log_deb "$array_count folders found"
   log_deb "Setting destination folder"
   mkdir -p "$rip_flac"/Unknown\ Artist1
   check_command
