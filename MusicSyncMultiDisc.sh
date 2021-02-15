@@ -215,8 +215,8 @@ get_CD_dirs () {
   for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
     log "${names[$i]}" ;
     if [[ -d "${names[$i]}" ]]; then
-      log "cd"$i" location found, continuing"
-      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i"\ Unknown\ Album
+      log "cd"$i+1" location found at array position $i, continuing"
+      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i+1"\ Unknown\ Album
       check_command
       rm -r "${names[$i]}"
       check_command
