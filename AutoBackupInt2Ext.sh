@@ -33,10 +33,10 @@ lockdir=/tmp/"$lockname"     # name of the lock dir to be used
 #+------------------------+
 rsync_command ()
 {
-  log "script name = $scriptname"
-  log "lock name will be = $lockname"
-  log "lock dir will be = $lockdir"
-  log "sync started"
+  enotify "script name = $scriptname"
+  enotify "lock name will be = $lockname"
+  enotify "lock dir will be = $lockdir"
+  enotify "sync started"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
   pushover
 #  rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$loglocation"/"$timestamp".log
@@ -46,8 +46,8 @@ exit_segment ()
 {
   rm -r "$lockdir"          #remove the lockdir once used
   umount "$mountpoint"
-  log "SUCCESS - sync completed"
-  log "Hard Drive $mountpoint unmounted"
+  enotify "SUCCESS - sync completed"
+  enotify "Hard Drive $mountpoint unmounted"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed, unplug the drive")
   pushover
   exit 0
@@ -94,14 +94,14 @@ grep -qs "$mount" /proc/mounts #if grep sees the mount then it will return a sil
 if [[ $? -eq 0 ]]; then
   log_deb "Hard Drive already mounted"
   mountpoint=$(grep "$mount" /proc/mounts | cut -c 1-9)
-  log "mountpoint is $mountpoint"
+  enotify "mountpoint is $mountpoint"
   rsync_command
   exit_segment
 else
   if [[ $? -eq 1 ]]; then
     log_deb "Hard Drive NOT currently mounted."
     if mount -U "$uuid" "$mount"; then
-      log "Hard Drive mounted successfully"
+      enotify "Hard Drive mounted successfully"
       rsync_command
       exit_segment
     else
