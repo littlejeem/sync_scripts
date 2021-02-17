@@ -83,14 +83,14 @@ beets_function () {
   if [[ $? = 0 ]]; then
     edebug "detected beets skipping"
     unknown_artist="$rip_flac""Unknown Artist"
-    edebug "$unknown_artist"
+    edebug "Unknown Artist path is: $unknown_artist"
     edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
     mv "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
  else
-  edebug "$download_flac is empty, no conversion needed"
+  enotify "$download_flac is empty, no conversion needed"
  fi
  if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   enotify "files located in $rip_flac"
@@ -107,33 +107,11 @@ beets_function () {
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
  else
-  edebug "$rip_flac is empty, no conversion needed"
+  enotify "$rip_flac is empty, no conversion needed"
  fi
  enotify "$section processing finished"
 }
 #
-#
-#OLD SINGLE BEETS FUNCTION
-old_beets_function () {
- enotify "$section processing started"
- if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  enotify "files located in $download_flac"
-  "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac"
-  rm "$beets_config_path"/musiclibrary.blb
-  should_sync="y"
- else
-  edebug "$download_flac is empty, no conversion needed"
- fi
- if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  enotify "files located in $rip_flac"
-  "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac"
-  rm "$beets_config_path"/musiclibrary.blb
-  should_sync="y"
- else
-  edebug "$rip_flac is empty, no conversion needed"
- fi
- enotify "$section processing finished"
-}
 #
 rsync_error_catch () {
   if [ $? == "0" ]
@@ -195,6 +173,24 @@ check_source () {
     test_flac_rip="n"
   fi
 }
+#
+#
+#+------------------------+
+#+---"Get User Options"---+
+#+------------------------+
+while getopts s:V:G:h flag
+do
+    case "${flag}" in
+        s) verbosity=$silent_lvl
+        edebug "-s specified: Silent mode";;
+        V) verbosity=$inf_lvl
+        edebug "-V specified: Verbose mode";;
+        G) verbosity=$dbg_lvl
+        edebug "-G specified: Debug mode";;
+        h) helpFunction;;
+        ?) helpFunction;;
+    esac
+done
 #
 #
 #+-------------------+
