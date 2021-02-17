@@ -7,9 +7,9 @@
 ## script is in $HOME/bin/sync_cripts                                                          ##
 #################################################################################################
 #
-#+-----------------+
-#+---Set Version---+
-#+-----------------+
+#+---------------------------+
+#+---Set Version & Logging---+
+#+---------------------------+
 version="1.0"
 #
 #
@@ -19,6 +19,8 @@ version="1.0"
 scriptlong="MusicSyncMultiDisc.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
+#set default logging level
+verbosity=4
 #
 #
 #+------------------+
@@ -45,20 +47,6 @@ source $HOME/bin/standalone_scripts/helper_script.sh
 check_running
 #
 #
-#+-----------------------+
-#+---Set up user flags---+
-#+-----------------------+
-while getopts m:v:a:n:h flag
-do
-    case "${flag}" in
-        m) multi_choice=${OPTARG};;
-        v) va_choice=${OPTARG};;
-        a) user_choice_auto=${OPTARG};;
-        n) user_choice_manual=${OPTARG};;
-        h) helpFunction;;
-        ?) helpFunction;;
-    esac
-done
 #+------------------------+
 #+--- Define Functions ---+
 #+------------------------+
@@ -77,69 +65,69 @@ helpFunction () {
 #
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
-  log_err "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
+  eerror "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
   rm -r /tmp/"$lockname"
   exit 64
  else
-  log "variable found, using: $JAIL_FATAL"
+  enotify "variable found, using: $JAIL_FATAL"
  fi
 }
 #
 debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
-  log_deb "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
+  edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  log "variable found, using: $JAIL_DEBUG"
+  enotify "variable found, using: $JAIL_DEBUG"
  fi
 }
 #
 beets_function () {
- log "$section processing started"
+ enotify "$section processing started"
 # shellcheck source=../sync_config.sh
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  log "files located in $download_flac"
+  enotify "files located in $download_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
   timestamp=$(date +%a%R)
   echo $OUTPUT | grep "Skipping"
   if [[ $? = 0 ]]; then
-    log_deb "detected beets skipping"
+    edebug "detected beets skipping"
     unknown_artist="$rip_flac""Unknown Artist"
-    log_deb "$unknown_artist"
-    log_deb "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
+    edebug "$unknown_artist"
+    edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
     cp -r "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
  else
-  log_deb "$download_flac is empty, no conversion needed"
+  edebug "$download_flac is empty, no conversion needed"
  fi
  if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  log "files located in $rip_flac"
+  enotify "files located in $rip_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
   timestamp=$(date +%a%R)
   echo $OUTPUT | grep "Skipping"
   if [[ $? = 0 ]]; then
-    log_deb "detected beets skipping"
+    edebug "detected beets skipping"
     unknown_artist="$rip_flac""Unknown Artist"
-    log_deb "$unknown_artist"
-    log_deb "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
+    edebug "$unknown_artist"
+    edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
     cp -r "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
  else
-  log_deb "$rip_flac is empty, no conversion needed"
+  edebug "$rip_flac is empty, no conversion needed"
  fi
- log "$section processing finished"
+ enotify "$section processing finished"
 }
 #
 #
 rsync_error_catch () {
   if [ $? == "0" ]
    then
-    log "rsync completed successfully"
+    enotify "rsync completed successfully"
    else
-    log_err "rsync produced an error"
+    eerror "rsync produced an error"
     rsync_error_flag="y"
   fi
 }
@@ -155,23 +143,23 @@ Logic1 () {
   if [ "$test_flac_down" = "y" ] || [ "$test_flac_rip" = "y" ] && [ -z "$rsync_error_flag" ]; then
     find "$location2" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
     if [[ "$?" = "0" ]]; then
-      log "Test conditions met, I am deleting..."
+      enotify "Test conditions met, I am deleting..."
       location="$download_flac"
       delete_function
       location="$rip_flac"
       delete_function
       location="$location2"
       if [ -z "$location2" ]; then
-       log_deb "No second delete location set"
+       edebug "No second delete location set"
       else
        delete_function
       fi
     else
-      log_deb "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
+      edebug "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
       rm -r /tmp/"$lockname"
     fi
   else
-    log_err "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
+    eerror "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
     exit 66
   fi
 }
@@ -179,27 +167,27 @@ Logic1 () {
 check_source () {
   find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
   if [[ "$?" = "0" ]]; then
-    log "Located files in directory $download_flac"
+    enotify "Located files in directory $download_flac"
     test_flac_down="y"
   else
-    log "no files located in directory $download_flac"
+    enotify "no files located in directory $download_flac"
     test_flac_down="n"
   fi
   find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
   if [[ "$?" = "0" ]]; then
-    log "Located files in directory $rip_flac"
+    enotify "Located files in directory $rip_flac"
     test_flac_rip="y"
   else
-    log "no files located in directory $rip_flac"
+    enotify "no files located in directory $rip_flac"
     test_flac_rip="n"
   fi
 }
 #
 check_command () {
 if [[ "$?" = "0" ]]; then
-  log "cd directory found, using"
+  enotify "cd directory found, using"
 else
-  log_err "no files located in directory"
+  eerror "no files located in directory"
   test_flac_down="n"
   exit 65
 fi
@@ -208,24 +196,42 @@ fi
 #
 get_CD_dirs () {
   array_count=${#names[@]} #counts the number of elements in the array and assigns to the variable cd_names
-  log_deb "$array_count folders found"
-  log_deb "Setting destination folder"
+  edebug "$array_count folders found"
+  edebug "Setting destination folder"
   mkdir -p "$rip_flac"/Unknown\ Artist1
   check_command
   for (( i=0; i<$array_count; i++)); do #basically says while the count (starting from 0) is less than the value in cd_names do the next bit
-    log "${names[$i]}" ;
+    enotify "${names[$i]}" ;
     if [[ -d "${names[$i]}" ]]; then
-      log "cd"$i+1" location found at array position $i, continuing"
+      enotify "cd"$i+1" location found at array position $i, continuing"
       cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i+1"\ Unknown\ Album
       check_command
       rm -r "${names[$i]}"
       check_command
     else
-      log_err "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
+      eerror "input error; array element $i ${names[$i]}, doesn't exist, check and try again"
       exit 65
     fi
   done
 }
+#
+#
+#+-----------------------+
+#+---Set up user flags---+
+#+-----------------------+
+OPTIND=1
+while getopts m:v:a:n:h opt
+do
+    case "${opt}" in
+        m) multi_choice=${OPTARG};;
+        v) va_choice=${OPTARG};;
+        a) user_choice_auto=${OPTARG};;
+        n) user_choice_manual=${OPTARG};;
+        h) helpFunction;;
+        ?) helpFunction;;
+    esac
+done
+shift $((OPTIND -1))
 #
 #
 #+-------------------+
@@ -234,44 +240,44 @@ get_CD_dirs () {
 #
 #Grab PID
 script_pid=$(echo $$)
-log_deb "MusicSync scripts PID is: $script_pid"
+edebug "MusicSync scripts PID is: $script_pid"
 #display version
-log_deb "Version is: $version"
+edebug "Version is: $version"
 #Check for existance FFMPEG
 if ! command -v ffmpeg &> /dev/null
 then
-  log_err "FFMPEG could not be found, script won't function wihout it"
+  eerror "FFMPEG could not be found, script won't function wihout it"
   exit 67
 else
-  log "FFMPEG command located, continuing"
+  enotify "FFMPEG command located, continuing"
 fi
 #
 # check for config file existance
 if [[ ! -f "$config_file" ]]; then
-  log_err "config file $config_file does not appear to exist"
-  log_deb "attempting to source config file from default location"
+  eerror "config file $config_file does not appear to exist"
+  edebug "attempting to source config file from default location"
   config_file="$HOME/.config/ScriptSettings/sync_config.sh"
   if [[ ! -f "$config_file" ]]; then
-    log_err "config file still not located at $config_file, script exiting"
+    eerror "config file still not located at $config_file, script exiting"
     rm -r /tmp/"$lockname"
     exit 65
   else
-    log_deb "located default config file at $config_file, continuing"
+    edebug "located default config file at $config_file, continuing"
     source "$config_file"
   fi
 else
   # source config file
-  log "Config file found, using $config_file"
+  enotify "Config file found, using $config_file"
   source "$config_file"
 fi
 #
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
-  log_err "a beets install at $beets_path not detected, please install and re-run"
+  eerror "a beets install at $beets_path not detected, please install and re-run"
   rm -r /tmp/"$lockname"
   exit 67
 else
-  log "Beets install detected, using $beets_path"
+  enotify "Beets install detected, using $beets_path"
 fi
 #
 #
@@ -317,7 +323,7 @@ debug_missing_var
 #
 #check the script has a flag set, otherwise exit
 if [[ $multi_choice = "" && $va_choice = "" ]]; then
-  log_err "Running the script with no flags causes failure, either -m or -v must be set, refer to help"
+  eerror "Running the script with no flags causes failure, either -m or -v must be set, refer to help"
   exit 1
   rm -r /tmp/$lockname
 fi
@@ -327,12 +333,12 @@ if [[ $multi_choice = "1" ]]; then
   if [[ $user_choice_auto = "1" ]]; then
     # use nullglob in case there are no matching files
     shopt -s nullglob
-    log_deb "Grabbing contents of rip_flac $rip_flac into array"
+    edebug "Grabbing contents of rip_flac $rip_flac into array"
     names=("$rip_flac"*)
     get_CD_dirs
   else
     read -a names
-    log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
+    enotify "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
     get_CD_dirs
   fi
 #get VA folder list to work on, automatic or manual as specified by user
@@ -340,12 +346,12 @@ elif [[ $va_choice = "1" ]]; then
   if [[ $user_choice_auto = "1" ]]; then
     # use nullglob in case there are no matching files
     shopt -s nullglob
-    log_deb "Grabbing contents of rip_flac $rip_flac into array"
+    edebug "Grabbing contents of rip_flac $rip_flac into array"
     names=("$rip_flac"*)
     get_CD_dirs
   else
     read -a names
-    log "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
+    enotify "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
     get_CD_dirs
   fi
 fi
@@ -355,27 +361,27 @@ fi
 #+---------------------------+
 # ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
 config_yaml="alac_config.yaml"
-log "config.yaml set as $config_yaml"
+enotify "config.yaml set as $config_yaml"
 beets_config_path=$(echo $beets_alac_path)
-log "beets_config_path set as $beets_config_path"
+enotify "beets_config_path set as $beets_config_path"
 section=${config_yaml::-12}
-log "section running is $section"
+enotify "section running is $section"
 if [[ "$music_alac" -eq 1 ]]
 then
   beets_function
   sleep 1s
-  log_deb "should sync is set to: $should_sync"
+  edebug "should sync is set to: $should_sync"
   if [[ "$should_sync" == "y" ]]
   then
-    log "$section sync started"
+    enotify "$section sync started"
     rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
     rsync_error_catch
-    log "$section sync finished"
+    enotify "$section sync finished"
   else
-    log "no $section conversions, so no sync"
+    enotify "no $section conversions, so no sync"
   fi
 else
-  log "$section conversion not selected"
+  enotify "$section conversion not selected"
 fi
 #
 #
@@ -386,31 +392,31 @@ section=${config_yaml::-12}
 if [[ "$music_google" -eq 1 ]]; then
   beets_function
 else
-  log "$section not selected"
+  enotify "$section not selected"
 fi
 #
 # FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
 config_yaml="flac_config.yaml"
-log "config.yaml set as $config_yaml"
+enotify "config.yaml set as $config_yaml"
 beets_config_path=$(echo $beets_flac_path)
-log "beets_config_path set as $beets_config_path"
+enotify "beets_config_path set as $beets_config_path"
 section=${config_yaml::-12}
-log "section running is $section"
+enotify "section running is $section"
 if [[ "$music_flac" -eq 1 ]]
 then
   beets_function
   sleep 1s
   if [[ "$should_sync" == "y" ]]
   then
-    log "$section sync started"
+    enotify "$section sync started"
     rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
     rsync_error_catch
-    log "$section sync finished"
+    enotify "$section sync finished"
   else
-    log "no $section conversions, so no sync"
+    enotify "no $section conversions, so no sync"
   fi
 else
-  log "$section conversion not selected"
+  enotify "$section conversion not selected"
 fi
 #+-------------------------------+
 #+---Begin deletion constructs---+
