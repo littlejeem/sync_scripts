@@ -175,6 +175,19 @@ check_source () {
 }
 #
 #
+helpFunction () {
+   echo ""
+   echo "Usage: $0 -u foo_user -d bar_drive"
+   echo "Usage: $0"
+   echo -e "\t Running the script with no flags causes failure, either -m or -v must be set"
+   echo -e "\t-m Use this flag to specify a single artist multi-disc, -m 1"
+   echo -e "\t-v Use this flag to specify a various artist multi-disc -v 1"
+   echo -e "\t-a Use this flag to tell the script to auto-combine all folders in rip_flac, eg. -a 1, can be combined with -m or -v"
+   echo -e "\t-n Use this flag to have the script prompt you for folders to include from rip_flac for combining, eg. -n 1, can be combined with -m or -v"
+   exit 1 # Exit script after printing help
+}
+#
+#
 #+------------------------+
 #+---"Get User Options"---+
 #+------------------------+
@@ -194,17 +207,6 @@ do
 done
 #
 #
-helpFunction () {
-   echo ""
-   echo "Usage: $0 -u foo_user -d bar_drive"
-   echo "Usage: $0"
-   echo -e "\t Running the script with no flags causes failure, either -m or -v must be set"
-   echo -e "\t-m Use this flag to specify a single artist multi-disc, -m 1"
-   echo -e "\t-v Use this flag to specify a various artist multi-disc -v 1"
-   echo -e "\t-a Use this flag to tell the script to auto-combine all folders in rip_flac, eg. -a 1, can be combined with -m or -v"
-   echo -e "\t-n Use this flag to have the script prompt you for folders to include from rip_flac for combining, eg. -n 1, can be combined with -m or -v"
-   exit 1 # Exit script after printing help
-}
 #+-------------------+
 #+---Initial Setup---+
 #+-------------------+
