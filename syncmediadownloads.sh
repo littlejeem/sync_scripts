@@ -44,8 +44,8 @@ script_pid=$(echo $$)
 #+--------------------------------------+
 #+---"Display some info about script"---+
 #+--------------------------------------+
-log_deb "Version of $scriptlong is: $version"
-log_deb "PID is $script_pid"
+edebug "Version of $scriptlong is: $version"
+edebug "PID is $script_pid"
 #
 #
 #+---------------------------------------+
@@ -59,11 +59,11 @@ check_running
 #+---------------------------------------+
 #check for config file
 if [[ ! -f "$config_file" ]]; then
-  log "config file $config_file does not exist, script exiting"
+  enotify "config file $config_file does not exist, script exiting"
   exit 65
   rm -r /tmp/"$lockname"
 else
-  log "config file found, using"
+  enotify "config file found, using"
   source "$config_file"
 fi
 #
@@ -74,9 +74,9 @@ fi
 rsync_error_catch () {
   if [ $? == "0" ]
    then
-    log "section: $section rsync completed successfully"
+    enotify "section: $section rsync completed successfully"
    else
-    log "Section: $section produced an error"
+    enotify "Section: $section produced an error"
   fi
 }
 #
@@ -84,9 +84,9 @@ rsync_error_catch () {
 #+-------------------------+
 #+---"Start Main Script"---+
 #+-------------------------+
-log "$scriptlong Started, sleeping for 1min to allow network to start"
-log_deb "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
-log_deb "syncmediadownloads PID is: $script_pid"
+enotify "$scriptlong Started, sleeping for 1min to allow network to start"
+edebug "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
+edebug "syncmediadownloads PID is: $script_pid"
 sleep 15s #sleep for cron @reboot to allow time for network to start
 #
 #
@@ -96,13 +96,13 @@ sleep 15s #sleep for cron @reboot to allow time for network to start
 section="audiobooks"
 if [[ "$section" -eq 1 ]]
 then
-  log "AUDIOBOOKS sync SELECTED, sync started"
+  enotify "AUDIOBOOKS sync SELECTED, sync started"
   rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$audiobook_source" "$audiobook_dest"
   rsync_error_catch
   update_audiolibrary # update Audio Library on Kodi Video Server
-  log "AUDIOBOOKS sync finished"
+  enotify "AUDIOBOOKS sync finished"
 else
-  log "AUDIOBOOKS sync DESELECTED, no sync"
+  enotify "AUDIOBOOKS sync DESELECTED, no sync"
 fi
 #
 #
@@ -112,33 +112,30 @@ fi
 section="ebooks"
 if [[ "$section" -eq 1 ]]
 then
-  log "EBOOKS sync SELECTED, sync started"
+  enotify "EBOOKS sync SELECTED, sync started"
   rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$ebook_source" "$ebook_dest"
   rsync_error_catch
   update_audiolibrary # update Audio Library on Kodi Video Server
-  log "EBOOKS sync finished"
+  enotify "EBOOKS sync finished"
 else
-  log "EBOOKS sync DESELECTED, no sync"
+  enotify "EBOOKS sync DESELECTED, no sync"
 fi
 #
 #
-
-
-
 #+------------------+
 #+---"MUSIC Sync"---+
 #+------------------+
 section="music_sync"
 if [[ "$section" -eq 1 ]]
 then
-  log "MUSIC sync SELECTED, sync started"
+  enotify "MUSIC sync SELECTED, sync started"
   rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
   rsync_error_catch
-  log "Starting MusicSync.sh"
+  enotify "Starting MusicSync.sh"
   sudo -u jlivin25 $HOME/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
   script_exit
 else
-  log "MUSIC sync DESELECTED, no sync"
+  enotify "MUSIC sync DESELECTED, no sync"
 fi
 #
 #
@@ -148,13 +145,13 @@ fi
 section="movies"
 if [[ "section" -eq 1 ]]
 then
-  log "MOVIES sync SELECTED, sync started"
+  enotify "MOVIES sync SELECTED, sync started"
   rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
-  log "MOVIES sync COMPLETE"
+  enotify "MOVIES sync COMPLETE"
 else
-  log "MOVIES sync DESELECTED, no sync"
+  enotify "MOVIES sync DESELECTED, no sync"
 fi
 #
 #
@@ -164,13 +161,13 @@ fi
 section="tv"
 if [[ "$section" -eq 1 ]]
 then
-  log "TV sync SELECTED, sync started"
+  enotify "TV sync SELECTED, sync started"
   rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
-  log "TV sync finished"
+  enotify "TV sync finished"
 else
-  log "TV sync DESELECTED, no sync"
+  enotify "TV sync DESELECTED, no sync"
 fi
 #
 #
@@ -180,15 +177,15 @@ fi
 section="nfl"
 if [[ "$section" -eq 1 ]]
 then
-  log "NFL sync SELECTED, sync started"
+  enotify "NFL sync SELECTED, sync started"
   rsync "$rsync_prune_empty" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
   rsync_error_catch
-  log "NFL sync finished"
+  enotify "NFL sync finished"
 else
-  log "NFL sync DESELECTED, no sync"
+  enotify "NFL sync DESELECTED, no sync"
 fi
 #
-log "$scriptlong complete"
+enotify "$scriptlong complete"
 #
 #
 rm -r /tmp/"$lockname"
