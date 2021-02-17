@@ -192,9 +192,9 @@ helpFunction () {
 #+---"Get User Options"---+
 #+------------------------+
 OPTIND=1
-while getopts s:V:G:h flag
+while getopts ":sVGh:" opt
 do
-    case "${flag}" in
+    case "${opt}" in
         s) verbosity=$silent_lvl
         edebug "-s specified: Silent mode";;
         V) verbosity=$inf_lvl
@@ -205,6 +205,7 @@ do
         ?) helpFunction;;
     esac
 done
+shift $((OPTIND -1))
 #
 #
 #+-------------------+
