@@ -302,6 +302,7 @@ check_source
 if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
   enotify "no input files detected, exiting"
   rm -r /tmp/"$lockname"
+  enotify "MusicSync.sh completed successfully"
   exit 0
 fi
 #+---------------------------+
