@@ -26,6 +26,8 @@ version="2.0"
 scriptname=`basename "$0"`      # imports the name of this script
 lockname=${scriptname::-3}    # reduces the name to remove .sh
 lockdir=/tmp/"$lockname"     # name of the lock dir to be used
+#set default logging level
+verbosity=4
 #
 #
 #+------------------------+

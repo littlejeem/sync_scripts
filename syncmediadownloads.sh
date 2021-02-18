@@ -39,6 +39,8 @@ scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 config_file="/home/jlivin25/.config/ScriptSettings/sync_config.sh"
 script_pid=$(echo $$)
+#set default logging level
+verbosity=4
 #
 #
 #+--------------------------------------+
