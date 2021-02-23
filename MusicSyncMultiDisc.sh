@@ -362,14 +362,14 @@ elif [[ $va_choice = "1" ]]; then
     shopt -s nullglob
     edebug "Grabbing contents of rip_flac $rip_flac into array"
     names=("$rip_flac"*)
-    FLAC_musicdest=$(FLAC_musicdest_va) #where the FLAC files for Various Artitst are stored
-    M4A_musicdest=$(M4A_musicdest_va) #where the M4A files for Various Artists are stored
+    FLAC_musicdest=$(echo "$FLAC_musicdest_va") #where the FLAC files for Various Artitst are stored
+    M4A_musicdest=$(echo "$M4A_musicdest_va") #where the M4A files for Various Artists are stored
     get_CD_dirs
   else
     read -a names
     enotify "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
-    FLAC_musicdest=$(echo $FLAC_musicdest_va) #where the FLAC files for Various Artitst are stored
-    M4A_musicdest=$(echo $M4A_musicdest_va) #where the M4A files for Various Artists are stored
+    FLAC_musicdest=$(echo "$FLAC_musicdest_va") #where the FLAC files for Various Artitst are stored
+    M4A_musicdest=$(echo "$M4A_musicdest_va") #where the M4A files for Various Artists are stored
     get_CD_dirs
   fi
 fi
