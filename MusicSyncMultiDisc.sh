@@ -41,7 +41,7 @@ scriptlong="MusicSyncMultiDisc.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
 #set default logging level
-verbosity=4
+verbosity=6
 #
 #
 #+--------------------------+
@@ -96,6 +96,7 @@ beets_function () {
 # shellcheck source=../sync_config.sh
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   enotify "files located in $download_flac"
+  enotify "beets lookup started"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
   timestamp=$(date +%a%R)
   echo $OUTPUT | grep "Skipping"
@@ -106,6 +107,7 @@ beets_function () {
     edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
     cp -r "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
+  enotify "beets lookup finished"
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
  else
@@ -113,6 +115,7 @@ beets_function () {
  fi
  if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   enotify "files located in $rip_flac"
+  enotify "beets lookup started"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
   timestamp=$(date +%a%R)
   echo $OUTPUT | grep "Skipping"
@@ -123,6 +126,7 @@ beets_function () {
     edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
     cp -r "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
+  enotify "beets lookup finished"
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
  else
