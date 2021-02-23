@@ -7,6 +7,27 @@
 ## script is in $HOME/bin/sync_cripts                                                          ##
 #################################################################################################
 #
+#
+#+------------------+
+#+---"Exit Codes"---+
+#+------------------+
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
+# exit 0 = Success
+# exit 64 = Variable Error
+# exit 65 = Sourcing file error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
+#
+#
+### verbosity levels
+#silent_lvl=0
+#crt_lvl=1
+#err_lvl=2
+#wrn_lvl=3
+#ntf_lvl=4
+#inf_lvl=5
+#dbg_lvl=6
+#
 #+---------------------------+
 #+---Set Version & Logging---+
 #+---------------------------+
@@ -21,17 +42,6 @@ lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
 #set default logging level
 verbosity=4
-#
-#
-#+------------------+
-#+---"Exit Codes"---+
-#+------------------+
-# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
-# exit 0 = Success
-# exit 64 = Variable Error
-# exit 65 = Sourcing file error
-# exit 66 = Processing Error
-# exit 67 = Required Program Missing
 #
 #
 #+--------------------------+
@@ -204,7 +214,7 @@ get_CD_dirs () {
     enotify "${names[$i]}" ;
     if [[ -d "${names[$i]}" ]]; then
       enotify "cd"$i+1" location found at array position $i, continuing"
-      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$i+1"\ Unknown\ Album
+      cp -r "${names[$i]}"/Unknown\ Album "$rip_flac"/Unknown\ Artist1/CD"$((i+1))"\ Unknown\ Album
       check_command
       rm -r "${names[$i]}"
       check_command
@@ -348,10 +358,14 @@ elif [[ $va_choice = "1" ]]; then
     shopt -s nullglob
     edebug "Grabbing contents of rip_flac $rip_flac into array"
     names=("$rip_flac"*)
+    FLAC_musicdest=$(FLAC_musicdest_va) #where the FLAC files for Various Artitst are stored
+    M4A_musicdest=$(M4A_musicdest_va) #where the M4A files for Various Artists are stored
     get_CD_dirs
   else
     read -a names
     enotify "Enter Folder Names in CD order; spaces seperate values, escape spaces & character as normal:"
+    FLAC_musicdest=$(FLAC_musicdest_va) #where the FLAC files for Various Artitst are stored
+    M4A_musicdest=$(M4A_musicdest_va) #where the M4A files for Various Artists are stored
     get_CD_dirs
   fi
 fi
@@ -359,7 +373,7 @@ fi
 #+---------------------------+
 #+---Start Conversion Work---+
 #+---------------------------+
-# ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
+# ALAC - convert flacs to alac and copy to the ALAC library, imports first by using -c flag to specify an alternative config to merge"
 config_yaml="alac_config.yaml"
 enotify "config.yaml set as $config_yaml"
 beets_config_path=$(echo $beets_alac_path)
