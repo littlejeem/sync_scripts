@@ -91,6 +91,7 @@ helpFunction () {
    echo -e "\t-V Override script set verbosity to specify Verbose log level"
    echo -e "\t-G Override script set verbosity to specify Debug log level"
    echo -e "\t-h Use this flag for help"
+   rm -r "$temp_dir"
    exit 1 # Exit script after printing help
 }
 #
