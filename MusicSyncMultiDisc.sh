@@ -371,8 +371,8 @@ debug_missing_var
 #check the script has a flag set, otherwise exit
 if [[ $multi_choice = "" && $va_choice = "" ]]; then
   eerror "Running the script without flags causes failure, either -m or -v must be set, refer to help"
-  exit 1
   rm -r /tmp/$lockname
+  exit 1
 fi
 #
 #get single artist folder list to work on, automatic or manual as specified by user
