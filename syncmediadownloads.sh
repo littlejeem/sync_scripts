@@ -84,14 +84,19 @@ rsync_error_catch () {
 #
 helpFunction () {
    echo ""
+   echo "Usage: $0 syncmediadownloads.sh"
    echo "Usage: $0 syncmediadownloads.sh -G"
-   echo "Usage: $0"
    echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
-   echo -e "\t-s Override script set verbosity to specify silent log level"
-   echo -e "\t-V Override script set verbosity to specify Verbose log level"
-   echo -e "\t-G Override script set verbosity to specify Debug log level"
+   echo -e "\t-s Override set verbosity to specify silent log level"
+   echo -e "\t-V Override set verbosity to specify Verbose log level"
+   echo -e "\t-G Override set verbosity to specify Debug log level"
    echo -e "\t-h Use this flag for help"
-   rm -r "$temp_dir"
+   if [ -d "/tmp/$lockname" ]; then
+     edebug "removing lock directory"
+     rm -r "/tmp/$lockname"
+   else
+     edebug "problem removing lock directory"
+   fi
    exit 1 # Exit script after printing help
 }
 #
