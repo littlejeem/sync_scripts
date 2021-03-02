@@ -133,7 +133,7 @@ shift $((OPTIND -1))
 #+-------------------------+
 #+---"Start Main Script"---+
 #+-------------------------+
-ecrit "$scriptlong Started, sleeping for 1min to allow network to start"
+esilent "$scriptlong Started, sleeping for 1min to allow network to start"
 edebug "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
 edebug "syncmediadownloads PID is: $script_pid"
 sleep 15s #sleep for cron @reboot to allow time for network to start
@@ -234,7 +234,7 @@ else
   enotify "NFL sync DESELECTED, no sync"
 fi
 #
-ecrit "$scriptlong complete"
+esilent "$scriptlong complete"
 #
 #
 rm -r /tmp/"$lockname"
