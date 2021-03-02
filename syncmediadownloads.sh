@@ -82,6 +82,38 @@ rsync_error_catch () {
   fi
 }
 #
+helpFunction () {
+   echo ""
+   echo "Usage: $0 syncmediadownloads.sh -G"
+   echo "Usage: $0"
+   echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
+   echo -e "\t-s Override script set verbosity to specify silent log level"
+   echo -e "\t-V Override script set verbosity to specify Verbose log level"
+   echo -e "\t-G Override script set verbosity to specify Debug log level"
+   echo -e "\t-h Use this flag for help"
+   exit 1 # Exit script after printing help
+}
+#
+#
+#+------------------------+
+#+---"Get User Options"---+
+#+------------------------+
+OPTIND=1
+while getopts ":sVGh:" opt
+do
+    case "${opt}" in
+        s) verbosity=$silent_lvl
+        edebug "-s specified: Silent mode";;
+        V) verbosity=$inf_lvl
+        edebug "-V specified: Verbose mode";;
+        G) verbosity=$dbg_lvl
+        edebug "-G specified: Debug mode";;
+        h) helpFunction;;
+        ?) helpFunction;;
+    esac
+done
+shift $((OPTIND -1))
+#
 #
 #+-------------------------+
 #+---"Start Main Script"---+
