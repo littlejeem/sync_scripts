@@ -8,18 +8,17 @@
 #################################################################################################
 #
 #
-#+------------------+
-#+---"Exit Codes"---+
-#+------------------+
+#+--------------------------------------+
+#+---"Exit Codes & Logging Verbosity"---+
+#+--------------------------------------+
 # pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
 # exit 0 = Success
 # exit 64 = Variable Error
-# exit 65 = Sourcing file error
+# exit 65 = Sourcing file/folder error
 # exit 66 = Processing Error
 # exit 67 = Required Program Missing
 #
-#
-### verbosity levels
+#verbosity levels
 #silent_lvl=0
 #crt_lvl=1
 #err_lvl=2
@@ -27,6 +26,7 @@
 #ntf_lvl=4
 #inf_lvl=5
 #dbg_lvl=6
+#
 #
 #+---------------------------+
 #+---Set Version & Logging---+
@@ -41,7 +41,7 @@ scriptlong="MusicSyncMultiDisc.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
 #set default logging level
-verbosity=6
+verbosity=2
 #
 #
 #+--------------------------+
@@ -62,13 +62,13 @@ check_running
 #+------------------------+
 helpFunction () {
    echo ""
-   echo "Usage: $0 -u foo_user -d bar_drive"
    echo "Usage: $0"
+   echo "Usage: $0 -vaG selects various artist source, autograb folder, debug level loging"
    echo -e "\t Running the script with no flags causes failure, either -m or -v must be set"
-   echo -e "\t-m Use this flag to specify a single artist multi-disc, -m 1"
-   echo -e "\t-v Use this flag to specify a various artist multi-disc -v 1"
-   echo -e "\t-a Use this flag to tell the script to auto-combine all folders in rip_flac, eg. -a 1, can be combined with -m or -v"
-   echo -e "\t-n Use this flag to have the script prompt you for folders to include from rip_flac for combining, eg. -n 1, can be combined with -m or -v"
+   echo -e "\t-m Use this flag to specify a single artist multi-disc"
+   echo -e "\t-v Use this flag to specify a various artist multi-disc"
+   echo -e "\t-a Use this flag to tell the script to auto-combine all folders in rip_flac, eg. -a, can be combined with -m or -v to become -ma"
+   echo -e "\t-n Use this flag to have the script prompt you for folders to include from rip_flac for combining, eg. -n, can be combined with -m or -v to become -nm"
    if [ -d "/tmp/$lockname" ]; then
      edebug "removing lock directory"
      rm -r "/tmp/$lockname"
