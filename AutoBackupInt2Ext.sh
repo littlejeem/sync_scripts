@@ -76,6 +76,7 @@ source /home/jlivin25/bin/standalone_scripts/helper_script.sh
 #+---"Initial Setup"---+
 #+---------------------+
 #Grab PID
+esilent "$lockname script started"
 script_pid=$(echo $$)
 log_deb "Script $scriptname running, PID is: $script_pid"
 #display version
@@ -123,4 +124,5 @@ else
     fi
   fi
 fi
+esilent "$lockname script finished"
 exit 0

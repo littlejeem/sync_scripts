@@ -227,7 +227,7 @@ shift $((OPTIND -1))
 #+---Initial Setup---+
 #+-------------------+
 #
-enotify "MusicSync.sh started"
+esilent "MusicSync.sh started"
 #Grab PID
 script_pid=$(echo $$)
 edebug "MusicSync scripts PID is: $script_pid"
@@ -450,5 +450,5 @@ fi
 #
 # all done
 rm -r /tmp/"$lockname"
-enotify "MusicSync.sh completed successfully"
+esilent "MusicSync.sh completed successfully"
 exit 0

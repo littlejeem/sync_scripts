@@ -375,6 +375,9 @@ if [[ $multi_choice = "" && $va_choice = "" ]]; then
   exit 1
 fi
 #
+#
+esilent "$lockname script started"
+#
 #get single artist folder list to work on, automatic or manual as specified by user
 if [[ $multi_choice = "1" ]]; then
   if [[ $user_choice_auto = "1" ]]; then
@@ -518,4 +521,5 @@ fi
 #+---"Script Complete"---+
 #+-----------------------+
 rm -r /tmp/"$lockname"
+esilent "$lockname script finished"
 exit 0
