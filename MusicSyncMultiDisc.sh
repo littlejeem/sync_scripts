@@ -233,16 +233,43 @@ get_CD_dirs () {
 #+-----------------------+
 #+---Set up user flags---+
 #+-----------------------+
+#OPTIND=1
+#while getopts m:v:a:n:h opt
+#do
+#    case "${opt}" in
+#        m) multi_choice=${OPTARG};;
+#        v) va_choice=${OPTARG};;
+#        a) user_choice_auto=${OPTARG};;
+#        n) user_choice_manual=${OPTARG};;
+#        h) helpFunction;;
+#        ?) helpFunction;;
+#    esac
+#done
+#shift $((OPTIND -1))
+#
+#+------------------------+
+#+---"Get User Options"---+
+#+------------------------+
 OPTIND=1
-while getopts m:v:a:n:h opt
+while getopts ":mvanVGh:" opt
 do
     case "${opt}" in
-        m) multi_choice=${OPTARG};;
-        v) va_choice=${OPTARG};;
-        a) user_choice_auto=${OPTARG};;
-        n) user_choice_manual=${OPTARG};;
-        h) helpFunction;;
-        ?) helpFunction;;
+      m) multi_choice="1"
+      edebug "-m specified: single artist multi disc choice selected";;
+      v) va_choice="1"
+      edebug "-v specified: various artist multi disc choice selected";;
+      a) user_choice_auto="1"
+      edebug "-a specified: automatically scan for included cd folder";;
+      n) user_choice_manual="1"
+      edebug "-n specified: user will be prompted for cd folders to include";;
+      s) verbosity=$silent_lvl
+      edebug "-s specified: Silent mode";;
+      V) verbosity=$inf_lvl
+      edebug "-V specified: Verbose mode";;
+      G) verbosity=$dbg_lvl
+      edebug "-G specified: Debug mode";;
+      h) helpFunction;;
+      ?) helpFunction;;
     esac
 done
 shift $((OPTIND -1))
@@ -337,7 +364,7 @@ debug_missing_var
 #
 #check the script has a flag set, otherwise exit
 if [[ $multi_choice = "" && $va_choice = "" ]]; then
-  eerror "Running the script with no flags causes failure, either -m or -v must be set, refer to help"
+  eerror "Running the script without flags causes failure, either -m or -v must be set, refer to help"
   exit 1
   rm -r /tmp/$lockname
 fi
