@@ -99,6 +99,8 @@ upload_mp3="" #Beets library where the mp3 uploads are stored
 # Music Destinations
 FLAC_musicdest="" #where the FLAC files are stored
 M4A_musicdest="" #where the M4A files are stored
+FLAC_musicdest_va="" #where the FLAC files for Various Artitst are stored
+M4A_musicdest_va="" #where the M4A files for Various Artists are stored
 # Beets
 beets_path="/home/$USER/.local/bin/beet" #default destination set change as appropriate
 beets_switch=""
