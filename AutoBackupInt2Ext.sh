@@ -44,13 +44,17 @@ verbosity=2
 #+------------------------+
 rsync_command ()
 {
-  enotify "script name = $scriptname"
-  enotify "lock name will be = $lockname"
-  enotify "lock dir will be = $lockdir"
-  enotify "sync started"
+  edebug "script name = $scriptname"
+  edebug "lock name will be = $lockname"
+  edebug "lock dir will be = $lockdir"
+  edebug "sync started"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
   pushover
-#  rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$loglocation"/"$timestamp".log
+  if [[ $dry_run -eq 1 ]]; then
+    edebug "dry-run enabled, rsync normally would run but disabled"
+  else
+    rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$loglocation"/"$timestamp".log
+  fi
 }
 #
 exit_segment ()
@@ -58,7 +62,7 @@ exit_segment ()
   rm -r "$lockdir"          #remove the lockdir once used
   umount "$mountpoint"
   enotify "SUCCESS - sync completed"
-  enotify "Hard Drive $mountpoint unmounted"
+  edebug "Hard Drive $mountpoint unmounted"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed, unplug the drive")
   pushover
   exit 0
@@ -78,15 +82,57 @@ source /home/jlivin25/bin/standalone_scripts/helper_script.sh
 #Grab PID
 esilent "$lockname script started"
 script_pid=$(echo $$)
-log_deb "Script $scriptname running, PID is: $script_pid"
+edebug "Script $scriptname running, PID is: $script_pid"
 #display version
-log_deb "Version is: $version"
+edebug "Version is: $version"
 #
 #
 #+---------------------------------------+
 #+---"Check if script running already"---+
 #+---------------------------------------+
 check_running
+#
+#
+#+------------------------+
+#+--- Define Functions ---+
+#+------------------------+
+helpFunction () {
+   echo ""
+   echo "Usage: $0"
+   echo "Usage: $0 -dV selects dry-run with verbose level logging"
+   echo -e "\t-d Use this flag to specify dry run, no files will be converted, useful in conjunction with -V or -G "
+   echo -e "\t-s Override set verbosity to specify silent log level"
+   echo -e "\t-V Override set verbosity to specify verbose log level"
+   echo -e "\t-G Override set verbosity to specify Debug log level"
+   if [ -d "/tmp/$lockname" ]; then
+     edebug "removing lock directory"
+     rm -r "/tmp/$lockname"
+   else
+     edebug "problem removing lock directory"
+   fi
+   exit 1 # Exit script after printing help
+}
+#
+#+------------------------+
+#+---"Get User Options"---+
+#+------------------------+
+OPTIND=1
+while getopts ":dsVGh:" opt
+do
+    case "${opt}" in
+      d) dry_run="1"
+      edebug "-d specified: dry run initiated";;
+      s) verbosity=$silent_lvl
+      edebug "-s specified: Silent mode";;
+      V) verbosity=$inf_lvl
+      edebug "-V specified: Verbose mode";;
+      G) verbosity=$dbg_lvl
+      edebug "-G specified: Debug mode";;
+      h) helpFunction;;
+      ?) helpFunction;;
+    esac
+done
+shift $((OPTIND -1))
 #
 #
 #+--------------------------------------------+
@@ -98,22 +144,28 @@ fatal_missing_var
 JAIL_FATAL="${lockdir}"
 fatal_missing_var
 #
+JAIL_FATAL="${rsyncsource}"
+fatal_missing_var
+#
+JAIL_FATAL="${rsyncdestination}"
+fatal_missing_var
+#
 #
 #+--------------------+
 #+---"Start Script"---+
 #+--------------------+
 grep -qs "$mount" /proc/mounts #if grep sees the mount then it will return a silent 0 if not seen a silent 1
 if [[ $? -eq 0 ]]; then
-  log_deb "Hard Drive already mounted"
+  edebug "Hard Drive already mounted"
   mountpoint=$(grep "$mount" /proc/mounts | cut -c 1-9)
   enotify "mountpoint is $mountpoint"
   rsync_command
   exit_segment
 else
   if [[ $? -eq 1 ]]; then
-    log_deb "Hard Drive NOT currently mounted."
+    edebug "Hard Drive NOT currently mounted."
     if mount -U "$uuid" "$mount"; then
-      enotify "Hard Drive mounted successfully"
+      edebug "Hard Drive mounted successfully"
       rsync_command
       exit_segment
     else
