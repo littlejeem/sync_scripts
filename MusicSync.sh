@@ -22,7 +22,7 @@ lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
 #
 #set default logging level
-verbosity=2
+verbosity=3
 #
 #
 #+--------------------------------------+
@@ -49,7 +49,7 @@ verbosity=2
 #+---Source helper script---+
 #+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-source "$HOME"/bin/standalone_scripts/helper_script.sh
+source /usr/local/bin/helper_script.sh
 #
 #
 #+---------------------------------------+

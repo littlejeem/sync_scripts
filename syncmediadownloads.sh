@@ -10,7 +10,7 @@
 #+---Source helper script---+
 #+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
-helper_file="/home/jlivin25/bin/standalone_scripts/helper_script.sh"
+helper_file="/usr/local/bin/helper_script.sh"
 if [[ ! -f "$helper_file" ]]; then
   echo "helper script $config_file does not exist, script exiting"
   exit 65
@@ -49,7 +49,7 @@ lockname=${scriptlong::-3} # reduces the name to remove .sh
 config_file="/home/jlivin25/.config/ScriptSettings/sync_config.sh"
 script_pid=$(echo $$)
 #set default logging level
-verbosity=2
+verbosity=3
 #
 #
 #+--------------------------------------+

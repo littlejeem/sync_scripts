@@ -36,7 +36,7 @@ scriptname=`basename "$0"`      # imports the name of this script
 lockname=${scriptname::-3}    # reduces the name to remove .sh
 lockdir=/tmp/"$lockname"     # name of the lock dir to be used
 #set default logging level
-verbosity=2
+verbosity=3
 #
 #
 #+------------------------+
@@ -73,7 +73,7 @@ exit_segment ()
 #+---"Import scripts"---+
 #+----------------------+
 source /home/jlivin25/.config/ScriptSettings/sync_config.sh
-source /home/jlivin25/bin/standalone_scripts/helper_script.sh
+source /usr/local/bin/helper_script.sh
 #
 #
 #+---------------------+
