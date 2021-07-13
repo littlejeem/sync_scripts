@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #
-#############################################################################################
-## this script is to move downloaded media from a remote source, such as raspberry pi,     ##
-## it moves media from the remote to the media source (local machine) using an rsync pull  ##
-## script is in user bin folder but run from sudo or su cron not user                      ##
-#############################################################################################
+########################################################################################################
+## this script is to move downloaded media from a remote source, such as raspberry pi,                ##
+## it moves media from the remote to the media source (local machine) using an rsync pull             ##
+## script is in user bin folder and run via crontab -e                                                ##
+## Ensure config.sh config file & helper files are found or linked in /usr/local/bin and with correct ##                                                      ##
+########################################################################################################
 #
 #+--------------------------+
 #+---Source helper script---+
@@ -12,7 +13,7 @@
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
 helper_file="/usr/local/bin/helper_script.sh"
 if [[ ! -f "$helper_file" ]]; then
-  echo "helper script $config_file does not exist, script exiting"
+  echo "helper script $helper_file does not exist, script exiting"
   exit 65
 else
   echo "helper script found, using"
@@ -46,7 +47,7 @@ fi
 version="2.0"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
-config_file="/home/jlivin25/.config/ScriptSettings/sync_config.sh"
+config_file="/usr/local/bin/config.sh"
 script_pid=$(echo $$)
 #set default logging level
 verbosity=3
@@ -146,7 +147,7 @@ section="audiobooks"
 if [[ "$section" -eq 1 ]]
 then
   enotify "AUDIOBOOKS sync SELECTED, sync started"
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$audiobook_source" "$audiobook_dest"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$audiobook_source" "$audiobook_dest"
   rsync_error_catch
   update_audiolibrary # update Audio Library on Kodi Video Server
   enotify "AUDIOBOOKS sync finished"
@@ -162,7 +163,7 @@ section="ebooks"
 if [[ "$section" -eq 1 ]]
 then
   enotify "EBOOKS sync SELECTED, sync started"
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$ebook_source" "$ebook_dest"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$ebook_source" "$ebook_dest"
   rsync_error_catch
   update_audiolibrary # update Audio Library on Kodi Video Server
   enotify "EBOOKS sync finished"
@@ -178,7 +179,7 @@ section="music_sync"
 if [[ "$section" -eq 1 ]]
 then
   enotify "MUSIC sync SELECTED, sync started"
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
   rsync_error_catch
   enotify "Starting MusicSync.sh"
   sudo -u jlivin25 $HOME/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
@@ -195,7 +196,7 @@ section="movies"
 if [[ "section" -eq 1 ]]
 then
   enotify "MOVIES sync SELECTED, sync started"
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
   enotify "MOVIES sync COMPLETE"
@@ -211,7 +212,7 @@ section="tv"
 if [[ "$section" -eq 1 ]]
 then
   enotify "TV sync SELECTED, sync started"
-  rsync "$rsync_prune_empty" "$rsync_set_perms" "$rsync_set_OwnGrp" "$rsync_set_chmod" "$rsync_set_chown" "$rsync_protect_args" "$rsync_remove_source" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
   enotify "TV sync finished"
@@ -227,7 +228,7 @@ section="nfl"
 if [[ "$section" -eq 1 ]]
 then
   enotify "NFL sync SELECTED, sync started"
-  rsync "$rsync_prune_empty" "$rsync_vzrc" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
+  rsync $rsync_prune_empty $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
   rsync_error_catch
   enotify "NFL sync finished"
 else
