@@ -247,7 +247,7 @@ fi
 if [[ ! -f "$config_file" ]]; then
   ewarn "config file $config_file does not appear to exist"
   edebug "attempting to source config file from default location"
-  config_file="$HOME/.config/ScriptSettings/sync_config.sh"
+  config_file="/usr/local/bin/config.sh"
   if [[ ! -f "$config_file" ]]; then
     ecrit "config file still not located at $config_file, script exiting"
     rm -r /tmp/"$lockname"

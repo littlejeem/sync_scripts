@@ -49,7 +49,7 @@ rsync_command ()
   edebug "lock dir will be = $lockdir"
   edebug "sync started"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
-  pushover
+  pushover > dev/null
   if [[ $dry_run -eq 1 ]]; then
     edebug "dry-run enabled, rsync normally would run but disabled"
   else
@@ -64,7 +64,7 @@ exit_segment ()
   enotify "SUCCESS - sync completed"
   edebug "Hard Drive $mountpoint unmounted"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed, unplug the drive")
-  pushover
+  pushover > /dev/null
   exit 0
 }
 #
@@ -72,7 +72,7 @@ exit_segment ()
 #+----------------------+
 #+---"Import scripts"---+
 #+----------------------+
-source /home/jlivin25/.config/ScriptSettings/sync_config.sh
+source /usr/local/bin/config.sh
 source /usr/local/bin/helper_script.sh
 #
 #
@@ -171,7 +171,7 @@ else
     else
       log_err "Something went wrong with the mount..."
       message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - ERROR - Something went wrong with the mount...")
-      pushover
+      pushover > /dev/null
       exit 66
     fi
   fi
