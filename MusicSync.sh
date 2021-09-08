@@ -429,25 +429,6 @@ if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0"
 fi
 #
 #
-#+-----------------------+
-#+---MUSIC SERVER sync---+
-#+-----------------------+
-if [[ "$musicserver_sync" -eq 1 ]]
-then
-  echo "-------------------------------------------------------------------------------------"
-  einfo "MUSIC SERVER sync SELECTED, sync started"
-  rsync "$rsync_alt_vzr" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
-  rsync_error_catch
-  einfo "MUSIC SERVER sync finished"
-  update_musiclibrary
-  sleep 30s
-  clean_musiclibrary
-else
-  echo "-------------------------------------------------------------------------------------"
-  einfo "MUSIC SERVER sync DESELECTED, no sync"
-fi
-#
-#
 # all done
 rm -r /tmp/"$lockname"
 esilent "MusicSync.sh completed successfully"
