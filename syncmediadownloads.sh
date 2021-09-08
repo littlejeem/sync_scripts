@@ -134,7 +134,7 @@ shift $((OPTIND -1))
 #+-------------------------+
 #+---"Start Main Script"---+
 #+-------------------------+
-esilent "$scriptlong Started, sleeping for 1min to allow network to start"
+enotify "$scriptlong Started, sleeping for 1min to allow network to start"
 edebug "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
 edebug "syncmediadownloads PID is: $script_pid"
 sleep 15s #sleep for cron @reboot to allow time for network to start
@@ -186,6 +186,25 @@ then
   script_exit
 else
   enotify "MUSIC sync DESELECTED, no sync"
+fi
+#
+#
+#+-------------------------+
+#+---"MUSIC SERVER sync"---+
+#+-------------------------+
+if [[ "$musicserver_sync" -eq 1 ]]
+then
+  echo "-------------------------------------------------------------------------------------"
+  einfo "MUSIC SERVER sync SELECTED, sync started"
+    rsync $rsync_prune_empty $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
+  rsync_error_catch
+  einfo "MUSIC SERVER sync finished"
+  update_musiclibrary
+  sleep 30s
+  clean_musiclibrary
+else
+  echo "-------------------------------------------------------------------------------------"
+  einfo "MUSIC SERVER sync DESELECTED, no sync"
 fi
 #
 #
