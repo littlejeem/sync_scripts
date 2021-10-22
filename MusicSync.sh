@@ -55,6 +55,7 @@ source /usr/local/bin/helper_script.sh
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
+lockname=MusicSync.sh
 check_running
 #
 #
@@ -233,6 +234,8 @@ script_pid=$(echo $$)
 edebug "MusicSync scripts PID is: $script_pid"
 #display version
 edebug "Version is: $version"
+#display env variable PATH
+edebug "PATH is: $PATH"
 #Check for existance FFMPEG
 if ! command -v ffmpeg &> /dev/null
 then
