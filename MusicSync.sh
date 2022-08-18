@@ -1,30 +1,36 @@
 #!/usr/bin/env bash
-#
-#
+
+
 #################################################################################################
+## "INFO"                                                                                      ##
 ## This script is to import music transferred from the a remote location into Beets Library    ##
-## Once imported and converted it moves the fies to my music library, this is also done with   ##
+## Once imported and converted it moves the fies to my music storage, this is also done with   ##
 ## any ripped music                                                                            ##
+##                                                                                             ##
+## "REQUIREMENTS"                                                                              ##
+## Requires bin/control_scripts/control_scripts_install.sh running to prep environment         ##
+##                                                                                             ##
+## "LOCATION"                                                                                  ##
 ## script is in $HOME/bin/sync_cripts                                                          ##
 #################################################################################################
 #
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="2.0"
-#
-#
+version="2.2"
+
+
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
 scriptlong="MusicSync.sh" # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 script_pid=$(echo $$)
-#
+
 #set default logging level
 verbosity=3
-#
-#
+
+
 #+--------------------------------------+
 #+---"Exit Codes & Logging Verbosity"---+
 #+--------------------------------------+
@@ -43,27 +49,43 @@ verbosity=3
 #ntf_lvl=4
 #inf_lvl=5
 #dbg_lvl=6
-#
-#
+
+
 #+--------------------------+
 #+---Source helper script---+
 #+--------------------------+
 PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
 source /usr/local/bin/helper_script.sh
-#
-#
+
+
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
-lockname=MusicSync.sh
 check_running
-#
-#
+
+
 #+------------------------+
 #+--- Define Functions ---+
 #+------------------------+
-# clean Audiolibrary
-#
+clean_ctrlc () {
+  let ctrlc_count++
+  echo
+  if [[ $ctrlc_count == 1 ]]; then
+    echo "Quit command detected, are you sure?"
+  elif [[ $ctrlc_count == 2 ]]; then
+    echo "...once more and the script will exit..."
+  else
+    clean_exit
+  fi
+}
+
+clean_exit () {
+  edebug "Exiting script gracefully"
+  rm -r /tmp/music_converter_in_progress_block
+  rm -r /tmp/"$lockname"
+  exit 0
+}
+
 fatal_missing_var () {
  if [ -z "${JAIL_FATAL}" ]; then
   ecrit "Failed to find: $JAIL_FATAL, JAIL_FATAL is unset or set to the empty string, script cannot continue. Exiting!"
@@ -73,7 +95,7 @@ fatal_missing_var () {
   einfo "variable found, using: $JAIL_FATAL"
  fi
 }
-#
+
 debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
   edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
@@ -81,7 +103,7 @@ debug_missing_var () {
   einfo "variable found, using: $JAIL_DEBUG"
  fi
 }
-#
+
 beets_function () {
  einfo "$section processing started"
 # shellcheck source=../sync_config.sh
@@ -121,8 +143,7 @@ beets_function () {
  fi
  einfo "$section processing finished"
 }
-#
-#
+
 rsync_error_catch () {
   if [ $? == "0" ]
    then
@@ -132,14 +153,14 @@ rsync_error_catch () {
     rsync_error_flag="y"
   fi
 }
-#
+
 delete_function () {
   sleep "$sleep_time"
   find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec echo '{}' \;
   sleep "$sleep_time"
   find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec rm -rf '{}' \;
 }
-#
+
 Logic1 () {
   if [ "$test_flac_down" = "y" ] || [ "$test_flac_rip" = "y" ] && [ -z "$rsync_error_flag" ]; then
     find "$location2" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
@@ -164,7 +185,7 @@ Logic1 () {
     exit 66
   fi
 }
-#
+
 check_source () {
   find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
   if [[ "$?" = "0" ]]; then
@@ -183,7 +204,21 @@ check_source () {
     test_flac_rip="n"
   fi
 }
-#
+
+#sync_music_server () {
+#if [[ "$musicserver_sync" -eq 1 ]] #---->Mediapc to Musicserver
+#then
+#  echo "-------------------------------------------------------------------------------------"
+#  einfo "MUSIC SERVER sync SELECTED, sync started"
+#  rsync $rsync_prune_empty -a "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
+#  rsync_error_catch
+#  einfo "MUSIC SERVER sync finished"
+#  clean_musiclibrary
+#else
+#  echo "-------------------------------------------------------------------------------------"
+#  einfo "MUSIC SERVER sync DESELECTED, no sync"
+#fi
+#}
 #
 helpFunction () {
    echo ""
@@ -217,17 +252,38 @@ do
         edebug "-V specified: Verbose mode";;
         G) verbosity=$dbg_lvl
         edebug "-G specified: Debug mode";;
+        u) user_install=${OPTARG}
+        edebug "-u specified: using $chosen_user";;
         h) helpFunction;;
         ?) helpFunction;;
     esac
 done
 shift $((OPTIND -1))
-#
-#
+
+
+#+---------------------+
+#+---"Trap & ctrl-c"---+
+#+---------------------+
+trap clean_ctrlc SIGINT
+trap clean_exit SIGTERM
+ctrlc_count=0
+
+
+#+-------------------------+
+#+---"Configure GETOPTS"---+
+#+-------------------------+
+if [[ $user_install = "" ]]; then
+  install_user="$USER"
+  export install_user
+else
+  install_user=$(echo $user_install)
+  export install_user=$(echo $user_install)
+fi
+
+
 #+-------------------+
 #+---Initial Setup---+
 #+-------------------+
-#
 esilent "MusicSync.sh started"
 #Grab PID
 script_pid=$(echo $$)
@@ -237,16 +293,45 @@ edebug "Version is: $version"
 #display env variable PATH
 edebug "PATH is: $PATH"
 #Check for existance FFMPEG
+if [ ! -d /tmp/music_converter_in_progress_block ]; then
+  edebug "Creating sync lock"
+  mkdir /tmp/music_converter_in_progress_block
+else
+  ecrit "/tmp/music_converter_in_progress_block exists, check for already running script"
+fi
+
+esilent "MusicSync.sh started"
+
+einfo "beginning checks..."
+if [ -d /tmp/media_sync_in_progress_block ]; then
+  ecrit "syncmediadownloads.sh is in progress, quitting..." #Quit because could take a while to complete
+  clean_exit
+fi
+
+if [ -d /tmp/music_sync_in_progress_block ]; then
+  while [ -d /tmp/music_sync_in_progress_block ]; do
+    ewarn "sync_music_server is in progress, waiting for it to complete..." #Wait as is a short running script
+    sleep 5m
+  done
+fi
+
 if ! command -v ffmpeg &> /dev/null
 then
-  eerror "FFMPEG could not be found, script won't function wihout it"
+  eerror "FFMPEG could not be found, script won't function wihout it, try running bin/standalone_scripts/manual_ffmpeg_install.sh or apt install ffmpeg -y"
   exit 67
 else
   einfo "FFMPEG command located, continuing"
 fi
-#
+
+
 # check for config file existance
 # the aim here is to have a config_file variable populated in the parent folder, once i work that one out, might need to flip this logic
+config_file="/usr/local/bin/config.sh"
+#
+#Export path now to include ~/.local/bin temporarily, sa this will be picked up on next log-in
+export PATH=$PATH:/home/"$USER"/.local/bin
+edebug "PATH is set as: $PATH"
+#
 if [[ ! -f "$config_file" ]]; then
   ewarn "config file $config_file does not appear to exist"
   edebug "attempting to source config file from default location"
@@ -261,7 +346,7 @@ if [[ ! -f "$config_file" ]]; then
   fi
 else
   # source config file
-  einfo "Config file found, using $config_file"
+  edebug "Config file found, using $config_file"
   source "$config_file"
 fi
 #
@@ -273,8 +358,8 @@ if [[ ! -f "$beets_path" ]]; then
 else
   einfo "Beets install detected, using $beets_path"
 fi
-#
-#
+
+
 #+--------------------------------------------+
 #+---Check that necessary variables are set---+
 #+--------------------------------------------+
@@ -323,6 +408,8 @@ if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
   enotify "MusicSync.sh completed successfully"
   exit 0
 fi
+
+einfo "...checks complete, continuing"
 #+---------------------------+
 #+---Start Conversion Work---+
 #+---------------------------+
@@ -341,8 +428,10 @@ then
   if [[ "$should_sync" == "y" ]]
   then
     einfo "$section sync started"
-    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
+    rsync "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
     rsync_error_catch
+    musicserver_sync
+    # TODO(littlejeem): work on the logic here, currently convert, dump, trigger library update, could we trigger scan specific to the new files?
     einfo "$section sync finished"
   else
     einfo "no $section conversions, so no sync"
@@ -433,6 +522,5 @@ fi
 #
 #
 # all done
-rm -r /tmp/"$lockname"
 esilent "MusicSync.sh completed successfully"
-exit 0
+clean_exit
