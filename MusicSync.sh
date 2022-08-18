@@ -300,8 +300,6 @@ else
   ecrit "/tmp/music_converter_in_progress_block exists, check for already running script"
 fi
 
-esilent "MusicSync.sh started"
-
 einfo "beginning checks..."
 if [ -d /tmp/media_sync_in_progress_block ]; then
   ecrit "syncmediadownloads.sh is in progress, quitting..." #Quit because could take a while to complete
