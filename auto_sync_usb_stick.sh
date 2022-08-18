@@ -126,6 +126,50 @@ else
 fi
 }
 #
+check_space () {
+  #get info in bytes about source folder
+  source_size_du=$(du /mnt/usbstorage)
+  edebug "Source folder size from du is: $source_size_du"
+  source_size_bytes=$(echo $source_size_du | cut -d ' ' -f 1)
+  edebug "Source folder size in bytes is: $source_size_bytes"
+  #get info in human readable format from du
+  source_size_du_human=$(du -sh /mnt/usbstorage)
+  edebug "Source folder size from du is: $source_size_du_human"
+  source_size_human=$(echo $source_size_du_human | cut -d ' ' -f 1)
+  edebug "Source folder size is: $source_size_human"
+  #get info on destination drive capacity
+  drive_size_bytes=$(lsblk -b --output SIZE -n -d $mountpoint)
+  edebug "Destination drive size in bytes is: $source_size_bytes"
+  #now test
+  if [[ $drive_size_bytes -le $source_size_bytes ]]; then
+    #DRIVE too SMALL unmount it
+    umount "$mountpoint"
+    if [[ $? -eq 0 ]]; then
+      edebug "Drive unmounted"
+    else
+      ecrit "FAILURE - umount returned error: $?"
+      exit 66
+    fi
+    #notify user
+    eerror "Drive size is to small, have you checked its blank/large enough?"
+    message_form="ERROR: Drive size is to small to fit ($source_size_human) downloaded media on, unplug and check its blank"
+    pushover
+    #start script exit
+    rm -r /tmp/"$lockname"
+    if [[ $? -ne 0 ]]; then
+        eerror "error removing lockdirectory"
+        exit 65
+    else
+        enotify "successfully removed lockdirectory"
+    fi
+    esilent "$lockname completed"
+    exit 66
+  else
+    #ALL OK, CARRY ON
+    edebug "Drive capacity large enough to sync media"
+  fi
+}
+#
 exit_segment () {
 umount "$mountpoint"
 if [[ $? -eq 0 ]]; then
@@ -277,6 +321,7 @@ if [[ $? -eq 0 ]]; then
   edebug "USB Drive already mounted"
   mountpoint=$(grep "$usb_transfer_mount" /proc/mounts | cut -c 1-9)
   enotify "mountpoint is $mountpoint"
+  check_space
   message_form=$(echo "USB DETECTED - Sync starting, please wait...")
   edebug "Message form would be: $message_form"
   pushover
@@ -299,6 +344,7 @@ elif [[ $? -eq 1 ]]; then
       mountpoint=$(grep "$usb_transfer_mount" /proc/mounts | cut -c 1-9)
       enotify "mountpoint is $mountpoint"
       edebug "USB Drive mounted successfully"
+      check_space
       message_form=$(echo "USB DETECTED - Sync starting, please wait...")
       edebug "Message form would be: $message_form"
       pushover
