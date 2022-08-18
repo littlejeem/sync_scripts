@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-#
+
+
 ########################################################################################################
 ## this script is to move downloaded media from a remote source, such as raspberry pi,                ##
 ## it moves media from the remote to the media source (local machine) using an rsync pull             ##
 ## script is in user bin folder and run via crontab -e                                                ##
 ## Ensure config.sh config file & helper files are found or linked in /usr/local/bin and with correct ##                                                      ##
 ########################################################################################################
-#
+
+
 #+--------------------------+
 #+---Source helper script---+
 #+--------------------------+
@@ -19,8 +21,8 @@ else
   echo "helper script found, using"
   source "$helper_file"
 fi
-#
-#
+
+
 #+--------------------------------------+
 #+---"Exit Codes & Logging Verbosity"---+
 #+--------------------------------------+
@@ -39,47 +41,47 @@ fi
 #ntf_lvl=4
 #inf_lvl=5
 #dbg_lvl=6
-#
-#
+
+
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
-version="2.0"
+version="2.1"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 config_file="/usr/local/bin/config.sh"
 script_pid=$(echo $$)
 #set default logging level
 verbosity=3
-#
-#
+
+
 #+--------------------------------------+
 #+---"Display some info about script"---+
 #+--------------------------------------+
 edebug "Version of $scriptlong is: $version"
 edebug "PID is $script_pid"
-#
-#
+
+
 #+---------------------------------------+
 #+---"check if script already running"---+
 #+---------------------------------------+
 check_running
-#
-#
+
+
 #+---------------------------------------+
 #+---"Import sensitive data from file"---+
 #+---------------------------------------+
 #check for config file
 if [[ ! -f "$config_file" ]]; then
-  enotify "config file $config_file does not exist, script exiting"
+  ecrit "config file $config_file does not exist, script exiting"
   exit 65
   rm -r /tmp/"$lockname"
 else
-  enotify "config file found, using"
+  edebug "config file found, using"
   source "$config_file"
 fi
-#
-#
+
+
 #+-----------------+
 #+---"Functions"---+
 #+-----------------+
@@ -91,7 +93,7 @@ rsync_error_catch () {
     enotify "Section: $section produced an error"
   fi
 }
-#
+
 helpFunction () {
    echo ""
    echo "Usage: $0 syncmediadownloads.sh"
@@ -109,8 +111,27 @@ helpFunction () {
    fi
    exit 1 # Exit script after printing help
 }
-#
-#
+
+clean_ctrlc () {
+  let ctrlc_count++
+  echo
+  if [[ $ctrlc_count == 1 ]]; then
+    echo "Quit command detected, are you sure?"
+  elif [[ $ctrlc_count == 2 ]]; then
+    echo "...once more and the script will exit..."
+  else
+    clean_exit
+  fi
+}
+
+clean_exit () {
+  edebug "Exiting script gracefully"
+  rm -r /tmp/media_sync_in_progress_block
+  rm -r /tmp/"$lockname"
+  exit 0
+}
+
+
 #+------------------------+
 #+---"Get User Options"---+
 #+------------------------+
@@ -129,23 +150,58 @@ do
     esac
 done
 shift $((OPTIND -1))
-#
-#
+
+
+#+---------------------+
+#+---"Trap & ctrl-c"---+
+#+---------------------+
+trap clean_ctrlc SIGINT
+trap clean_exit SIGTERM
+ctrlc_count=0
+
+
+#+------------------+
+#+---"Run Checks"---+
+#+------------------+
+enotify "Running checks..."
+if [ ! -d "/tmp/media_sync_in_progress_block" ]; then
+  mkdir /tmp/media_sync_in_progress_block
+  edebug "/tmp/media_sync_in_progress_block lock created"
+else
+  ecrit "/tmp/media_sync_in_progress_block exists, check running scripts and try again"
+fi
+
+if [ -d /tmp/sync_music_server ]; then
+  while [ -d /tmp/sync_music_server ]; do
+    ewarn "sync_music_server is in progress, waiting for it to complete..."
+    sleep 5m
+  done
+fi
+
+if [ -d /tmp/music_conversion ]; then
+  while [ -d /tmp/music_conversion ]; do
+    ewarn "MusicSync.sh is in progress, waiting for it to complete..."
+    sleep 5m
+    enotify "$scriptlong Started, sleeping for 1min to allow network to start"
+  done
+else
+  enotify "$scriptlong Started, sleeping for 1min to allow network to start"
+  sleep 15s
+fi
+
+
 #+-------------------------+
 #+---"Start Main Script"---+
 #+-------------------------+
-enotify "$scriptlong Started, sleeping for 1min to allow network to start"
 edebug "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
 edebug "syncmediadownloads PID is: $script_pid"
-sleep 15s #sleep for cron @reboot to allow time for network to start
-#
-#
+
+
 #+-----------------------+
 #+---"AUDIOBOOKS Sync"---+
 #+-----------------------+
 section="audiobooks"
-if [[ "$section" -eq 1 ]]
-then
+if [[ "$section" -eq 1 ]]; then
   enotify "AUDIOBOOKS sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$audiobook_source" "$audiobook_dest"
   rsync_error_catch
@@ -154,14 +210,13 @@ then
 else
   enotify "AUDIOBOOKS sync DESELECTED, no sync"
 fi
-#
-#
+
+
 #+-------------------+
 #+---"EBOOKS Sync"---+
 #+-------------------+
 section="ebooks"
-if [[ "$section" -eq 1 ]]
-then
+if [[ "$section" -eq 1 ]]; then
   enotify "EBOOKS sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$ebook_source" "$ebook_dest"
   rsync_error_catch
@@ -170,50 +225,26 @@ then
 else
   enotify "EBOOKS sync DESELECTED, no sync"
 fi
-#
-#
+
+
 #+------------------+
 #+---"MUSIC Sync"---+
 #+------------------+
-section="music_sync"
-if [[ "$section" -eq 1 ]]
-then
+section="music_sync" #<----Pull from Downloadbox to Mediapc
+if [[ "$section" -eq 1 ]]; then
   enotify "MUSIC sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
   rsync_error_catch
-  enotify "Starting MusicSync.sh"
-  sudo -u jlivin25 $HOME/bin/sync_scripts/MusicSync.sh #run seperate 'tagger' script
-  script_exit
 else
   enotify "MUSIC sync DESELECTED, no sync"
 fi
-#
-#
-#+-------------------------+
-#+---"MUSIC SERVER sync"---+
-#+-------------------------+
-if [[ "$musicserver_sync" -eq 1 ]]
-then
-  echo "-------------------------------------------------------------------------------------"
-  einfo "MUSIC SERVER sync SELECTED, sync started"
-    rsync $rsync_prune_empty $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
-  rsync_error_catch
-  einfo "MUSIC SERVER sync finished"
-  update_musiclibrary
-  sleep 30s
-  clean_musiclibrary
-else
-  echo "-------------------------------------------------------------------------------------"
-  einfo "MUSIC SERVER sync DESELECTED, no sync"
-fi
-#
-#
+
+
 #+-----------------+
 #+---"FILM Sync"---+
 #+-----------------+
 section="movies"
-if [[ "section" -eq 1 ]]
-then
+if [[ "section" -eq 1 ]]; then
   enotify "MOVIES sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest"
   rsync_error_catch
@@ -222,14 +253,13 @@ then
 else
   enotify "MOVIES sync DESELECTED, no sync"
 fi
-#
-#
+
+
 #+---------------+
 #+---"TV Sync"---+
 #+---------------+
 section="tv"
-if [[ "$section" -eq 1 ]]
-then
+if [[ "$section" -eq 1 ]]; then
   enotify "TV sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest"
   rsync_error_catch
@@ -238,14 +268,13 @@ then
 else
   enotify "TV sync DESELECTED, no sync"
 fi
-#
-#
+
+
 #+----------------+
 #+---"NFL Sync"---+
 #+----------------+
 section="nfl"
-if [[ "$section" -eq 1 ]]
-then
+if [[ "$section" -eq 1 ]]; then
   enotify "NFL sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
   rsync_error_catch
@@ -253,9 +282,10 @@ then
 else
   enotify "NFL sync DESELECTED, no sync"
 fi
-#
+
+
+#+-------------------+
+#+---"Exit Script"---+
+#+-------------------+
 esilent "$scriptlong complete"
-#
-#
-rm -r /tmp/"$lockname"
-exit 0
+clean_exit
