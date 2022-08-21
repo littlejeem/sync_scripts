@@ -82,6 +82,7 @@ clean_ctrlc () {
 clean_exit () {
   edebug "Exiting script gracefully"
   rm -r /tmp/music_converter_in_progress_block
+  music_converter_in_progress_block
   rm -r /tmp/"$lockname"
   exit 0
 }
@@ -182,7 +183,7 @@ Logic1 () {
     fi
   else
     eerror "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
-    exit 66
+    clean_exit
   fi
 }
 
@@ -298,6 +299,7 @@ if [ ! -d /tmp/music_converter_in_progress_block ]; then
   mkdir /tmp/music_converter_in_progress_block
 else
   ecrit "/tmp/music_converter_in_progress_block exists, check for already running script"
+  clean_exit
 fi
 
 einfo "beginning checks..."
@@ -317,6 +319,7 @@ if ! command -v ffmpeg &> /dev/null
 then
   eerror "FFMPEG could not be found, script won't function wihout it, try running bin/standalone_scripts/manual_ffmpeg_install.sh or apt install ffmpeg -y"
   exit 67
+  clean_exit
 else
   einfo "FFMPEG command located, continuing"
 fi
@@ -404,7 +407,7 @@ if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
   enotify "no input files detected, exiting"
   rm -r /tmp/"$lockname"
   enotify "MusicSync.sh completed successfully"
-  exit 0
+  clean_exit
 fi
 
 einfo "...checks complete, continuing"
@@ -428,7 +431,7 @@ then
     einfo "$section sync started"
     rsync "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
     rsync_error_catch
-    musicserver_sync
+    #musicserver_sync
     # TODO(littlejeem): work on the logic here, currently convert, dump, trigger library update, could we trigger scan specific to the new files?
     einfo "$section sync finished"
   else
