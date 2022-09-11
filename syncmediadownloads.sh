@@ -206,7 +206,6 @@ if [[ "$section" -eq 1 ]]; then
   enotify "AUDIOBOOKS sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$audiobook_source" "$audiobook_dest"
   rsync_error_catch
-  update_audiolibrary # update Audio Library on Kodi Video Server
   enotify "AUDIOBOOKS sync finished"
 else
   enotify "AUDIOBOOKS sync DESELECTED, no sync"
@@ -221,7 +220,6 @@ if [[ "$section" -eq 1 ]]; then
   enotify "EBOOKS sync SELECTED, sync started"
   rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$ebook_source" "$ebook_dest"
   rsync_error_catch
-  update_audiolibrary # update Audio Library on Kodi Video Server
   enotify "EBOOKS sync finished"
 else
   enotify "EBOOKS sync DESELECTED, no sync"
