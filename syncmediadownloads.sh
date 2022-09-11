@@ -46,7 +46,7 @@ fi
 #+---------------------+
 #+---"Set Variables"---+
 #+---------------------+
-version="2.1"
+version="2.2"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
 config_file="/usr/local/bin/config.sh"
@@ -169,6 +169,7 @@ if [ ! -d "/tmp/media_sync_in_progress_block" ]; then
   edebug "/tmp/media_sync_in_progress_block lock created"
 else
   ecrit "/tmp/media_sync_in_progress_block exists, check running scripts and try again"
+  clean_exit
 fi
 
 if [ -d /tmp/sync_music_server ]; then
@@ -273,11 +274,30 @@ fi
 #+----------------+
 #+---"NFL Sync"---+
 #+----------------+
+#LIVE LOCATIONS
+#destination_nfl_stanza="library_FLAC"
+#re-use variables from /usr/local/bin/config.sh
+#source_nfl="${nfl_dest}"
+
 section="nfl"
 if [[ "$section" -eq 1 ]]; then
   enotify "NFL sync SELECTED, sync started"
+  #rsync pull from download box to media_pc
   rsync $rsync_prune_empty $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
   rsync_error_catch
+
+  if [[ "${section}_push" -eq 1 ]]; then
+    enotify "NFL push SELECTED...pushing"
+    #rsync push from media_pc to music_Server
+    #LIVE LOCATIONS
+    destination_nfl_stanza="library_NFL"
+    #re-use variables from /usr/local/bin/config.sh
+    source_nfl="${nfl_dest}"
+    rsync -avz $rsync_prune_empty ${source_nfl}/ ${musicserver_ip}::${destination_nfl_stanza} > /dev/null
+    rsync_error_catch
+  else
+    enotify "NFL push DESELECTED"
+  fi
   enotify "NFL sync finished"
 else
   enotify "NFL sync DESELECTED, no sync"
