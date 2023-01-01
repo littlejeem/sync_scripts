@@ -50,7 +50,6 @@ source /usr/local/bin/helper_script.sh
 #+---"Initial Setup"---+
 #+---------------------+
 #Grab PID
-esilent "$lockname script started"
 script_pid=$(echo $$)
 edebug "Script $scriptname running, PID is: $script_pid"
 #display version
@@ -66,7 +65,7 @@ rsync_command ()
   edebug "lock name will be = $lockname"
   edebug "lock dir will be = $lockdir"
   edebug "sync started"
-  message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
+  message_form=$(echo "NOTICE - sync started")
   pushover > /dev/null
   if [[ $dry_run -eq 1 ]]; then
     edebug "dry-run enabled, calling rsync with dry-run flag"
@@ -81,7 +80,7 @@ exit_segment ()
   umount /dev/disk/by-uuid/"$uuid"
   enotify "SUCCESS - sync completed"
   edebug "Hard Drive $mountpoint unmounted"
-  message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed, unplug the drive")
+  message_form=$(echo "SUCCESS - sync completed, unplug the drive")
   pushover > /dev/null
   rm -r "$lockdir"          #remove the lockdir once used
   clean_exit
@@ -159,6 +158,13 @@ ctrlc_count=0
 check_running
 
 
+#+----------------------+
+#+---"Script Started"---+
+#+----------------------+
+# At this point the script is set up and all necessary conditions met so lets log this
+esilent "$lockname script started"
+
+
 #+--------------------------------------------+
 #+---Check that necessary variables are set---+
 #+--------------------------------------------+
@@ -174,6 +180,7 @@ fatal_missing_var
 
 JAIL_FATAL="${rsyncdestination}"
 fatal_missing_var
+
 edebug "...necessary variables are set"
 
 
@@ -196,7 +203,7 @@ else
       exit_segment
     else
       eerror "Something went wrong with the mount..."
-      message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - ERROR - Something went wrong with the mount...")
+      message_form=$(echo "ERROR - Something went wrong with the mount...")
       pushover > /dev/null
       exit 66
     fi
