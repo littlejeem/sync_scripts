@@ -49,7 +49,7 @@ rsync_command ()
   edebug "lock dir will be = $lockdir"
   edebug "sync started"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NOTICE - sync started")
-  pushover > dev/null
+  pushover > /dev/null
   if [[ $dry_run -eq 1 ]]; then
     edebug "dry-run enabled, rsync normally would run but disabled"
   else
@@ -59,12 +59,12 @@ rsync_command ()
 #
 exit_segment ()
 {
-  rm -r "$lockdir"          #remove the lockdir once used
-  umount "$mountpoint"
+  umount /dev/disk/by-uuid/"$uuid"
   enotify "SUCCESS - sync completed"
   edebug "Hard Drive $mountpoint unmounted"
   message_form=$(echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - SUCCESS - sync completed, unplug the drive")
   pushover > /dev/null
+  rm -r "$lockdir"          #remove the lockdir once used
   exit 0
 }
 #
@@ -157,7 +157,7 @@ fatal_missing_var
 grep -qs "$mount" /proc/mounts #if grep sees the mount then it will return a silent 0 if not seen a silent 1
 if [[ $? -eq 0 ]]; then
   edebug "Hard Drive already mounted"
-  mountpoint=$(grep "$mount" /proc/mounts | cut -c 1-9)
+  mountpoint=$(grep "$mount" /proc/mounts | cut -d ' ' -f 1)
   enotify "mountpoint is $mountpoint"
   rsync_command
   exit_segment
