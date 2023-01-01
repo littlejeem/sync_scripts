@@ -71,12 +71,13 @@ rsync_command ()
     edebug "dry-run enabled, calling rsync with dry-run flag"
     rsync --dry-run -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination
   else
-    rsync -ari --delete --exclude 'lost+found' $rsyncsource $rsyncdestination 2>&1 >/dev/null
+    rsync -ari --delete --exclude 'lost+found' $rsyncsource $rsyncdestination --log-file="$loglocation"/"$lockname"_rsync_"$(date +"%d_%m_%Y")".log > /dev/null
   fi
 }
 
 exit_segment ()
 {
+  sleep 2m
   umount /dev/disk/by-uuid/"$uuid"
   enotify "SUCCESS - sync completed"
   edebug "Hard Drive $mountpoint unmounted"
