@@ -69,9 +69,9 @@ rsync_command ()
   pushover > /dev/null
   if [[ $dry_run -eq 1 ]]; then
     edebug "dry-run enabled, calling rsync with dry-run flag"
-    rsync --dry-run -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$loglocation"/"$timestamp".log
+    rsync --dry-run -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination
   else
-    rsync -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination --log-file="$loglocation"/"$timestamp".log
+    rsync -ari --delete --exclude 'lost+found' $rsyncsource $rsyncdestination 2>&1 >/dev/null
   fi
 }
 
@@ -82,7 +82,6 @@ exit_segment ()
   edebug "Hard Drive $mountpoint unmounted"
   message_form=$(echo "SUCCESS - sync completed, unplug the drive")
   pushover > /dev/null
-  rm -r "$lockdir"          #remove the lockdir once used
   clean_exit
 }
 
@@ -210,4 +209,3 @@ else
   fi
 fi
 esilent "$lockname script finished"
-clean_exit
