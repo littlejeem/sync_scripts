@@ -69,9 +69,9 @@ rsync_command ()
   pushover > /dev/null
   if [[ $dry_run -eq 1 ]]; then
     edebug "dry-run enabled, calling rsync with dry-run flag"
-    rsync --dry-run -avrvi --delete --exclude 'lost+found' --progress $rsyncsource $rsyncdestination
+    rsync --dry-run -avrvi --delete --exclude 'lost+found' $rsync_backup_exclusions --progress $rsyncsource $rsyncdestination
   else
-    rsync -ari --delete --exclude 'lost+found' $rsyncsource $rsyncdestination --log-file="$loglocation"/"$lockname"_rsync_"$(date +"%d_%m_%Y")".log > /dev/null
+    rsync -ari --delete --exclude 'lost+found' $rsync_backup_exclusions $rsyncsource $rsyncdestination --log-file="$loglocation"/"$lockname"_rsync_"$(date +"%d_%m_%Y")".log > /dev/null
   fi
 }
 
@@ -102,6 +102,14 @@ clean_exit () {
   edebug "Exiting script gracefully"
   rm -r /tmp/"$lockname"
   exit 0
+}
+
+error_exit () {
+  ecrit "detected on line $(caller)" >&2
+  message_form="ERROR - Backup Script exited with an error"
+  pushover
+  rm -r /tmp/"$lockname"
+  exit 66
 }
 
 helpFunction () {
@@ -149,6 +157,7 @@ shift $((OPTIND -1))
 #+---------------------+
 trap clean_ctrlc SIGINT
 trap clean_exit SIGTERM
+trap error_exit ERR
 ctrlc_count=0
 
 
