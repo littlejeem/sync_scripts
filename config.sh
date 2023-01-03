@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 ###################
 ## Version "2.0" ##
 ###################
@@ -120,9 +121,44 @@ user_token="" #<--Main user key from your pushover account
 #######################
 mount="" #<--Desired mount point
 uuid="" #<--UUID of the backup drive
-backup_app_token="" #<--Script specific token from pushover, which needs setting up first.
+application_token="" #<--Script specific token from pushover, which needs setting up first.
 loglocation=""
 rsyncsource="" #<--Backup from... (trailing slash for "contents of")
 rsyncdestination="" #<--Backup too... (no trailing slash to copy INTO trailing folder)
+rsync_backup_exclusions=""
 #
 #
+#########################
+## "USB Sync" Settings ##
+#########################
+#sync choices
+usb_MUSIC="0"
+usb_TV="0"
+usb_MOVIES="0"
+usb_AUDIOBOOKS="0"
+usb_EBOOKS="0"
+#usb info
+usb_transfer_mount=""
+usb_uuid=""
+#source / destinations
+usb_MUSIC_source="/"
+usb_MUSIC_destination=""
+usb_TV_source="/"
+usb_TV_destination=""
+usb_MOVIES_source="/"
+usb_MOVIES_destination=""
+usb_AUDIOBOOKS_source="/"
+usb_AUDIOBOOKS_destination=""
+usb_EBOOKS_source="/"
+usb_EBOOKS_destination=""
+#
+#
+####################################
+### "Bluray Automatic Handbrake" ###
+####################################
+dev_drive="/dev/sr0" #dev path of the optical drive, eg. /dev/sr1
+#next options allow for a hierachy of folder structures: eg. working_dir/encode_dest/category working_dir/rip_dest/category
+working_dir="/home/jlivin25/Videos" #parent folder to work in, eg ~/Videos
+category="blurays" #single name, eg: blurays. used to diffrentiate from say DVD's
+rip_dest="Rips" #single name, eg: Rips. Where makemkv will rip disc to
+encode_dest="Encodes" #single name, eg: Encodes. Where handbrake will put encodes
