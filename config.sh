@@ -65,25 +65,25 @@ kodi_MUSIC_assembly="http://"$kodiMUSICuser":"$kodiMUSICpass"@"$musicserver_ip":
 ## "syncmediadownloads.sh Settings" ##
 ######################################
 # LOSSLESS AUDIO
-lossless_source="/"
+lossless_source="" # <- trailing slash for "contents of"
 lossless_dest=""
 # MUSICSERVER AUDIO
-musicserver_source="/"
+musicserver_source="" # <- trailing slash for "contents of"
 musicserver_dest=""
 # AUDIOBOOKS
-ebook_source="/"
+ebook_source="" # <- trailing slash for "contents of"
 ebook_dest=""
 # AUDIOBOOKS
-audiobook_source="/"
+audiobook_source="" # <- trailing slash for "contents of"
 audiobook_dest=""
 # TV
-tv_source="/"
+tv_source="" # <- trailing slash for "contents of"
 tv_dest=""
 # MOVIES
-movie_source="/"
+movie_source="" # <- trailing slash for "contents of"
 movie_dest=""
 # NFL
-nfl_source="/"
+nfl_source="" # <- trailing slash for "contents of"
 nfl_dest=""
 # file transfers
 fileowner="" #file owner of the files desired on the destination location
@@ -103,7 +103,7 @@ M4A_musicdest="" #where the M4A files are stored
 FLAC_musicdest_va="" #where the FLAC files for Various Artitst are stored
 M4A_musicdest_va="" #where the M4A files for Various Artists are stored
 # Beets
-beets_path="/home/$USER/.local/bin/beet" #default destination set change as appropriate
+beets_path="/home/$USER/.local/bin/beet" #default destination, change as appropriate
 beets_switch=""
 beets_flac_path="" #path to beets config & library file directory (FLAC)
 beets_alac_path="" #path to beets config & library file directory (alac)
@@ -141,24 +141,24 @@ usb_EBOOKS="0"
 usb_transfer_mount=""
 usb_uuid=""
 #source / destinations
-usb_MUSIC_source="/"
+usb_MUSIC_source="" # <- trailing slash for "contents of"
 usb_MUSIC_destination=""
-usb_TV_source="/"
+usb_TV_source="" # <- trailing slash for "contents of"
 usb_TV_destination=""
-usb_MOVIES_source="/"
+usb_MOVIES_source="" # <- trailing slash for "contents of"
 usb_MOVIES_destination=""
-usb_AUDIOBOOKS_source="/"
+usb_AUDIOBOOKS_source="" # <- trailing slash for "contents of"
 usb_AUDIOBOOKS_destination=""
-usb_EBOOKS_source="/"
+usb_EBOOKS_source="" # <- trailing slash for "contents of"
 usb_EBOOKS_destination=""
 #
 #
 ####################################
 ### "Bluray Automatic Handbrake" ###
 ####################################
-dev_drive="/dev/sr0" #dev path of the optical drive, eg. /dev/sr1
+dev_drive="" #dev path of the optical drive, eg. /dev/sr1
 #next options allow for a hierachy of folder structures: eg. working_dir/encode_dest/category working_dir/rip_dest/category
-working_dir="/home/jlivin25/Videos" #parent folder to work in, eg ~/Videos
+working_dir="" #parent folder to work in, eg ~/Videos
 category="blurays" #single name, eg: blurays. used to diffrentiate from say DVD's
 rip_dest="Rips" #single name, eg: Rips. Where makemkv will rip disc to
 encode_dest="Encodes" #single name, eg: Encodes. Where handbrake will put encodes
