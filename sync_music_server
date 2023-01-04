@@ -164,9 +164,6 @@ clean_exit () {
   exit 0
 }
 
-#+-----------------+
-#+---"Functions"---+
-#+-----------------+
 rsync_error_catch () {
   if [ $? == "0" ]
    then
@@ -372,22 +369,24 @@ if [[ "$musicserver_sync" -eq 1 ]]; then
     edebug "final $section rsync construct is: rsync -avz --dry-run $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza}"
     einfo "Starting $section sync..."
     rsync -avz --dry-run ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza}
+    rsync_error_catch
   elif [ ! -z $dry_run_rsync ] && [ -z $loud_rsync ]; then
     edebug "final $section rsync construct is: rsync -avz --dry-run $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null"
     einfo "Starting $section sync..."
     rsync -avz --dry-run ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null
+    rsync_error_catch
   elif [ -z $dry_run_rsync ] && [ ! -z $loud_rsync ]; then
     edebug "final $section rsync construct is: rsync -avz $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza}"
     einfo "Starting $section sync..."
     rsync -avz ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza}
+    rsync_error_catch
   else
     edebug "final $section rsync construct is: rsync -avz $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null"
     einfo "Starting $section sync..."
     rsync -avz ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null
+    rsync_error_catch
   fi
-  rsync_error_catch
   einfo "$section complete"
-
   einfo "MUSIC SERVER sync finished"
 else
   einfo "MUSIC SERVER sync DESELECTED, no sync"
