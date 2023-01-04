@@ -69,15 +69,15 @@ rsync_command ()
   pushover > /dev/null
   if [[ $dry_run -eq 1 ]]; then
     edebug "dry-run enabled, calling rsync with dry-run flag"
-    rsync --dry-run -avrvi --delete --exclude 'lost+found' $rsync_backup_exclusions --progress $rsyncsource $rsyncdestination
+    rsync --dry-run -avrvi --delete --exclude 'lost+found' --exclude '$rsync_backup_exclusions' $rsync_backup_exclusions --progress $rsyncsource $rsyncdestination
   else
-    rsync -ari --delete --exclude 'lost+found' $rsync_backup_exclusions $rsyncsource $rsyncdestination --log-file="$loglocation"/"$lockname"_rsync_"$(date +"%d_%m_%Y")".log > /dev/null
+    rsync -ari --delete --exclude 'lost+found' --exclude '$rsync_backup_exclusions' $rsyncsource $rsyncdestination --log-file="$loglocation"/"$lockname"_rsync_"$(date +"%d_%m_%Y")".log > /dev/null
   fi
 }
 
 exit_segment ()
 {
-  sleep 2m
+  sleep 15s
   umount /dev/disk/by-uuid/"$uuid"
   enotify "SUCCESS - sync completed"
   edebug "Hard Drive $mountpoint unmounted"
@@ -157,7 +157,7 @@ shift $((OPTIND -1))
 #+---------------------+
 trap clean_ctrlc SIGINT
 trap clean_exit SIGTERM
-trap error_exit ERR
+#trap error_exit ERR
 ctrlc_count=0
 
 
@@ -178,6 +178,7 @@ esilent "$lockname script started"
 #+---Check that necessary variables are set---+
 #+--------------------------------------------+
 edebug "Checking necessary variables are set..."
+
 JAIL_FATAL="${scriptname}"
 fatal_missing_var
 
