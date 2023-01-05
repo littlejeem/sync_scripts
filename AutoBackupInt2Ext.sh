@@ -81,6 +81,8 @@ exit_segment ()
   umount /dev/disk/by-uuid/"$uuid"
   enotify "SUCCESS - sync completed"
   edebug "Hard Drive $mountpoint unmounted"
+  edebug "...sleeping to let drive wind down"
+  sleep 2m
   message_form=$(echo "SUCCESS - sync completed, unplug the drive")
   pushover > /dev/null
   clean_exit
@@ -189,6 +191,12 @@ JAIL_FATAL="${rsyncsource}"
 fatal_missing_var
 
 JAIL_FATAL="${rsyncdestination}"
+fatal_missing_var
+
+JAIL_FATAL="${mount}"
+fatal_missing_var
+
+JAIL_FATAL="${uuid}"
 fatal_missing_var
 
 edebug "...necessary variables are set"
