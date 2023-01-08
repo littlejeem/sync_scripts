@@ -204,8 +204,22 @@ edebug "syncmediadownloads PID is: $script_pid"
 section="audiobooks"
 if [[ "$section" -eq 1 ]]; then
   enotify "AUDIOBOOKS sync SELECTED, sync started"
-  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$audiobook_source" "$audiobook_dest"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$audiobooks_source" "$audiobooks_dest"
   rsync_error_catch
+
+  if [[ "${section}_push" -eq 1 ]]; then
+    enotify "AUDIOBOOKS push SELECTED...pushing"
+    #rsync push from media_pc to music_Server
+    #LIVE LOCATIONS
+    destination_audiobooks_stanza="library_AUDIOBOOKS"
+    #re-use variables from /usr/local/bin/config.sh
+    source_audiobooks="${audiobooks_dest}"
+    rsync -avz --delete $rsync_prune_empty ${source_audiobooks}/ ${musicserver_ip}::${destination_audiobooks_stanza} > /dev/null
+    rsync_error_catch
+  else
+    enotify "AUDIOBOOKS push DESELECTED"
+  fi
+
   enotify "AUDIOBOOKS sync finished"
 else
   enotify "AUDIOBOOKS sync DESELECTED, no sync"
@@ -218,8 +232,22 @@ fi
 section="ebooks"
 if [[ "$section" -eq 1 ]]; then
   enotify "EBOOKS sync SELECTED, sync started"
-  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$ebook_source" "$ebook_dest"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$ebooks_source" "$ebooks_dest"
   rsync_error_catch
+
+  if [[ "${section}_push" -eq 1 ]]; then
+    enotify "EBOOKS push SELECTED...pushing"
+    #rsync push from media_pc to music_Server
+    #LIVE LOCATIONS
+    destination_ebooks_stanza="library_EBOOKS"
+    #re-use variables from /usr/local/bin/config.sh
+    source_ebooks="${ebooks_dest}"
+    rsync -avz --delete $rsync_prune_empty ${source_ebooks}/ ${musicserver_ip}::${destination_ebooks_stanza} > /dev/null
+    rsync_error_catch
+  else
+    enotify "EBOOKS push DESELECTED"
+  fi
+
   enotify "EBOOKS sync finished"
 else
   enotify "EBOOKS sync DESELECTED, no sync"
@@ -291,7 +319,7 @@ if [[ "$section" -eq 1 ]]; then
     destination_nfl_stanza="library_NFL"
     #re-use variables from /usr/local/bin/config.sh
     source_nfl="${nfl_dest}"
-    rsync -avz $rsync_prune_empty ${source_nfl}/ ${musicserver_ip}::${destination_nfl_stanza} > /dev/null
+    rsync -avz --delete $rsync_prune_empty ${source_nfl}/ ${musicserver_ip}::${destination_nfl_stanza} > /dev/null
     rsync_error_catch
   else
     enotify "NFL push DESELECTED"
