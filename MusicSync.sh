@@ -82,7 +82,6 @@ clean_ctrlc () {
 clean_exit () {
   edebug "Exiting script gracefully"
   rm -r /tmp/music_converter_in_progress_block
-  music_converter_in_progress_block
   rm -r /tmp/"$lockname"
   exit 0
 }
