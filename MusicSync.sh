@@ -83,6 +83,7 @@ clean_exit () {
   edebug "Exiting script gracefully"
   rm -r /tmp/music_converter_in_progress_block
   rm -r /tmp/"$lockname"
+  esilent "MusicSync.sh completed successfully"
   exit 0
 }
 
@@ -178,7 +179,7 @@ Logic1 () {
       fi
     else
       ewarn "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
-      rm -r /tmp/"$lockname"
+      clean_exit
     fi
   else
     eerror "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
@@ -205,21 +206,7 @@ check_source () {
   fi
 }
 
-#sync_music_server () {
-#if [[ "$musicserver_sync" -eq 1 ]] #---->Mediapc to Musicserver
-#then
-#  echo "-------------------------------------------------------------------------------------"
-#  einfo "MUSIC SERVER sync SELECTED, sync started"
-#  rsync $rsync_prune_empty -a "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_dest"
-#  rsync_error_catch
-#  einfo "MUSIC SERVER sync finished"
-#  clean_musiclibrary
-#else
-#  echo "-------------------------------------------------------------------------------------"
-#  einfo "MUSIC SERVER sync DESELECTED, no sync"
-#fi
-#}
-#
+
 helpFunction () {
    echo ""
    echo "Usage: $0 MusicSync.sh"
@@ -286,7 +273,6 @@ fi
 #+-------------------+
 esilent "MusicSync.sh started"
 #Grab PID
-script_pid=$(echo $$)
 edebug "MusicSync scripts PID is: $script_pid"
 #display version
 edebug "Version is: $version"
@@ -353,7 +339,7 @@ fi
 # check if beets is intalled
 if [[ ! -f "$beets_path" ]]; then
   eerror "a beets install at $beets_path not detected, please install and re-run"
-  rm -r /tmp/"$lockname"
+  clean_exit
   exit 67
 else
   einfo "Beets install detected, using $beets_path"
@@ -404,8 +390,6 @@ debug_missing_var
 check_source
 if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
   enotify "no input files detected, exiting"
-  rm -r /tmp/"$lockname"
-  enotify "MusicSync.sh completed successfully"
   clean_exit
 fi
 
@@ -522,5 +506,4 @@ fi
 #
 #
 # all done
-esilent "MusicSync.sh completed successfully"
 clean_exit
