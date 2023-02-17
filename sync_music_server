@@ -265,53 +265,6 @@ edebug "PATH is: $PATH"
 #+----------------------------+
 #+---"Main Script Contents"---+
 #+----------------------------+
-#check mandatory variables are set and exist
-if [ -z $mediapc_ip ]; then
-  ecrit "\$mediapc_ip shows not set. Set and try again"
-  clean_exit
-else
-  edebug "\$mediapc_ip shows set, using"
-fi
-
-if [ -z $source_ALAC ]; then
-  ecrit "\$source_ALAC shows not set. Set and try again"
-  clean_exit
-else
-  edebug "\$source_ALAC set, checking folder exists"
-  if [ -d $source_ALAC ]; then
-    edebug "$source_ALAC folder found"
-  else
-    ecrit "\source_ALAC set but doesn't exist"
-    clean_exit
-  fi
-fi
-
-if [ -z $source_FLAC ]; then
-  ecrit "\$source_FLAC shows not set. Set and try again"
-  clean_exit
-else
-  edebug "\$source_FLAC set, checking location exists"
-  if [ -d $source_FLAC ]; then
-    edebug "$source_FLAC folder found"
-  else
-    ecrit "\source_FLAC set but doesn't exist"
-    clean_exit
-  fi
-fi
-
-if [ -z $destination_ALAC_stanza ]; then
-  ecrit "\$destination_ALAC_stanza shows not set. Set and try again"
-  clean_exit
-else
-  edebug "\$destination_ALAC_stanza set"
-fi
-
-if [ -z $destination_FLAC_stanza ]; then
-  ecrit "\destination_FLAC_stanza shows not set. Set and try again"
-  clean_exit
-else
-  edebug "\$destination_FLAC_stanza set"
-fi
 
 #check if script section is set to run from config settings
 if [[ "$musicserver_sync" -eq 1 ]]; then
@@ -333,6 +286,58 @@ if [[ "$musicserver_sync" -eq 1 ]]; then
     done
   fi
   einfo "...checks complete, starting file sync process"
+
+  #check mandatory variables are set and exist
+  if [ -z $mediapc_ip ]; then
+    ecrit "\$mediapc_ip shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$mediapc_ip shows set, using"
+  fi
+
+  if [ -z $source_ALAC ]; then
+    ecrit "\$source_ALAC shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$source_ALAC set, checking folder exists"
+    if [ -d $source_ALAC ]; then
+      edebug "$source_ALAC folder found"
+    else
+      ecrit "\source_ALAC set but doesn't exist"
+      clean_exit
+    fi
+  fi
+
+  if [ -z $source_FLAC ]; then
+    ecrit "\$source_FLAC shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$source_FLAC set, checking location exists"
+    if [ -d $source_FLAC ]; then
+      edebug "$source_FLAC folder found"
+    else
+      ecrit "\source_FLAC set but doesn't exist"
+      clean_exit
+    fi
+  fi
+
+  if [ -z $destination_ALAC_stanza ]; then
+    ecrit "\$destination_ALAC_stanza shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$destination_ALAC_stanza set"
+  fi
+
+  if [ -z $destination_FLAC_stanza ]; then
+    ecrit "\destination_FLAC_stanza shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$destination_FLAC_stanza set"
+  fi
+
+  # A final security check to make sure no source directories are showing as non-empty but accidentially root
+
+
 
   #start with push to Albums (ALAC)
   section="ALAC source"
@@ -365,6 +370,7 @@ if [[ "$musicserver_sync" -eq 1 ]]; then
 
   #start push to backups (FLAC)
   section="FLAC Backup"
+  #TODO:@littlejeem, need to guard against the '/' in below commands, empty and uncaught variables will resul in a script running but choose root locations, BAD FORM DUDE!
   if [ ! -z $dry_run_rsync ] && [ ! -z $loud_rsync ]; then
     edebug "final $section rsync construct is: rsync -avz --dry-run $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza}"
     einfo "Starting $section sync..."
