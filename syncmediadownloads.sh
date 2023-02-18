@@ -1,162 +1,337 @@
 #!/usr/bin/env bash
+
+
+########################################################################################################
+## this script is to move downloaded media from a remote source, such as raspberry pi,                ##
+## it moves media from the remote to the media source (local machine) using an rsync pull             ##
+## script is in user bin folder and run via crontab -e                                                ##
+## Ensure config.sh config file & helper files are found or linked in /usr/local/bin and with correct ##                                                      ##
+########################################################################################################
+
+
+#+--------------------------+
+#+---Source helper script---+
+#+--------------------------+
+PATH=/sbin:/bin:/usr/bin:/home/jlivin25:/home/jlivin25/.local/bin:/home/jlivin25/bin
+helper_file="/usr/local/bin/helper_script.sh"
+if [[ ! -f "$helper_file" ]]; then
+  echo "helper script $helper_file does not exist, script exiting"
+  exit 65
+else
+  echo "helper script found, using"
+  source "$helper_file"
+fi
+
+
+#+--------------------------------------+
+#+---"Exit Codes & Logging Verbosity"---+
+#+--------------------------------------+
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
+# exit 0 = Success
+# exit 64 = Variable Error
+# exit 65 = Sourcing file/folder error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
 #
-#############################################################################################
-## this script is to move downloaded media from a remote source, such as raspberry pi,     ##
-## it moves media from the remote to the media source (local machine) using an rsync pull  ##
-## script is in user bin folder but run from sudo or su cron not user                      ##
-#############################################################################################
-#
-#
-####################
-## set variables  ##
-####################
-version="v2.0"
+#verbosity levels
+#silent_lvl=0
+#crt_lvl=1
+#err_lvl=2
+#wrn_lvl=3
+#ntf_lvl=4
+#inf_lvl=5
+#dbg_lvl=6
+
+
+#+---------------------+
+#+---"Set Variables"---+
+#+---------------------+
+version="2.2"
 scriptlong=`basename "$0"` # imports the name of this script
 lockname=${scriptlong::-3} # reduces the name to remove .sh
-logname=$lockname.log # Uses the script name to create the log
-username="jlivin25"
-config_file="/home/$username/.config/ScriptSettings/config.sh"
-stamp=$(echo "SYNC-`date +%d_%m_%Y`-`date +%H.%M.%S`")
-#
-#
-#####################################
-## Import sensitive data from file ##
-#####################################
-source "$config_file"
-#
-#
-##############################################################
-## set FUNCTIONS - tested on KODI 17/18 for library actions ##
-##############################################################
-update_videolibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly
-}
-#
-update_musiclibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Scan", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-}
-#
-clean_videolibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "VideoLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_VIDEO_assembly
-}
-#
-clean_musiclibrary () {
-curl --data-binary '{ "jsonrpc": "2.0", "method": "AudioLibrary.Clean", "id": "mybash"}' -H 'content-type: application/json;' $kodi_MUSIC_assembly
-}
-#
+config_file="/usr/local/bin/config.sh"
+script_pid=$(echo $$)
+#set default logging level
+verbosity=3
+
+
+#+--------------------------------------+
+#+---"Display some info about script"---+
+#+--------------------------------------+
+edebug "Version of $scriptlong is: $version"
+edebug "PID is $script_pid"
+
+
+#+---------------------------------------+
+#+---"check if script already running"---+
+#+---------------------------------------+
+check_running
+
+
+#+---------------------------------------+
+#+---"Import sensitive data from file"---+
+#+---------------------------------------+
+#check for config file
+if [[ ! -f "$config_file" ]]; then
+  ecrit "config file $config_file does not exist, script exiting"
+  exit 65
+  rm -r /tmp/"$lockname"
+else
+  edebug "config file found, using"
+  source "$config_file"
+fi
+
+
+#+-----------------+
+#+---"Functions"---+
+#+-----------------+
 rsync_error_catch () {
   if [ $? == "0" ]
    then
-    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` $section rsync completed successfully" >> $logfolder/$logname
+    enotify "section: $section rsync completed successfully"
    else
-    echo "`date +%d/%m/%Y` - `date +%H:%M:%S` $section produced an error" >> $logfolder/$logname
+    enotify "Section: $section produced an error"
   fi
 }
-#
-#
-#######################
-## Start Main Script ##
-#######################
-mkdir -p "$logfolder"
-echo "#####################################################################################################################" > $logfolder/$logname
-echo " - $locknamelong Started, sleeping for 1min to allow network to start" >> $logfolder/$logname
-echo "User is $username and config file is $config_file" >> $logfolder/$logname #for error checking
-sleep 15s #sleep for cron @reboot to allow tine for network to start
-#
-#
-################
-## MUSIC sync ##
-################
-section="music"
-if [[ "$section" -eq 1 ]]
-then
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest" >> $logfolder/$logname
-  rsync_error_catch
-  "$workdir"/MusicSync.sh #run seperate 'tagger' script
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync finished" >> $logfolder/$logname
+
+helpFunction () {
+   echo ""
+   echo "Usage: $0 syncmediadownloads.sh"
+   echo "Usage: $0 syncmediadownloads.sh -G"
+   echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
+   echo -e "\t-s Override set verbosity to specify silent log level"
+   echo -e "\t-V Override set verbosity to specify Verbose log level"
+   echo -e "\t-G Override set verbosity to specify Debug log level"
+   echo -e "\t-h Use this flag for help"
+   if [ -d "/tmp/$lockname" ]; then
+     edebug "removing lock directory"
+     rm -r "/tmp/$lockname"
+   else
+     edebug "problem removing lock directory"
+   fi
+   exit 1 # Exit script after printing help
+}
+
+clean_ctrlc () {
+  let ctrlc_count++
+  echo
+  if [[ $ctrlc_count == 1 ]]; then
+    echo "Quit command detected, are you sure?"
+  elif [[ $ctrlc_count == 2 ]]; then
+    echo "...once more and the script will exit..."
+  else
+    clean_exit
+  fi
+}
+
+clean_exit () {
+  edebug "Exiting script gracefully"
+  rm -r /tmp/media_sync_in_progress_block
+  rm -r /tmp/"$lockname"
+  exit 0
+}
+
+
+#+------------------------+
+#+---"Get User Options"---+
+#+------------------------+
+OPTIND=1
+while getopts ":sVGh:" opt
+do
+    case "${opt}" in
+        s) verbosity=$silent_lvl
+        edebug "-s specified: Silent mode";;
+        V) verbosity=$inf_lvl
+        edebug "-V specified: Verbose mode";;
+        G) verbosity=$dbg_lvl
+        edebug "-G specified: Debug mode";;
+        h) helpFunction;;
+        ?) helpFunction;;
+    esac
+done
+shift $((OPTIND -1))
+
+
+#+---------------------+
+#+---"Trap & ctrl-c"---+
+#+---------------------+
+trap clean_ctrlc SIGINT
+trap clean_exit SIGTERM
+ctrlc_count=0
+
+
+#+------------------+
+#+---"Run Checks"---+
+#+------------------+
+enotify "Running checks..."
+if [ ! -d "/tmp/media_sync_in_progress_block" ]; then
+  mkdir /tmp/media_sync_in_progress_block
+  edebug "/tmp/media_sync_in_progress_block lock created"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSIC sync DESELECTED, no sync" >> $logfolder/$logname
+  ecrit "/tmp/media_sync_in_progress_block exists, check running scripts and try again"
+  clean_exit
 fi
-#
-#
-##############################
-## start "MUSICSERVER" sync ##
-##############################
-section="musicserver"
-if [[ "$section" -eq 1 ]]
-then
-  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$musicserver_source" "$musicserver_user"@"$musicserver_ip":"$musicserver_source" >> $logfolder/$logname
-  rsync_error_catch
-  update_musiclibrary
-  clean_musiclibrary
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER section finished" >> $logfolder/$logname
+
+if [ -d /tmp/sync_music_server ]; then
+  while [ -d /tmp/sync_music_server ]; do
+    ewarn "sync_music_server is in progress, waiting for it to complete..."
+    sleep 5m
+  done
+fi
+
+if [ -d /tmp/music_conversion ]; then
+  while [ -d /tmp/music_conversion ]; do
+    ewarn "MusicSync.sh is in progress, waiting for it to complete..."
+    sleep 5m
+    enotify "$scriptlong Started, sleeping for 1min to allow network to start"
+  done
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MUSICSERVER sync DESELECTED, no sync" >> $logfolder/$logname
+  enotify "$scriptlong Started, sleeping for 1min to allow network to start"
+  sleep 15s
 fi
-#
-#
-echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - $locknamelong complete" >> $logfolder/$logname
-echo "####################################################################################" >> $logfolder/$logname
-#
-#
-###############
-## FILM sync ##
-###############
+
+
+#+-------------------------+
+#+---"Start Main Script"---+
+#+-------------------------+
+edebug "username is set as $username; USER is set at $USER and config file is $config_file"  #for error checking
+edebug "syncmediadownloads PID is: $script_pid"
+
+
+#+-----------------------+
+#+---"AUDIOBOOKS Sync"---+
+#+-----------------------+
+section="audiobooks"
+if [[ "$section" -eq 1 ]]; then
+  enotify "AUDIOBOOKS sync SELECTED, sync started"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$audiobooks_source" "$audiobooks_dest"
+  rsync_error_catch
+
+  if [[ "${section}_push" -eq 1 ]]; then
+    enotify "AUDIOBOOKS push SELECTED...pushing"
+    #rsync push from media_pc to music_Server
+    #LIVE LOCATIONS
+    destination_audiobooks_stanza="library_AUDIOBOOKS"
+    #re-use variables from /usr/local/bin/config.sh
+    source_audiobooks="${audiobooks_dest}"
+    rsync -avz --delete $rsync_prune_empty ${source_audiobooks}/ ${musicserver_ip}::${destination_audiobooks_stanza} > /dev/null
+    rsync_error_catch
+  else
+    enotify "AUDIOBOOKS push DESELECTED"
+  fi
+
+  enotify "AUDIOBOOKS sync finished"
+else
+  enotify "AUDIOBOOKS sync DESELECTED, no sync"
+fi
+
+
+#+-------------------+
+#+---"EBOOKS Sync"---+
+#+-------------------+
+section="ebooks"
+if [[ "$section" -eq 1 ]]; then
+  enotify "EBOOKS sync SELECTED, sync started"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$ebooks_source" "$ebooks_dest"
+  rsync_error_catch
+
+  if [[ "${section}_push" -eq 1 ]]; then
+    enotify "EBOOKS push SELECTED...pushing"
+    #rsync push from media_pc to music_Server
+    #LIVE LOCATIONS
+    destination_ebooks_stanza="library_EBOOKS"
+    #re-use variables from /usr/local/bin/config.sh
+    source_ebooks="${ebooks_dest}"
+    rsync -avz --delete $rsync_prune_empty ${source_ebooks}/ ${musicserver_ip}::${destination_ebooks_stanza} > /dev/null
+    rsync_error_catch
+  else
+    enotify "EBOOKS push DESELECTED"
+  fi
+
+  enotify "EBOOKS sync finished"
+else
+  enotify "EBOOKS sync DESELECTED, no sync"
+fi
+
+
+#+------------------+
+#+---"MUSIC Sync"---+
+#+------------------+
+section="music_sync" #<----Pull from Downloadbox to Mediapc
+if [[ "$section" -eq 1 ]]; then
+  enotify "MUSIC sync SELECTED, sync started"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$lossless_source" "$lossless_dest"
+  rsync_error_catch
+else
+  enotify "MUSIC sync DESELECTED, no sync"
+fi
+
+
+#+-----------------+
+#+---"FILM Sync"---+
+#+-----------------+
 section="movies"
-if [[ "section" -eq 1 ]]
-then
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest" >> $logfolder/$logname
+if [[ "section" -eq 1 ]]; then
+  enotify "MOVIES sync SELECTED, sync started"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$movie_source" "$movie_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync COMPLETE" >> $logfolder/$logname
+  enotify "MOVIES sync COMPLETE"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - MOVIES sync DESELECTED, no sync" >> $logfolder/$logname
+  enotify "MOVIES sync DESELECTED, no sync"
 fi
-#
-#
-#############
-## TV sync ##
-#############
+
+
+#+---------------+
+#+---"TV Sync"---+
+#+---------------+
 section="tv"
-if [[ "$section" -eq 1 ]]
-then
-  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable3" "$rsync_variable4" "$rsync_variable5" "$rsync_variable6" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest" >> $logfolder/$logname
+if [[ "$section" -eq 1 ]]; then
+  enotify "TV sync SELECTED, sync started"
+  rsync $rsync_prune_empty $rsync_set_perms $rsync_set_OwnGrp $rsync_set_chmod $rsync_set_chown $rsync_protect_args $rsync_remove_source $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$tv_source" "$tv_dest"
   rsync_error_catch
   update_videolibrary # update Video Library on Kodi Video Server
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync finished" >> $logfolder/$logname
+  enotify "TV sync finished"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - TV sync DESELECTED, no sync" >> $logfolder/$logname
+  enotify "TV sync DESELECTED, no sync"
 fi
-#
-#
-####################
-## start NFL sync ##
-####################
+
+
+#+----------------+
+#+---"NFL Sync"---+
+#+----------------+
+#LIVE LOCATIONS
+#destination_nfl_stanza="library_FLAC"
+#re-use variables from /usr/local/bin/config.sh
+#source_nfl="${nfl_dest}"
+
 section="nfl"
-if [[ "$section" -eq 1 ]]
-then
-  echo "------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync SELECTED, sync started" >> $logfolder/$logname
-  rsync "$rsync_variable7" "$rsync_variable1" "$rsync_variable2" "$rsync_switch" "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest" >> $logfolder/$logname
+if [[ "$section" -eq 1 ]]; then
+  enotify "NFL sync SELECTED, sync started"
+  #rsync pull from download box to media_pc
+  rsync $rsync_prune_empty $rsync_vzrc "$downloadbox_user"@"$downloadbox_ip":"$nfl_source" "$nfl_dest"
   rsync_error_catch
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync finished" >> $logfolder/$logname
+
+  if [[ "${section}_push" -eq 1 ]]; then
+    enotify "NFL push SELECTED...pushing"
+    #rsync push from media_pc to music_Server
+    #LIVE LOCATIONS
+    destination_nfl_stanza="library_NFL"
+    #re-use variables from /usr/local/bin/config.sh
+    source_nfl="${nfl_dest}"
+    rsync -avz --delete $rsync_prune_empty ${source_nfl}/ ${musicserver_ip}::${destination_nfl_stanza} > /dev/null
+    rsync_error_catch
+  else
+    enotify "NFL push DESELECTED"
+  fi
+  enotify "NFL sync finished"
 else
-  echo "-------------------------------------------------------------------------------------" >> $logfolder/$logname
-  echo "`date +%d/%m/%Y` - `date +%H:%M:%S` - NFL sync DESELECTED, no sync" >> $logfolder/$logname
+  enotify "NFL sync DESELECTED, no sync"
 fi
-#
-#
-exit 0
+
+
+#+-------------------+
+#+---"Exit Script"---+
+#+-------------------+
+esilent "$scriptlong complete"
+clean_exit

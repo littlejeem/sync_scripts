@@ -1,0 +1,405 @@
+#!/usr/bin/env bash
+
+# (C) 2022 littlejeem
+# https://github.com/littlejeem
+
+# This code is licensed under MIT license:
+# http://opensource.org/licenses/MIT
+
+# Shell Style Guide have been adhered to where viable
+# https://google.github.io/styleguide/shell.xml
+# and
+# https://tldp.org/LDP/abs/html/index.html
+
+# Linted with shellcheck: https://github.com/koalaman/shellcheck
+
+# Developed using Atom: https://atom.io/
+
+# References:
+# HERE IF APLICABLE
+
+# Credits
+# Thank you to anyone who has made script, posted on stackexchange or posted a blog thats influenced me,
+# if i've used something and not credited message me and I'll add it. ta!
+
+# DISCLAIMER
+# Whilst care has been taken to thoroughly test this script, my knowledge is currently limited to Ubuntu
+# cases, # as with all Linux/UNIX-like affairs, it may still fail in mysterious
+# circumstances. I'M STILL A NEWB!
+
+#########################################################################
+###    "PUT INFO ABOUT THE SCRIPT, ITS PURPOSE, HOW IT WORKS"         ###
+###      "WHERE IT SHOULD BE KEPT, DEPENDANCIES, etc...here"          ###
+#########################################################################
+
+#+--------------------------------------+
+#+---"Exit Codes & Logging Verbosity"---+
+#+--------------------------------------+
+# Exit codes:
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
+# exit 0 = Success
+# exit 64 = Variable Error
+# exit 65 = Sourcing file/folder error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
+
+# Verbosity levels
+# silent_lvl=0
+# crt_lvl=1
+# err_lvl=2
+# wrn_lvl=3
+# ntf_lvl=4
+# inf_lvl=5
+# dbg_lvl=6
+
+# Two spaces to indent, NOT TABS!
+
+# don't echo "" or echo -e "" for a blank line, use echo -e "\r" or echo -e "\n"
+# edebug "\r" or equivalent will also work
+
+# Todo example
+# TODO(littlejeem): Handle the unlikely edge cases (bug ####)
+
+# Google style guide states that a function uses the format 'function name () {' style to declare a function
+# but commonly accepted practice is that function is no longer used and depricated so plain 'name () {'
+# Use comments to describe inobvious functions, example below
+
+#######################################
+# Cleanup files from the backup directory.
+# Globals:
+#   BACKUP_DIR
+#   ORACLE_SID
+# Arguments:
+#   None
+#######################################
+
+# the help function in this file needs no comments as its usage is straight forward
+
+#+-----------------------+
+#+---"Set script name"---+
+#+-----------------------+
+# imports the name of this script
+# failure to to set this as lockname will result in check_running failing and 'hung' script
+# manually set this if being run as child from another script otherwise will inherit name of calling/parent script
+scriptlong=$(basename "$0")
+lockname=$scriptlong
+
+#+--------------------------+
+#+---Source helper script---+
+#+--------------------------+
+source /usr/local/bin/helper_script.sh
+
+
+#+---------------------------+
+#+---"Set Early Variables"---+
+#+---------------------------+
+#set default logging level, failure to set this will cause a 'unary operator expected' error
+#remember at level 3 and lower, only esilent messages show, best to include an override in getopts
+verbosity=4
+version="1.0" #
+script_pid=$(echo $$)
+
+
+#+-------------------+
+#+---Set functions---+
+#+-------------------+
+helpFunction () {
+   echo ""
+   echo "Usage: $0 $scriptlong"
+   echo "Usage: $0 $scriptlong -G"
+   echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
+   echo -e "\t-S Override set verbosity to specify silent log level"
+   echo -e "\t-V Override set verbosity to specify Verbose log level"
+   echo -e "\t-G Override set verbosity to specify Debug log level"
+   echo -e "\t-h Use this flag for help"
+   if [ -d "/tmp/$lockname" ]; then
+     edebug "removing lock directory"
+     rm -r "/tmp/$lockname"
+   else
+     edebug "problem removing lock directory"
+   fi
+   exit 65 # Exit script after printing help
+}
+
+clean_ctrlc () {
+  let ctrlc_count++
+  echo
+  if [[ $ctrlc_count == 1 ]]; then
+    echo "Quit command detected, are you sure?"
+  elif [[ $ctrlc_count == 2 ]]; then
+    echo "...once more and the script will exit..."
+  else
+    clean_exit
+  fi
+}
+
+local_script_exit () {
+  if [ -d /tmp/"$lockname" ]; then
+    rm -r /tmp/"$lockname"
+    if [[ $? -ne 0 ]]; then
+        eerror "error removing lockdirectory"
+        exit 65
+    else
+        enotify "successfully removed lockdirectory"
+    fi
+  fi
+  esilent "$lockname completed"
+  exit 0
+}
+
+clean_exit () {
+  if [ -d "/tmp/music_sync_in_progress_block" ]; then
+    edebug "removing sync block directory"
+    rm -r "/tmp/music_sync_in_progress_block"
+  else
+    edebug "problem removing SYNC block directory"
+  fi
+  if [ -d "/tmp/$lockname" ]; then
+    edebug "removing lock directory"
+    rm -r "/tmp/$lockname"
+  else
+    edebug "problem removing lock directory"
+  fi
+  esilent "$lockname completed"
+  exit 0
+}
+
+rsync_error_catch () {
+  if [ $? == "0" ]
+   then
+    enotify "... rsync of $section completed successfully"
+   else
+    ewarn "Section: rsync of $section produced an error"
+  fi
+}
+
+
+#+------------------------+
+#+---"Get User Options"---+
+#+------------------------+
+OPTIND=1
+while getopts ":SVGdlHh:" opt
+do
+    case "${opt}" in
+        S) verbosity=$silent_lvl
+        edebug "-S specified: Silent mode";;
+        V) verbosity=$inf_lvl
+        edebug "-V specified: Verbose mode";;
+        G) verbosity=$dbg_lvl
+        edebug "-G specified: Debug mode";;
+        d) dry_run_rsync=1
+        edebug "-d specified: setting rsync to --dry-run";;
+        l) loud_rsync=1
+        edebug "-l specified: setting rsync to print output";;
+        H) helpFunction;;
+        h) helpFunction;;
+        ?) helpFunction;;
+    esac
+done
+shift $((OPTIND -1))
+
+
+#+---------------------+
+#+---"Trap & ctrl-c"---+
+#+---------------------+
+trap clean_ctrlc SIGINT
+trap clean_exit SIGTERM
+ctrlc_count=0
+
+
+#+---------------------------------------+
+#+---"check if script already running"---+
+#+---------------------------------------+
+check_running
+
+
+#+----------------------+
+#+---"Script Started"---+
+#+----------------------+
+# At this point the script is set up and all necessary conditions met so lets log this
+esilent "$lockname started"
+
+
+#+--------------------------+
+#+---"Source config file"---+
+#+--------------------------+
+source /usr/local/bin/config.sh
+
+
+#+------------------------+
+#+---"Script Variables"---+
+#+------------------------+
+mediapc_ip="192.168.0.2"
+
+#LIVE LOCATIONS
+destination_FLAC_stanza="library_FLAC"
+destination_ALAC_stanza="library_ALAC"
+#re-use variables from /usr/local/bin/config.sh
+source_ALAC="${M4A_musicdest}"
+source_FLAC="${FLAC_musicdest}"
+
+#TEST LOCATIONS
+#destination_FLAC_stanza="library_FLAC_test"
+#destination_ALAC_stanza="library_ALAC_test"
+#source_ALAC="/media/Data_1/Music/lsync_test/Albums"
+#source_FLAC="/media/Data_1/Music/lsync_test/FLAC_Backups"
+
+
+#+--------------------------------------+
+#+---"Display some info about script"---+
+#+--------------------------------------+
+edebug "Version of $scriptlong is: $version"
+edebug "Version of helper_script is: $helper_version"
+edebug "PID is $script_pid"
+
+
+#+-------------------+
+#+---Set up script---+
+#+-------------------+
+#Get environmental info
+edebug "INVOCATION_ID is set as: $INVOCATION_ID"
+edebug "EUID is set as: $EUID"
+edebug "PATH is: $PATH"
+
+
+#+----------------------------+
+#+---"Main Script Contents"---+
+#+----------------------------+
+
+#check if script section is set to run from config settings
+if [[ "$musicserver_sync" -eq 1 ]]; then
+  section="ALAC sourcesync"
+  einfo "MUSIC SERVER sync SELECTED, beginning checks..."
+  mkdir /tmp/music_sync_in_progress_block
+
+  #Check if an existing syncmediadownloads script is running, if it is we exit as could take a while"
+  if [ -d /tmp/media_sync_in_progress_block ]; then
+   ecrit "syncmediadownloads.sh in progress on media_pc, stopping script"
+   clean_exit
+  fi
+
+  #Check if an existing music conversion is underway, if it is we wait as it shoud be done shortly"
+  if [ -d /tmp/music_converter_in_progress_block ]; then
+    while [ -d /tmp/music_converter_in_progress_block ]; do
+     ewarn "music_converter is in progress on media_pc, waiting for it to complete..."
+     sleep 5m
+    done
+  fi
+  einfo "...checks complete, starting file sync process"
+
+  #check mandatory variables are set and exist
+  if [ -z $mediapc_ip ]; then
+    ecrit "\$mediapc_ip shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$mediapc_ip shows set, using"
+  fi
+
+  if [ -z $source_ALAC ]; then
+    ecrit "\$source_ALAC shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$source_ALAC set, checking folder exists"
+    if [ -d $source_ALAC ]; then
+      edebug "$source_ALAC folder found"
+    else
+      ecrit "\source_ALAC set but doesn't exist"
+      clean_exit
+    fi
+  fi
+
+  if [ -z $source_FLAC ]; then
+    ecrit "\$source_FLAC shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$source_FLAC set, checking location exists"
+    if [ -d $source_FLAC ]; then
+      edebug "$source_FLAC folder found"
+    else
+      ecrit "\source_FLAC set but doesn't exist"
+      clean_exit
+    fi
+  fi
+
+  if [ -z $destination_ALAC_stanza ]; then
+    ecrit "\$destination_ALAC_stanza shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$destination_ALAC_stanza set"
+  fi
+
+  if [ -z $destination_FLAC_stanza ]; then
+    ecrit "\destination_FLAC_stanza shows not set. Set and try again"
+    clean_exit
+  else
+    edebug "\$destination_FLAC_stanza set"
+  fi
+
+  # A final security check to make sure no source directories are showing as non-empty but accidentially root
+
+
+
+  #start with push to Albums (ALAC)
+  section="ALAC source"
+  if [ ! -z $dry_run_rsync ] && [ ! -z $loud_rsync ]; then
+    edebug "final $section rsync construct is: rsync -avz --dry-run $source_ALAC ${musicserver_ip}::${destination_ALAC_stanza}"
+    einfo "Starting $section sync..."
+    rsync -avz --dry-run ${source_ALAC}/ ${musicserver_ip}::${destination_ALAC_stanza}
+  elif [ ! -z $dry_run_rsync ] && [ -z $loud_rsync ]; then
+    edebug "final $section rsync construct is: rsync -avz --dry-run $source_ALAC ${musicserver_ip}::${destination_ALAC_stanza} > /dev/null"
+    einfo "Starting $section sync..."
+    rsync -avz --dry-run ${source_ALAC}/ ${musicserver_ip}::${destination_ALAC_stanza} > /dev/null
+  elif [ -z $dry_run_rsync ] && [ ! -z $loud_rsync ]; then
+    edebug "final $section rsync construct is: rsync -avz $source_ALAC ${musicserver_ip}::${destination_ALAC_stanza}"
+    einfo "Starting $section sync..."
+    rsync -avz ${source_ALAC}/ ${musicserver_ip}::${destination_ALAC_stanza}
+  else
+    edebug "final $section rsync construct is: rsync -avz $source_ALAC ${musicserver_ip}::${destination_ALAC_stanza} > /dev/null"
+    einfo "Starting $section sync..."
+    rsync -avz ${source_ALAC}/ ${musicserver_ip}::${destination_ALAC_stanza} > /dev/null
+  fi
+  rsync_error_catch
+  if [ -z $dry_run_rsync ]; then
+    einfo "triggering KODI Music Server update..."
+    update_musiclibrary #"Don't forget to set setting in advanced settings to have kodi mysql server 'clean' on update, or you will need to uncomment library clean""
+    sleep 5m
+    einfo "...KODI Music Server library update complete"
+  fi
+  #clean_musiclibrary
+  einfo "$section complete"
+
+  #start push to backups (FLAC)
+  section="FLAC Backup"
+  #TODO:@littlejeem, need to guard against the '/' in below commands, empty and uncaught variables will resul in a script running but choose root locations, BAD FORM DUDE!
+  if [ ! -z $dry_run_rsync ] && [ ! -z $loud_rsync ]; then
+    edebug "final $section rsync construct is: rsync -avz --dry-run $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza}"
+    einfo "Starting $section sync..."
+    rsync -avz --dry-run ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza}
+    rsync_error_catch
+  elif [ ! -z $dry_run_rsync ] && [ -z $loud_rsync ]; then
+    edebug "final $section rsync construct is: rsync -avz --dry-run $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null"
+    einfo "Starting $section sync..."
+    rsync -avz --dry-run ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null
+    rsync_error_catch
+  elif [ -z $dry_run_rsync ] && [ ! -z $loud_rsync ]; then
+    edebug "final $section rsync construct is: rsync -avz $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza}"
+    einfo "Starting $section sync..."
+    rsync -avz ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza}
+    rsync_error_catch
+  else
+    edebug "final $section rsync construct is: rsync -avz $source_FLAC ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null"
+    einfo "Starting $section sync..."
+    rsync -avz ${source_FLAC}/ ${musicserver_ip}::${destination_FLAC_stanza} > /dev/null
+    rsync_error_catch
+  fi
+  einfo "$section complete"
+  einfo "MUSIC SERVER sync finished"
+else
+  einfo "MUSIC SERVER sync DESELECTED, no sync"
+fi
+
+
+#+-------------------+
+#+---"Script Exit"---+
+#+-------------------+
+clean_exit
