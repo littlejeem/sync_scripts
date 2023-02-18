@@ -128,12 +128,13 @@ beets_function () {
  if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   einfo "files located in $rip_flac"
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
+  edebug "beets OUTPUT result is as: $OUTPUT"
   timestamp=$(date +%a%R)
-  echo "$OUTPUT" | grep "Skipping"
-  if [[ $? = 0 ]]; then
-    edebug "detected beets skipping"
+  if $(echo "$OUTPUT" | grep -q "Skipping") ; then
+    skipped_album=$(echo "$OUTPUT" | sed 1d | sed 2d | cut -d '(' -f1)
+    edebug "detected beets skipping album(s): $skipped_album"
     unknown_artist="$rip_flac""Unknown Artist"
-    edebug "$unknown_artist"
+    edebug "Unknown Artist albums will be placed: $unknown_artist"
     edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
     mv "$unknown_artist" "$unknown_artist""-$timestamp"
   fi
@@ -391,9 +392,11 @@ check_source
 if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
   enotify "no input files detected, exiting"
   clean_exit
+else
+  edebug "test_flac_down set as: $test_flac_down, test_flac_rip set as: $test_flac_rip"
+  einfo "...checks complete, continuing"
 fi
 
-einfo "...checks complete, continuing"
 #+---------------------------+
 #+---Start Conversion Work---+
 #+---------------------------+
