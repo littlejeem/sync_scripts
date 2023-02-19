@@ -110,11 +110,13 @@ beets_function () {
 # shellcheck source=../sync_config.sh
  if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   einfo "files located in $download_flac"
+  edebug "running command: "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac""
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
+  edebug "beets OUTPUT result is as: $OUTPUT"
   timestamp=$(date +%a%R)
-  echo "$OUTPUT" | grep "Skipping"
-  if [[ $? = 0 ]]; then
-    edebug "detected beets skipping"
+  if $(echo "$OUTPUT" | grep -q "Skipping") ; then
+    skipped_album_flac=$(echo "$OUTPUT" | sed 1d | sed 2d | cut -d '(' -f1)
+    edebug "detected beets skipping downloaded album(s): $skipped_album"
     unknown_artist="$rip_flac""Unknown Artist"
     edebug "Unknown Artist path is: $unknown_artist"
     edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
@@ -127,12 +129,13 @@ beets_function () {
  fi
  if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
   einfo "files located in $rip_flac"
+  edebug "running command: "$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac""
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
   edebug "beets OUTPUT result is as: $OUTPUT"
   timestamp=$(date +%a%R)
   if $(echo "$OUTPUT" | grep -q "Skipping") ; then
     skipped_album=$(echo "$OUTPUT" | sed 1d | sed 2d | cut -d '(' -f1)
-    edebug "detected beets skipping album(s): $skipped_album"
+    edebug "detected beets skipping ripped album(s): $skipped_album"
     unknown_artist="$rip_flac""Unknown Artist"
     edebug "Unknown Artist albums will be placed: $unknown_artist"
     edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
