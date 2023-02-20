@@ -115,12 +115,14 @@ beets_function () {
   edebug "beets OUTPUT result is as: $OUTPUT"
   timestamp=$(date +%a%R)
   if $(echo "$OUTPUT" | grep -q "Skipping") ; then
-    skipped_album_flac=$(echo "$OUTPUT" | sed 1d | sed 2d | cut -d '(' -f1)
+    skipped_album_flac=$(echo "$OUTPUT" | sed 1d | sed '$d' | cut -d '(' -f1)
     edebug "detected beets skipping downloaded album(s): $skipped_album"
+    edebug "checking for "Unknown Artist"..."
     unknown_artist="$download_flac""Unknown Artist"
-    edebug "Unknown Artist path is: $unknown_artist"
-    edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
-    mv "$unknown_artist" "$unknown_artist""-$timestamp"
+    if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep "Unknown Artist"; then
+      edebug "...Generic 'Unknown Artist' folder found in $section, assuming non tagging by beets, keeping folder appended with timestamp"
+      mv "$unknown_artist" "$unknown_artist""-$timestamp"
+    fi
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
@@ -134,12 +136,13 @@ beets_function () {
   edebug "beets OUTPUT result is as: $OUTPUT"
   timestamp=$(date +%a%R)
   if $(echo "$OUTPUT" | grep -q "Skipping") ; then
-    skipped_album=$(echo "$OUTPUT" | sed 1d | sed 2d | cut -d '(' -f1)
+    skipped_album=$(echo "$OUTPUT" | sed 1d | sed '$d' | cut -d '(' -f1)
     edebug "detected beets skipping ripped album(s): $skipped_album"
     unknown_artist="$rip_flac""Unknown Artist"
-    edebug "Unknown Artist albums will be placed: $unknown_artist"
-    edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
-    mv "$unknown_artist" "$unknown_artist""-$timestamp"
+    if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep "Unknown Artist"; then
+      edebug "...Generic 'Unknown Artist' folder found in $section, assuming non tagging by beets, keeping folder appended with timestamp"
+      mv "$unknown_artist" "$unknown_artist""-$timestamp"
+    fi
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
