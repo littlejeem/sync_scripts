@@ -356,8 +356,9 @@ edebug "array contents are: ${download_flac_array[*]}"
 download_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array'
 edebug "found: $download_flac_array_count folders"
 if [[ "$download_flac_array_count" -gt 0 ]]; then
+  edebug "source: $download_flac contains valid content, processing..."
   for (( i=0; i<$download_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
-    edebug "Found artist folder: ${download_flac_array[$i]}" ;
+    edebug "...artist folder: ${download_flac_array[$i]}" ;
   done
 else
   edebug "No folders found in: $download_flac"
