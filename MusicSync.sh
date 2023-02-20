@@ -351,8 +351,8 @@ debug_missing_var
 
 shopt -s nullglob
 edebug "Grabbing contents of $download_flac into array"
-download_flac_array=($download_flac*)
-edebug "array contents are: ${download_flac_array[@]}"
+download_flac_array=("$download_flac"*)
+edebug "array contents are: ${download_flac_array[*]}"
 download_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array'
 edebug "found: $download_flac_array_count folders"
 if [[ "$download_flac_array_count" -gt 0 ]]; then
