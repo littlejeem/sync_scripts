@@ -117,7 +117,7 @@ beets_function () {
   if $(echo "$OUTPUT" | grep -q "Skipping") ; then
     skipped_album_flac=$(echo "$OUTPUT" | sed 1d | sed 2d | cut -d '(' -f1)
     edebug "detected beets skipping downloaded album(s): $skipped_album"
-    unknown_artist="$rip_flac""Unknown Artist"
+    unknown_artist="$download_flac""Unknown Artist"
     edebug "Unknown Artist path is: $unknown_artist"
     edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
     mv "$unknown_artist" "$unknown_artist""-$timestamp"
