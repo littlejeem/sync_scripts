@@ -114,7 +114,7 @@ beets_function () {
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
   edebug "beets OUTPUT result is as: $OUTPUT"
   timestamp=$(date +%a%R)
-  if $(echo "$OUTPUT" | grep -q "Skipping") ; then
+  if $(echo "$OUTPUT" | grep -q -B1 "Skipping") ; then
     skipped_album_flac=$(echo "$OUTPUT" | sed 1d | sed '$d' | cut -d '(' -f1)
     edebug "detected beets skipping downloaded album(s): $skipped_album"
     edebug "checking for "Unknown Artist"..."
@@ -139,7 +139,7 @@ beets_function () {
   OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
   edebug "beets OUTPUT result is as: $OUTPUT"
   timestamp=$(date +%a%R)
-  if $(echo "$OUTPUT" | grep -q "Skipping") ; then
+  if $(echo "$OUTPUT" | grep -q -B1 "Skipping") ; then
     skipped_album=$(echo "$OUTPUT" | sed 1d | sed '$d' | cut -d '(' -f1)
     edebug "detected beets skipping ripped album(s): $skipped_album"
     edebug "checking for "Unknown Artist"..."
