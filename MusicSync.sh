@@ -125,6 +125,8 @@ beets_function () {
     else
       edebug "...no Unknown Artist folder detected, assuming failure of named artist"
     fi
+  else
+    edebug "successful beets import process"
   fi
   rm "$beets_config_path"/musiclibrary.blb
   should_sync="y"
@@ -148,9 +150,11 @@ beets_function () {
     else
       edebug "...no Unknown Artist folder detected, assuming failure of named artist"
     fi
+  else
+    edebug "successful beets import process"
   fi
   rm "$beets_config_path"/musiclibrary.blb
-  should_sync="y"
+  should_sync="n"
  else
   einfo "$rip_flac is empty, no conversion needed"
  fi
