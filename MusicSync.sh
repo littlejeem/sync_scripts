@@ -17,7 +17,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="2.2"
+version="3.1"
 
 
 #+---------------------+
@@ -115,30 +115,6 @@ rsync_error_catch () {
   fi
 }
 
-Logic1 () {
-  if [ "$test_flac_down" = "y" ] || [ "$test_flac_rip" = "y" ] && [ -z "$rsync_error_flag" ]; then
-    find "$location2" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-    if [[ "$?" = "0" ]]; then
-      einfo "Test conditions met, I am deleting..."
-      location="$download_flac"
-      delete_function
-      location="$rip_flac"
-      delete_function
-      location="$location2"
-      if [ -z "$location2" ]; then
-       edebug "No second delete location set"
-      else
-       delete_function
-      fi
-    else
-      ewarn "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
-      clean_exit
-    fi
-  else
-    eerror "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
-    clean_exit
-  fi
-}
 
 check_source () {
   find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
@@ -349,20 +325,89 @@ debug_missing_var
 #  einfo "...checks complete, continuing"
 #fi
 
-shopt -s nullglob
+shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
 edebug "Grabbing contents of $download_flac into array"
 download_flac_array=("$download_flac"*)
 edebug "array contents are: ${download_flac_array[*]}"
-download_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array'
-edebug "found: $download_flac_array_count folders"
+download_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
+edebug "found: $download_flac_array_count folder(s)"
 if [[ "$download_flac_array_count" -gt 0 ]]; then
-  edebug "source: $download_flac contains valid content, processing..."
+  edebug "source: $download_flac_array contains valid content, processing..."
   for (( i=0; i<$download_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
-    edebug "...artist folder: ${download_flac_array[$i]}" ;
+    edebug "...artist folder: ${download_flac_array[$i]}"
+    #+-----------------------------+
+    #+---"$download_flac import"---+
+    #+-----------------------------+
+    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q "${download_flac_array[$i]}")
+    edebug "beets import result is as: $beets_import_result"
+    if $(echo "$beets_import_result" | grep -q "Skipping") ; then
+        edebug "detected beets skipping import of ${download_flac_array[i]}"
+        edebug "moving skipped import to $skipped_imports_location"
+        if [[ -d "${download_flac_array[i]}" ]]; then
+          #mv ${download_flac_array[i]} "$skipped_imports_location"/
+          edebug "adding ${download_flac_array[i]} to skipped_imports_array"
+          skipped_imports_array+=(${download_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
+          edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
+        fi
+        rm ~/.config/beets/flac/musiclibrary.blb
+    else
+      edebug "beets successfully imported: ${download_flac_array[i]}", converting...
+      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+      rm ~/.config/beets/flac/musiclibrary.blb
+    fi
   done
 else
   edebug "No folders found in: $download_flac"
 fi
 
+#use above to scan folders download_flac & rip_flac for files -> If they exist process them
+#Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
+#1: Import using the cusomised config, we use the 'move' option as if the import is successful it moves the flac files out of the original source directory
+#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Downloads/
+#2: Create a converted copy via
+#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+#delete the library and then do rip_flac same way
+#rm ~/.config/beets/flac/musiclibrary.blb
 
+
+
+#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Rips/
+#2: Create a converted copy via
+#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+#delete the library and then do rip_flac same way
+#rm ~/.config/beets/flac/musiclibrary.blb
+
+
+
+#see if you can read the results and if folders don't successfulyl scan read into 'beets_import_failure' array
+#rename those folders
+#check for rsync success
+#check new folders from array exist in destination
+#then delete source
+#use same again to
+
+#how to pick out result of this?
+#
+#/home/jlivin25/Music/Downloads/Imagine Dragons/Mercury – Acts 1 & 2/Digital Media 01 (28 items)
+#Skipping.
+
+#/home/jlivin25/Music/Downloads/Imagine Dragons/Mercury – Acts 1 & 2/Digital Media 02 (36 items)
+#Skipping.
+#
+
+#+------------------------+
+#+---"$rip_flac import"---+
+#+------------------------+
+
+
+
+#+----------------------+
+#+---"Starting rsync"---+
+#+----------------------+
+
+
+
+#+------------+
+#+---"Exit"---+
+#+------------+
 clean_exit
