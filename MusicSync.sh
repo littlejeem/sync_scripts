@@ -17,7 +17,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="3.1"
+version="3.2"
 
 
 #+---------------------+
@@ -114,27 +114,6 @@ rsync_error_catch () {
     rsync_error_flag="y"
   fi
 }
-
-
-check_source () {
-  find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-  if [[ "$?" = "0" ]]; then
-    einfo "Located files in directory $download_flac"
-    test_flac_down="y"
-  else
-    einfo "no files located in directory $download_flac"
-    test_flac_down="n"
-  fi
-  find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-  if [[ "$?" = "0" ]]; then
-    einfo "Located files in directory $rip_flac"
-    test_flac_rip="y"
-  else
-    einfo "no files located in directory $rip_flac"
-    test_flac_rip="n"
-  fi
-}
-
 
 helpFunction () {
    echo ""
@@ -280,85 +259,42 @@ fi
 #+--------------------------------------------+
 JAIL_FATAL="${music_alac}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${download_flac}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${rip_flac}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${alaclibrary_source}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${flaclibrary_source}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${upload_mp3}"
 debug_missing_var
-#
+
 JAIL_FATAL="${FLAC_musicdest}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${M4A_musicdest}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_switch}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_flac_path}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_alac_path}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
-#
-#
-#Check if source folders are empty, if they are bail gracefully, if not continue
-#check_source
-#if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
-#  enotify "no input files detected, exiting"
-#  clean_exit
-#else
-#  edebug "test_flac_down set as: $test_flac_down, test_flac_rip set as: $test_flac_rip"
-#  einfo "...checks complete, continuing"
-#fi
 
-shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
-edebug "Grabbing contents of $download_flac into array"
-download_flac_array=("$download_flac"*)
-edebug "array contents are: ${download_flac_array[*]}"
-download_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
-edebug "found: $download_flac_array_count folder(s)"
-if [[ "$download_flac_array_count" -gt 0 ]]; then
-  edebug "source: $download_flac_array contains valid content, processing..."
-  for (( i=0; i<$download_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
-    edebug "...artist folder: ${download_flac_array[$i]}"
-    #+-----------------------------+
-    #+---"$download_flac import"---+
-    #+-----------------------------+
-    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q "${download_flac_array[$i]}")
-    edebug "beets import result is as: $beets_import_result"
-    if $(echo "$beets_import_result" | grep -q "Skipping") ; then
-        edebug "detected beets skipping import of ${download_flac_array[i]}"
-        edebug "moving skipped import to $skipped_imports_location"
-        if [[ -d "${download_flac_array[i]}" ]]; then
-          #mv ${download_flac_array[i]} "$skipped_imports_location"/
-          edebug "adding ${download_flac_array[i]} to skipped_imports_array"
-          skipped_imports_array+=(${download_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
-          edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
-        fi
-        rm ~/.config/beets/flac/musiclibrary.blb
-    else
-      edebug "beets successfully imported: ${download_flac_array[i]}", converting...
-      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
-      rm ~/.config/beets/flac/musiclibrary.blb
-    fi
-  done
-else
-  edebug "No folders found in: $download_flac"
-fi
+
+
 
 #use above to scan folders download_flac & rip_flac for files -> If they exist process them
 #Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
@@ -385,6 +321,106 @@ fi
 #check new folders from array exist in destination
 #then delete source
 #use same again to
+
+
+
+
+
+
+
+
+
+shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
+
+
+
+
+
+
+
+#+---------------------------------+
+#+---"$download_flac processing"---+
+#+---------------------------------+
+#read into array the source contents
+edebug "Grabbing contents of $download_flac into array"
+download_flac_array=("$download_flac"*)
+edebug "array contents are: ${download_flac_array[*]}"
+download_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
+edebug "found: $download_flac_array_count folder(s)"
+
+# Check if any contents in the source, if there are process them. If that succeds delete the now empty source, if it fails wokr out why (skipping) and take seperate action
+if [[ "$download_flac_array_count" -gt 0 ]]; then
+  edebug "source: download_flac_array contains valid content, processing..."
+  #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
+  for (( i=0; i<$download_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
+    edebug "...artist folder: ${download_flac_array[$i]}"
+    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q "${download_flac_array[$i]}")
+    edebug "beets import result is as: $beets_import_result"
+    if $(echo "$beets_import_result" | grep -q "Skipping") ; then
+        edebug "detected beets skipping import of ${download_flac_array[i]}"
+        edebug "moving skipped import to $skipped_imports_location"
+        if [[ -d "${download_flac_array[i]}" ]]; then
+          #mv ${download_flac_array[i]} "$skipped_imports_location"/
+          edebug "adding ${download_flac_array[i]} to skipped_imports_array"
+          skipped_imports_array+=(${download_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
+          edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
+        fi
+        rm ~/.config/beets/flac/musiclibrary.blb
+    else
+      edebug "beets successfully imported: ${download_flac_array[i]}", converting to ALAC...
+      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+      rm ~/.config/beets/flac/musiclibrary.blb
+    fi
+    find "$download_flac" -empty -type -delete
+  done
+else
+  edebug "No folders found in: $download_flac"
+fi
+
+
+#+----------------------------+
+#+---"$rip_flac processing"---+
+#+----------------------------+
+#read into array the source contents
+edebug "Grabbing contents of $rip_flac into array"
+rip_flac_array=("$rip_flac"*)
+edebug "array contents are: ${rip_flac_array[*]}"
+rip_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
+edebug "found: $rip_flac_array_count folder(s)"
+
+# Check if any contents in the source, if there are process them. If that succeds delete the now empty source, if it fails wokr out why (skipping) and take seperate action
+if [[ "$rip_flac_array_count" -gt 0 ]]; then
+  edebug "source: rip_flac_array contains valid content, processing..."
+  #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
+  for (( i=0; i<$rip_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
+    edebug "...artist folder: ${rip_flac_array[$i]}"
+    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q "${rip_flac_array[$i]}")
+    edebug "beets import result is as: $beets_import_result"
+    if $(echo "$beets_import_result" | grep -q "Skipping") ; then
+        edebug "detected beets skipping import of ${rip_flac_array[i]}"
+        edebug "moving skipped import to $skipped_imports_location"
+        if [[ -d "${rip_flac_array[i]}" ]]; then
+          #mv ${rip_flac_array[i]} "$skipped_imports_location"/
+          edebug "adding ${rip_flac_array[i]} to skipped_imports_array"
+          skipped_imports_array+=(${download_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
+          edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
+        fi
+        rm ~/.config/beets/flac/musiclibrary.blb
+    else
+      edebug "beets successfully imported: ${rip_flac_array[i]}", converting to ALAC...
+      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+      rm ~/.config/beets/flac/musiclibrary.blb
+    fi
+    find "$rip_flac" -empty -type -delete
+  done
+else
+  edebug "No folders found in: $rip_flac"
+fi
+
+
+
+
+
 
 #how to pick out result of this?
 #
