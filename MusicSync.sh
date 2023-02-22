@@ -346,6 +346,7 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
     find "$download_flac" -empty -type d -delete
+    beets_import_result=
   done
 else
   einfo "No folders found in: $download_flac"
@@ -359,7 +360,7 @@ fi
 edebug "Grabbing contents of $rip_flac into array"
 rip_flac_array=("$rip_flac"*)
 edebug "array contents are: ${rip_flac_array[*]}"
-rip_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
+rip_flac_array_count=${#rip_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
 edebug "found: $rip_flac_array_count folder(s)"
 
 # Check if any contents in the source, if there are process them. If that succeds delete the now empty source, if it fails wokr out why (skipping) and take seperate action
@@ -376,7 +377,7 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
         if [[ -d "${rip_flac_array[i]}" ]]; then
           #mv ${rip_flac_array[i]} "$skipped_imports_location"/
           edebug "adding ${rip_flac_array[i]} to skipped_imports_array"
-          skipped_imports_array+=(${download_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
+          skipped_imports_array+=(${rip_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
           edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
         fi
         rm ~/.config/beets/flac/musiclibrary.blb
@@ -386,6 +387,7 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
     find "$rip_flac" -empty -type d -delete
+    beets_import_result=
   done
 else
   einfo "No folders found in: $rip_flac"
