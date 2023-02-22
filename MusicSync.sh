@@ -195,7 +195,7 @@ else
   clean_exit
 fi
 
-einfo "beginning checks..."
+edebug "beginning checks..."
 if [ -d /tmp/media_sync_in_progress_block ]; then
   ecrit "syncmediadownloads.sh is in progress, quitting..." #Quit because could take a while to complete
   clean_exit
@@ -250,7 +250,7 @@ if [[ ! -f "$beets_path" ]]; then
   clean_exit
   exit 67
 else
-  einfo "Beets install detected, using $beets_path"
+  edebug "Beets install detected, using $beets_path"
 fi
 
 
