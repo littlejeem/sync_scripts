@@ -345,7 +345,7 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
       /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
-    find "$download_flac" -empty -type -delete
+    find "$download_flac" -empty -type d -delete
   done
 else
   einfo "No folders found in: $download_flac"
@@ -385,7 +385,7 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
       /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
-    find "$rip_flac" -empty -type -delete
+    find "$rip_flac" -empty -type d -delete
   done
 else
   einfo "No folders found in: $rip_flac"
