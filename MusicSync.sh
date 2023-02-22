@@ -93,7 +93,7 @@ fatal_missing_var () {
   rm -r /tmp/"$lockname"
   exit 64
  else
-  einfo "variable found, using: $JAIL_FATAL"
+  edebug "variable found, using: $JAIL_FATAL"
  fi
 }
 
@@ -101,7 +101,7 @@ debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
   edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  einfo "variable found, using: $JAIL_DEBUG"
+  edebug "variable found, using: $JAIL_DEBUG"
  fi
 }
 
@@ -214,7 +214,7 @@ then
   exit 67
   clean_exit
 else
-  einfo "FFMPEG command located, continuing"
+  edebug "FFMPEG command located, continuing"
 fi
 
 
@@ -294,9 +294,7 @@ JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
 
 
-
-
-#use above to scan folders download_flac & rip_flac for files -> If they exist process them
+#scan folders download_flac & rip_flac for files -> If they exist process them
 #Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
 #1: Import using the cusomised config, we use the 'move' option as if the import is successful it moves the flac files out of the original source directory
 #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Downloads/
@@ -304,17 +302,6 @@ debug_missing_var
 #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
 #delete the library and then do rip_flac same way
 #rm ~/.config/beets/flac/musiclibrary.blb
-
-
-
-#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Rips/
-#2: Create a converted copy via
-#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
-#delete the library and then do rip_flac same way
-#rm ~/.config/beets/flac/musiclibrary.blb
-
-
-
 #see if you can read the results and if folders don't successfulyl scan read into 'beets_import_failure' array
 #rename those folders
 #check for rsync success
@@ -322,20 +309,7 @@ debug_missing_var
 #then delete source
 #use same again to
 
-
-
-
-
-
-
-
-
 shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
-
-
-
-
-
 
 
 #+---------------------------------+
@@ -374,7 +348,7 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
     find "$download_flac" -empty -type -delete
   done
 else
-  edebug "No folders found in: $download_flac"
+  einfo "No folders found in: $download_flac"
 fi
 
 
@@ -414,33 +388,8 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
     find "$rip_flac" -empty -type -delete
   done
 else
-  edebug "No folders found in: $rip_flac"
+  einfo "No folders found in: $rip_flac"
 fi
-
-
-
-
-
-
-#how to pick out result of this?
-#
-#/home/jlivin25/Music/Downloads/Imagine Dragons/Mercury – Acts 1 & 2/Digital Media 01 (28 items)
-#Skipping.
-
-#/home/jlivin25/Music/Downloads/Imagine Dragons/Mercury – Acts 1 & 2/Digital Media 02 (36 items)
-#Skipping.
-#
-
-#+------------------------+
-#+---"$rip_flac import"---+
-#+------------------------+
-
-
-
-#+----------------------+
-#+---"Starting rsync"---+
-#+----------------------+
-
 
 
 #+------------+
