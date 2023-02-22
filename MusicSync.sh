@@ -400,6 +400,7 @@ fi
 #+---"Process skipped_imports"---+
 #+-------------------------------+
 einfo "Processing skipped imports"
+edebug "array contents are: ${skipped_imports_array[*]}"
 skipped_imports_array_count=${#skipped_imports_array[@]}
 edebug "found: $skipped_imports_array_count skipped folder(s)"
 if [[ "$skipped_imports_array_count" -gt 0 ]]; then
@@ -407,7 +408,7 @@ if [[ "$skipped_imports_array_count" -gt 0 ]]; then
     edebug "...artist folder: ${skipped_imports_array[$i]}"
     if [[ -d "${skipped_imports_array[$i]}" ]]; then
       timestamp=$(date +%a%R)
-      mv "${skipped_imports_array[$i]}" "${skipped_imports_array[$i]}-${timestamp}"
+      mv "${skipped_imports_array[$i]}" "${skipped_imports_array[$i]}"-"${timestamp}"
     else
       edebug "failed to append and move "${skipped_imports_array[$i]}""
     fi
