@@ -17,7 +17,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="3.2"
+version="3.3"
 
 
 #+---------------------+
@@ -222,7 +222,7 @@ fi
 # the aim here is to have a config_file variable populated in the parent folder, once i work that one out, might need to flip this logic
 config_file="/usr/local/bin/config.sh"
 #
-#Export path now to include ~/.local/bin temporarily, sa this will be picked up on next log-in
+#Export path now to include ~/.local/bin temporarily, as this will be picked up on next log-in
 export PATH=$PATH:/home/"$USER"/.local/bin
 edebug "PATH is set as: $PATH"
 #
@@ -293,7 +293,6 @@ fatal_missing_var
 JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
 
-
 #scan folders download_flac & rip_flac for files -> If they exist process them
 #Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
 #1: Import using the cusomised config, we use the 'move' option as if the import is successful it moves the flac files out of the original source directory
@@ -311,11 +310,13 @@ debug_missing_var
 
 shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
 
+einfo "Artist folders that are unable to be tagged will be appended with '-<DATE>', the importer for beets will then igneore these items on subsequent scans"
 
 #+---------------------------------+
 #+---"$download_flac processing"---+
 #+---------------------------------+
 #read into array the source contents
+einfo "Processing DOWNLOADS"
 edebug "Grabbing contents of $download_flac into array"
 download_flac_array=("$download_flac"*)
 edebug "array contents are: ${download_flac_array[*]}"
@@ -357,6 +358,7 @@ fi
 #+---"$rip_flac processing"---+
 #+----------------------------+
 #read into array the source contents
+einfo "Processing RIPs"
 edebug "Grabbing contents of $rip_flac into array"
 rip_flac_array=("$rip_flac"*)
 edebug "array contents are: ${rip_flac_array[*]}"
@@ -391,6 +393,27 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
   done
 else
   einfo "No folders found in: $rip_flac"
+fi
+
+
+#+-------------------------------+
+#+---"Process skipped_imports"---+
+#+-------------------------------+
+einfo "Processing skipped imports"
+skipped_imports_array_count=${#skipped_imports_array[@]}
+edebug "found: $skipped_imports_array_count skipped folder(s)"
+if [[ "$skipped_imports_array_count" -gt 0 ]]; then
+  for (( i=0; i<$skipped_imports_array_count; i++)); do
+    edebug "...artist folder: ${skipped_imports_array[$i]}"
+    if [[ -d "${skipped_imports_array[$i]}" ]]; then
+      timestamp=$(date +%a%R)
+      mv "${skipped_imports_array[$i]}" "${skipped_imports_array[$i]}-${timestamp}"
+    else
+      edebug "failed to append and move "${skipped_imports_array[$i]}""
+    fi
+  done
+else
+  einfo "No skipped imports to process, exiting"
 fi
 
 
