@@ -417,6 +417,18 @@ else
 fi
 
 
+#+--------------------------+
+#+---Sync Processed Files---+
+#+--------------------------+
+einfo "sync of FLAC files started"
+rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
+rsync_error_catch
+
+einfo "sync of ALAC files started"
+rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
+rsync_error_catch
+
+
 #+-------------+
 #+---Tidy Up---+
 #+-------------+
@@ -440,17 +452,25 @@ else
   edebug "no empty source folders in $rip_flac"
 fi
 
+#Tidy up $flaclibrary_source
+if [[ -d "$flaclibrary_source" ]]; then
+  cd "$flaclibrary_source"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $flaclibrary_source"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $flaclibrary_source to delete"
+fi
 
-#+--------------------------+
-#+---Sync Processed Files---+
-#+--------------------------+
-einfo "sync of FLAC files started"
-rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
-rsync_error_catch
-
-einfo "sync of ALAC files started"
-rsync "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
-rsync_error_catch
+#Tidy up $alaclibrary_source
+if [[ -d "$alaclibrary_source" ]]; then
+  cd "$alaclibrary_source"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $alaclibrary_source"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $alaclibrary_source"
+fi
 
 
 #+------------+
