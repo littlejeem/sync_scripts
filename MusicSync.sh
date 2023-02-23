@@ -17,7 +17,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="3.3"
+version="3.4"
 
 
 #+---------------------+
@@ -334,7 +334,7 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
     if $(echo "$beets_import_result" | grep -q "Skipping") ; then
         edebug "detected beets skipping import of ${download_flac_array[i]}"
         if [[ -d "${download_flac_array[i]}" ]]; then
-            edebug "adding ${download_flac_array[i]} to skipped_imports_array"
+          edebug "adding ${download_flac_array[i]} to skipped_imports_array"
           skipped_imports_array+=("${download_flac_array[i]}") #append download_flac_array element 'i' to skipped_import_array
           edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
         fi
@@ -439,6 +439,18 @@ if [[ -d "$rip_flac" ]]; then
 else
   edebug "no empty source folders in $rip_flac"
 fi
+
+
+#+--------------------------+
+#+---Sync Processed Files---+
+#+--------------------------+
+einfo "sync of FLAC files started"
+rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
+rsync_error_catch
+
+einfo "sync of ALAC files started"
+rsync "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
+rsync_error_catch
 
 
 #+------------+
