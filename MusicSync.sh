@@ -333,11 +333,9 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
     edebug "beets import result is as: $beets_import_result"
     if $(echo "$beets_import_result" | grep -q "Skipping") ; then
         edebug "detected beets skipping import of ${download_flac_array[i]}"
-        edebug "moving skipped import to $skipped_imports_location"
         if [[ -d "${download_flac_array[i]}" ]]; then
-          #mv ${download_flac_array[i]} "$skipped_imports_location"/
-          edebug "adding ${download_flac_array[i]} to skipped_imports_array"
-          skipped_imports_array+=(${download_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
+            edebug "adding ${download_flac_array[i]} to skipped_imports_array"
+          skipped_imports_array+=("${download_flac_array[i]}") #append download_flac_array element 'i' to skipped_import_array
           edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
         fi
         rm ~/.config/beets/flac/musiclibrary.blb
@@ -374,11 +372,9 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
     edebug "beets import result is as: $beets_import_result"
     if $(echo "$beets_import_result" | grep -q "Skipping") ; then
         edebug "detected beets skipping import of ${rip_flac_array[i]}"
-        edebug "moving skipped import to $skipped_imports_location"
         if [[ -d "${rip_flac_array[i]}" ]]; then
-          #mv ${rip_flac_array[i]} "$skipped_imports_location"/
           edebug "adding ${rip_flac_array[i]} to skipped_imports_array"
-          skipped_imports_array+=(${rip_flac_array[i]}) #append download_flac_array element 'i' to skipped_import_array
+          skipped_imports_array+=("${rip_flac_array[i]}") #append download_flac_array element 'i' to skipped_import_array
           edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
         fi
         rm ~/.config/beets/flac/musiclibrary.blb
