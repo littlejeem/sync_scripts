@@ -17,7 +17,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="3.4"
+version="4.1"
 
 
 #+---------------------+
@@ -411,9 +411,10 @@ if [[ "$skipped_imports_array_count" -gt 0 ]]; then
       edebug "moving "${skipped_imports_array[$i]}" to "$skipped_imports_location"/"$skip_dest_file_name""
       mv "${skipped_imports_array[$i]}" "$skipped_imports_location"/"$skip_dest_file_name"
       #call pushover
-      application_token=""
-      pushover_title=""
-      message_form=""
+      edebug "Calling pushover"
+      application_token="aejkqvp5vhc7wmqx6xjkr33ho2kanr"
+      pushover_title="Music Sync - Skipped Artist"
+      message_form="Music Sync has detected beets skipping artist ${skipped_imports_array[$i]}, please check $skipped_imports_location"
       pushover
       #set variable to null
       skip_dest_file_name=
