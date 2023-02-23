@@ -329,7 +329,7 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
   #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
   for (( i=0; i<$download_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
     edebug "...artist folder: ${download_flac_array[$i]}"
-    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q "${download_flac_array[$i]}")
+    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import -q "${download_flac_array[$i]}")
     edebug "beets import result is as: $beets_import_result"
     if $(echo "$beets_import_result" | grep -q "Skipping") ; then
         edebug "detected beets skipping import of ${download_flac_array[i]}"
@@ -341,7 +341,7 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
         rm ~/.config/beets/flac/musiclibrary.blb
     else
       edebug "beets successfully imported: ${download_flac_array[i]}", converting to ALAC...
-      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
     beets_import_result=
@@ -368,7 +368,7 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
   #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
   for (( i=0; i<$rip_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
     edebug "...artist folder: ${rip_flac_array[$i]}"
-    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q "${rip_flac_array[$i]}")
+    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import -q "${rip_flac_array[$i]}")
     edebug "beets import result is as: $beets_import_result"
     if $(echo "$beets_import_result" | grep -q "Skipping") ; then
         edebug "detected beets skipping import of ${rip_flac_array[i]}"
@@ -380,7 +380,7 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
         rm ~/.config/beets/flac/musiclibrary.blb
     else
       edebug "beets successfully imported: ${rip_flac_array[i]}", converting to ALAC...
-      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
     beets_import_result=
