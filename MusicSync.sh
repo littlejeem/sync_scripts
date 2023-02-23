@@ -17,7 +17,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="2.2"
+version="3.4"
 
 
 #+---------------------+
@@ -93,7 +93,7 @@ fatal_missing_var () {
   rm -r /tmp/"$lockname"
   exit 64
  else
-  einfo "variable found, using: $JAIL_FATAL"
+  edebug "variable found, using: $JAIL_FATAL"
  fi
 }
 
@@ -101,49 +101,8 @@ debug_missing_var () {
  if [ -z "${JAIL_DEBUG}" ]; then
   edebug "JAIL_DEBUG $JAIL_DEBUG is unset or set to the empty string, may cause issues"
  else
-  einfo "variable found, using: $JAIL_DEBUG"
+  edebug "variable found, using: $JAIL_DEBUG"
  fi
-}
-
-beets_function () {
- einfo "$section processing started"
-# shellcheck source=../sync_config.sh
- if find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  einfo "files located in $download_flac"
-  OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$download_flac")
-  timestamp=$(date +%a%R)
-  echo "$OUTPUT" | grep "Skipping"
-  if [[ $? = 0 ]]; then
-    edebug "detected beets skipping"
-    unknown_artist="$rip_flac""Unknown Artist"
-    edebug "Unknown Artist path is: $unknown_artist"
-    edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
-    mv "$unknown_artist" "$unknown_artist""-$timestamp"
-  fi
-  rm "$beets_config_path"/musiclibrary.blb
-  should_sync="y"
- else
-  einfo "$download_flac is empty, no conversion needed"
- fi
- if find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
-  einfo "files located in $rip_flac"
-  OUTPUT=$("$beets_path" "$beets_switch" "$beets_config_path"/"$config_yaml" import -q "$rip_flac")
-  edebug "beets OUTPUT result is as: $OUTPUT"
-  timestamp=$(date +%a%R)
-  if $(echo "$OUTPUT" | grep -q "Skipping") ; then
-    skipped_album=$(echo "$OUTPUT" | sed 1d | sed 2d | cut -d '(' -f1)
-    edebug "detected beets skipping album(s): $skipped_album"
-    unknown_artist="$rip_flac""Unknown Artist"
-    edebug "Unknown Artist albums will be placed: $unknown_artist"
-    edebug "Generic 'Unknown Artist' folder, assuming non tagging by beets, keeping folder appended with timestamp"
-    mv "$unknown_artist" "$unknown_artist""-$timestamp"
-  fi
-  rm "$beets_config_path"/musiclibrary.blb
-  should_sync="y"
- else
-  einfo "$rip_flac is empty, no conversion needed"
- fi
- einfo "$section processing finished"
 }
 
 rsync_error_catch () {
@@ -155,58 +114,6 @@ rsync_error_catch () {
     rsync_error_flag="y"
   fi
 }
-
-delete_function () {
-  sleep "$sleep_time"
-  find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec echo '{}' \;
-  sleep "$sleep_time"
-  find "$location" -mindepth 1 -maxdepth 1 -type d -not -wholename ""$location"Unknown\ Artist-*" -prune -exec rm -rf '{}' \;
-}
-
-Logic1 () {
-  if [ "$test_flac_down" = "y" ] || [ "$test_flac_rip" = "y" ] && [ -z "$rsync_error_flag" ]; then
-    find "$location2" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-    if [[ "$?" = "0" ]]; then
-      einfo "Test conditions met, I am deleting..."
-      location="$download_flac"
-      delete_function
-      location="$rip_flac"
-      delete_function
-      location="$location2"
-      if [ -z "$location2" ]; then
-       edebug "No second delete location set"
-      else
-       delete_function
-      fi
-    else
-      ewarn "Test codition not met, found files in $download_flac or $rip_flac but none in $location2, possible failed conversion"
-      clean_exit
-    fi
-  else
-    eerror "Expected files in $download_flac or $rip_flac and no rsync errors, one of these conditions failed"
-    clean_exit
-  fi
-}
-
-check_source () {
-  find "$download_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-  if [[ "$?" = "0" ]]; then
-    einfo "Located files in directory $download_flac"
-    test_flac_down="y"
-  else
-    einfo "no files located in directory $download_flac"
-    test_flac_down="n"
-  fi
-  find "$rip_flac" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-  if [[ "$?" = "0" ]]; then
-    einfo "Located files in directory $rip_flac"
-    test_flac_rip="y"
-  else
-    einfo "no files located in directory $rip_flac"
-    test_flac_rip="n"
-  fi
-}
-
 
 helpFunction () {
    echo ""
@@ -288,7 +195,7 @@ else
   clean_exit
 fi
 
-einfo "beginning checks..."
+edebug "beginning checks..."
 if [ -d /tmp/media_sync_in_progress_block ]; then
   ecrit "syncmediadownloads.sh is in progress, quitting..." #Quit because could take a while to complete
   clean_exit
@@ -307,7 +214,7 @@ then
   exit 67
   clean_exit
 else
-  einfo "FFMPEG command located, continuing"
+  edebug "FFMPEG command located, continuing"
 fi
 
 
@@ -315,7 +222,7 @@ fi
 # the aim here is to have a config_file variable populated in the parent folder, once i work that one out, might need to flip this logic
 config_file="/usr/local/bin/config.sh"
 #
-#Export path now to include ~/.local/bin temporarily, sa this will be picked up on next log-in
+#Export path now to include ~/.local/bin temporarily, as this will be picked up on next log-in
 export PATH=$PATH:/home/"$USER"/.local/bin
 edebug "PATH is set as: $PATH"
 #
@@ -343,7 +250,7 @@ if [[ ! -f "$beets_path" ]]; then
   clean_exit
   exit 67
 else
-  einfo "Beets install detected, using $beets_path"
+  edebug "Beets install detected, using $beets_path"
 fi
 
 
@@ -352,161 +259,221 @@ fi
 #+--------------------------------------------+
 JAIL_FATAL="${music_alac}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${download_flac}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${rip_flac}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${alaclibrary_source}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${flaclibrary_source}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${upload_mp3}"
 debug_missing_var
-#
+
 JAIL_FATAL="${FLAC_musicdest}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${M4A_musicdest}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_switch}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_flac_path}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_alac_path}"
 fatal_missing_var
-#
+
 JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
-#
-#
-#Check if source folders are empty, if they are bail gracefully, if not continue
-check_source
-if [ "$test_flac_down" = "n" ] && [ "$test_flac_rip" = "n" ]; then
-  enotify "no input files detected, exiting"
-  clean_exit
+
+#scan folders download_flac & rip_flac for files -> If they exist process them
+#Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
+#1: Import using the cusomised config, we use the 'move' option as if the import is successful it moves the flac files out of the original source directory
+#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Downloads/
+#2: Create a converted copy via
+#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+#delete the library and then do rip_flac same way
+#rm ~/.config/beets/flac/musiclibrary.blb
+#see if you can read the results and if folders don't successfulyl scan read into 'beets_import_failure' array
+#rename those folders
+#check for rsync success
+#check new folders from array exist in destination
+#then delete source
+#use same again to
+
+shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
+
+einfo "Artist folders that are unable to be tagged will be appended with '-<DATE>', the importer for beets will then igneore these items on subsequent scans"
+
+#+---------------------------------+
+#+---"$download_flac processing"---+
+#+---------------------------------+
+#read into array the source contents
+einfo "Processing DOWNLOADS"
+edebug "Grabbing contents of $download_flac into array"
+download_flac_array=("$download_flac"*)
+edebug "array contents are: ${download_flac_array[*]}"
+download_flac_array_count=${#download_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
+edebug "found: $download_flac_array_count folder(s)"
+
+# Check if any contents in the source, if there are process them. If that succeds delete the now empty source, if it fails wokr out why (skipping) and take seperate action
+if [[ "$download_flac_array_count" -gt 0 ]]; then
+  edebug "source: download_flac_array contains valid content, processing..."
+  #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
+  for (( i=0; i<$download_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
+    edebug "...artist folder: ${download_flac_array[$i]}"
+    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import -q "${download_flac_array[$i]}")
+    edebug "beets import result is as: $beets_import_result"
+    if $(echo "$beets_import_result" | grep -q "Skipping") ; then
+        edebug "detected beets skipping import of ${download_flac_array[i]}"
+        if [[ -d "${download_flac_array[i]}" ]]; then
+          edebug "adding ${download_flac_array[i]} to skipped_imports_array"
+          skipped_imports_array+=("${download_flac_array[i]}") #append download_flac_array element 'i' to skipped_import_array
+          edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
+        fi
+        rm ~/.config/beets/flac/musiclibrary.blb
+    else
+      edebug "beets successfully imported: ${download_flac_array[i]}", converting to ALAC...
+      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
+      rm ~/.config/beets/flac/musiclibrary.blb
+    fi
+    beets_import_result=
+  done
 else
-  edebug "test_flac_down set as: $test_flac_down, test_flac_rip set as: $test_flac_rip"
-  einfo "...checks complete, continuing"
+  einfo "No folders found in: $download_flac"
 fi
 
-#+---------------------------+
-#+---Start Conversion Work---+
-#+---------------------------+
-# ALAC - convert flacs to alac and copy to the ALAC library imports first by using -c flag to specify an alternative config to merge"
-config_yaml="alac_config.yaml"
-einfo "config.yaml set as $config_yaml"
-beets_config_path=$(echo "$beets_alac_path")
-einfo "beets_config_path set as $beets_config_path"
-section=${config_yaml::-12}
-einfo "section running is $section"
-if [[ "$music_alac" -eq 1 ]]
-then
-  beets_function
-  sleep 1s
-  edebug "should sync is set to: $should_sync"
-  if [[ "$should_sync" == "y" ]]
-  then
-    einfo "$section sync started"
-    rsync "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
-    rsync_error_catch
-    #musicserver_sync
-    # TODO(littlejeem): work on the logic here, currently convert, dump, trigger library update, could we trigger scan specific to the new files?
-    einfo "$section sync finished"
-  else
-    einfo "no $section conversions, so no sync"
-  fi
+
+#+----------------------------+
+#+---"$rip_flac processing"---+
+#+----------------------------+
+#read into array the source contents
+einfo "Processing RIPs"
+edebug "Grabbing contents of $rip_flac into array"
+rip_flac_array=("$rip_flac"*)
+edebug "array contents are: ${rip_flac_array[*]}"
+rip_flac_array_count=${#rip_flac_array[@]} #counts the number of elements in the array and assigns to the variable 'download_flac_array_count'
+edebug "found: $rip_flac_array_count folder(s)"
+
+# Check if any contents in the source, if there are process them. If that succeds delete the now empty source, if it fails wokr out why (skipping) and take seperate action
+if [[ "$rip_flac_array_count" -gt 0 ]]; then
+  edebug "source: rip_flac_array contains valid content, processing..."
+  #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
+  for (( i=0; i<$rip_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
+    edebug "...artist folder: ${rip_flac_array[$i]}"
+    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import -q "${rip_flac_array[$i]}")
+    edebug "beets import result is as: $beets_import_result"
+    if $(echo "$beets_import_result" | grep -q "Skipping") ; then
+        edebug "detected beets skipping import of ${rip_flac_array[i]}"
+        if [[ -d "${rip_flac_array[i]}" ]]; then
+          edebug "adding ${rip_flac_array[i]} to skipped_imports_array"
+          skipped_imports_array+=("${rip_flac_array[i]}") #append download_flac_array element 'i' to skipped_import_array
+          edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
+        fi
+        rm ~/.config/beets/flac/musiclibrary.blb
+    else
+      edebug "beets successfully imported: ${rip_flac_array[i]}", converting to ALAC...
+      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
+      rm ~/.config/beets/flac/musiclibrary.blb
+    fi
+    beets_import_result=
+  done
 else
-  einfo "$section conversion not selected" #<---I think this is the issue with the spurious logging name error
+  einfo "No folders found in: $rip_flac"
 fi
-#
-# UPLOAD - convert the flac files to mp3 and copy to the UPLOAD directory
-config_yaml="uploads_config.yaml"
-beets_config_path=$(echo "$beets_upload_path")
-section=${config_yaml::-12}
-if [[ "$music_google" -eq 1 ]]
-then
-  beets_function
-else
-  einfo "$section not selected"
-fi
-#
-# FLAC - correct the flac file tags now and move to the FLAC import library using -c flac to specify an alternative config to merge
-config_yaml="flac_config.yaml"
-einfo "config.yaml set as $config_yaml"
-beets_config_path=$(echo "$beets_flac_path")
-einfo "beets_config_path set as $beets_config_path"
-section=${config_yaml::-12}
-einfo "section running is $section"
-if [[ "$music_flac" -eq 1 ]]
-then
-  beets_function
-  sleep 1s
-  if [[ "$should_sync" == "y" ]]
-  then
-    einfo "$section sync started"
-    rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
-    rsync_error_catch
-    einfo "$section sync finished"
-  else
-    einfo "no $section conversions, so no sync"
-  fi
-else
-  einfo "$section conversion not selected"
-fi
-#
+
+
 #+-------------------------------+
-#+---Begin deletion constructs---+
+#+---"Process skipped_imports"---+
 #+-------------------------------+
-#
-# Check if source folders contain files
-#
-# 1: Check if only ALAC conversion is selected
-if [ "$music_alac" = "1" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "0" ]; then
-  check_source
-  location2="$alaclibrary_source"
-  sleep_time="2s"
-  Logic1
+einfo "Processing skipped imports"
+edebug "array contents are: ${skipped_imports_array[*]}"
+skipped_imports_array_count=${#skipped_imports_array[@]}
+edebug "found: $skipped_imports_array_count skipped folder(s)"
+edebug "array contents are: ${skipped_imports_array[*]}"
+if [[ "$skipped_imports_array_count" -gt 0 ]]; then
+  for (( i=0; i<$skipped_imports_array_count; i++)); do
+    edebug "processing artist folder: ${skipped_imports_array[$i]}"
+    if [[ -d "${skipped_imports_array[$i]}" ]]; then
+      timestamp=$(date +%a%R)
+      skip_dest_file_name="${skipped_imports_array[$i]}"-"${timestamp}"
+      skip_dest_file_name=$(echo $skip_dest_file_name | cut -d '/' -f6)
+      edebug "moving "${skipped_imports_array[$i]}" to "$skipped_imports_location"/"$skip_dest_file_name""
+      mv "${skipped_imports_array[$i]}" "$skipped_imports_location"/"$skip_dest_file_name"
+      skip_dest_file_name=
+    else
+      edebug "failed to append and move "$skipped_imports_location""${skipped_imports_array[$i]}""
+    fi
+  done
+else
+  einfo "No skipped imports to process, exiting"
 fi
-#
-# 2: Check if only FLAC conversion is selected
-if [ "$music_alac" = "0" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0" ]; then
-  check_source
-  location2="$flaclibrary_source"
-  sleep_time="2s"
-  Logic1
+
+
+#+--------------------------+
+#+---Sync Processed Files---+
+#+--------------------------+
+einfo "sync of FLAC files started"
+rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
+rsync_error_catch
+
+einfo "sync of ALAC files started"
+rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
+rsync_error_catch
+
+
+#+-------------+
+#+---Tidy Up---+
+#+-------------+
+#Tidy up $download_flac
+if [[ -d "$download_flac" ]]; then
+  cd "$download_flac"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $download_flac"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $download_flac to delete"
 fi
-#
-# 3: Check if only MP3 Upload is selected
-if [ "$music_alac" = "0" ] && [ "$music_flac" = "0" ] && [ "$music_google" = "1" ]; then
-  check_source
-  location2="$upload_mp3"
-  sleep_time="2s"
-  Logic1
+
+#Tidy up $rip_flac
+if [[ -d "$rip_flac" ]]; then
+  cd "$rip_flac"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $rip_flac"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $rip_flac"
 fi
-#
-#
-# 4: Check if both ALAC & FLAC are selected
-if [ "$music_alac" = "1" ] && [ "$music_flac" = "1" ] && [ "$music_google" = "0" ]; then
-  check_source
-  location2="$alaclibrary_source"
-  sleep_time="2s"
-  Logic1
-  location3="$flaclibrary_source"
-  find "$location3" -mindepth 1 -print -quit 2>/dev/null | grep -q . #<---Command above returns 0 for contents found, or 1 if nothing found
-  if [[ "$?" = "0" ]]; then
-    location="$location3"
-    delete_function
-  fi
+
+#Tidy up $flaclibrary_source
+if [[ -d "$flaclibrary_source" ]]; then
+  cd "$flaclibrary_source"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $flaclibrary_source"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $flaclibrary_source to delete"
 fi
-#
-#
-# all done
+
+#Tidy up $alaclibrary_source
+if [[ -d "$alaclibrary_source" ]]; then
+  cd "$alaclibrary_source"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $alaclibrary_source"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $alaclibrary_source"
+fi
+
+
+#+------------+
+#+---"Exit"---+
+#+------------+
 clean_exit
