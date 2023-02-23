@@ -17,7 +17,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="3.4"
+version="4.1"
 
 
 #+---------------------+
@@ -120,6 +120,7 @@ helpFunction () {
    echo "Usage: $0 MusicSync.sh"
    echo "Usage: $0 MusicSync.sh -G"
    echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
+   echo -e "\t-P Turns on pushover integration for skipped beets imports"
    echo -e "\t-s Override set verbosity to specify silent log level"
    echo -e "\t-V Override set verbosity to specify Verbose log level"
    echo -e "\t-G Override set verbosity to specify Debug log level"
@@ -138,9 +139,11 @@ helpFunction () {
 #+---"Get User Options"---+
 #+------------------------+
 OPTIND=1
-while getopts ":sVGh:" opt
+while getopts ":PsVGh:" opt
 do
     case "${opt}" in
+        P) pushover_integration=${OPTARG}
+        edebug "-P Pushover integration set";;
         s) verbosity=$silent_lvl
         edebug "-s specified: Silent mode";;
         V) verbosity=$inf_lvl
@@ -407,6 +410,13 @@ if [[ "$skipped_imports_array_count" -gt 0 ]]; then
       skip_dest_file_name=$(echo $skip_dest_file_name | cut -d '/' -f6)
       edebug "moving "${skipped_imports_array[$i]}" to "$skipped_imports_location"/"$skip_dest_file_name""
       mv "${skipped_imports_array[$i]}" "$skipped_imports_location"/"$skip_dest_file_name"
+      #call pushover
+      edebug "Calling pushover"
+      application_token="aejkqvp5vhc7wmqx6xjkr33ho2kanr"
+      pushover_title="MusicSync: Skipped Artist"
+      message_form="beets skipping tagging detected for: $skip_dest_file_name please check ${skipped_imports_location##*/}"
+      pushover
+      #set variable to null
       skip_dest_file_name=
     else
       edebug "failed to append and move "$skipped_imports_location""${skipped_imports_array[$i]}""
