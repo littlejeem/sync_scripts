@@ -443,44 +443,48 @@ rsync_error_catch
 #+---Tidy Up---+
 #+-------------+
 #Tidy up $download_flac
-if [[ -d "$download_flac" ]]; then
+check_empty=$(find $download_flac -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$download_flac"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $download_flac"
   find . -type d -empty -delete
 else
   edebug "no empty source folders in $download_flac to delete"
 fi
+check_empty=
 
 #Tidy up $rip_flac
-if [[ -d "$rip_flac" ]]; then
+check_empty=$(find $rip_flac -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$rip_flac"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $rip_flac"
   find . -type d -empty -delete
 else
-  edebug "no empty source folders in $rip_flac"
+  edebug "no empty source folders in $rip_flac to delete"
 fi
+check_empty=
 
 #Tidy up $flaclibrary_source
-if [[ -d "$flaclibrary_source" ]]; then
+check_empty=$(find $flaclibrary_source -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$flaclibrary_source"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $flaclibrary_source"
   find . -type d -empty -delete
 else
   edebug "no empty source folders in $flaclibrary_source to delete"
 fi
+check_empty=
 
 #Tidy up $alaclibrary_source
-if [[ -d "$alaclibrary_source" ]]; then
+check_empty=$(find $alaclibrary_source -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$alaclibrary_source"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $alaclibrary_source"
   find . -type d -empty -delete
 else
-  edebug "no empty source folders in $alaclibrary_source"
+  edebug "no empty source folders in $alaclibrary_source to delete"
 fi
+check_empty=
 
 
 #+------------+
