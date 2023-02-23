@@ -346,7 +346,6 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
       /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
-    find "$download_flac" -empty -type d -delete
     beets_import_result=
   done
 else
@@ -388,7 +387,6 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
       /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
       rm ~/.config/beets/flac/musiclibrary.blb
     fi
-    find "$rip_flac" -empty -type d -delete
     beets_import_result=
   done
 else
@@ -409,13 +407,41 @@ if [[ "$skipped_imports_array_count" -gt 0 ]]; then
     edebug "processing artist folder: ${skipped_imports_array[$i]}"
     if [[ -d "${skipped_imports_array[$i]}" ]]; then
       timestamp=$(date +%a%R)
-      mv "${skipped_imports_array[$i]}" "${skipped_imports_array[$i]}"-"${timestamp}"
+      skip_dest_file_name="${skipped_imports_array[$i]}"-"${timestamp}"
+      skip_dest_file_name=$(echo $skip_dest_file_name | cut -d '/' -f6)
+      edebug "moving "${skipped_imports_array[$i]}" to "$skipped_imports_location"/"$skip_dest_file_name""
+      mv "${skipped_imports_array[$i]}" "$skipped_imports_location"/"$skip_dest_file_name"
+      skip_dest_file_name=
     else
-      edebug "failed to append and move "${skipped_imports_array[$i]}""
+      edebug "failed to append and move "$skipped_imports_location""${skipped_imports_array[$i]}""
     fi
   done
 else
   einfo "No skipped imports to process, exiting"
+fi
+
+
+#+-------------+
+#+---Tidy Up---+
+#+-------------+
+#Tidy up $download_flac
+if [[ -d "$download_flac" ]]; then
+  cd "$download_flac"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $download_flac"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $download_flac to delete"
+fi
+
+#Tidy up $rip_flac
+if [[ -d "$rip_flac" ]]; then
+  cd "$rip_flac"
+  find . -type d -empty -print
+  edebug "deleting empty source folders in $rip_flac"
+  find . -type d -empty -delete
+else
+  edebug "no empty source folders in $rip_flac"
 fi
 
 
