@@ -102,8 +102,9 @@ FLAC_musicdest="" #where the FLAC files are stored
 M4A_musicdest="" #where the M4A files are stored
 FLAC_musicdest_va="" #where the FLAC files for Various Artitst are stored
 M4A_musicdest_va="" #where the M4A files for Various Artists are stored
+skipped_imports_location="" #a dump folder where MusicSync will more untaggable artists, NO trailing '/'
 # Beets
-beets_path="/home/$USER/.local/bin/beet" #default destination, change as appropriate
+beets_path="" #path the beets executablechange as appropriate
 beets_switch=""
 beets_flac_path="" #path to beets config & library file directory (FLAC)
 beets_alac_path="" #path to beets config & library file directory (alac)

@@ -1,0 +1,56 @@
+directory: ~/Music/Library/flacimports
+library: ~/.config/beets/flac/musiclibrary.blb
+
+import:
+    copy: no
+    move: yes
+    write: yes
+    resume: ask
+    quiet_fallback: skip
+    timid: no
+    log: beetslog.txt
+
+ignore: [".AppleDouble", "._*", "*~", ".DS_Store", "Unknown Artist-*"]
+
+art_filename: folder
+
+plugins: embedart chroma fetchart convert permissions
+
+pluginpath: ~/.config/beets/myplugins
+
+threaded: yes
+
+color: yes
+
+match:
+    strong_rec_thresh: 0.55
+
+paths:
+    default: $albumartist/$album/$track - $title - $artist
+    singleton: Singletons/$track - $title - $artist
+    comp: Various/$album/$track - $title - $artist
+    albumtype:soundtrack: Soundtracks/$album/$track - $title - $artist
+
+permissions:
+    file: 664
+    dir: 775
+
+convert:
+    never_convert_lossy_files: yes
+    copy_album_art: no
+    source: ~/Music/Library/flacimports/
+    dest: ~/Music/Library/alacimports/
+    auto_keep: yes
+    pretend: no
+    embed: yes
+    threads: 8
+    album_art_maxwidth: 0
+    quiet: yes
+
+    format: alac
+    formats:
+        alac:
+            command: ffmpeg -i $source -y -vn -acodec alac $dest
+            extension: m4a
+    max_bitrate: 500
+    tmpdir:
