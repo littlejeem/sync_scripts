@@ -413,8 +413,8 @@ if [[ "$skipped_imports_array_count" -gt 0 ]]; then
       #call pushover
       edebug "Calling pushover"
       application_token="aejkqvp5vhc7wmqx6xjkr33ho2kanr"
-      pushover_title="Music Sync - Skipped Artist"
-      message_form="Music Sync has detected beets skipping artist ${skipped_imports_array[$i]}, please check $skipped_imports_location"
+      pushover_title="MusicSync: Skipped Artist"
+      message_form="beets skipping tagging detected for: $skip_dest_file_name please check ${skipped_imports_location##*/}"
       pushover
       #set variable to null
       skip_dest_file_name=
