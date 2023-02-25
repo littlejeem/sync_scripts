@@ -370,14 +370,14 @@ if [[ ! -z $manual_mode ]]; then
   enotify "initial array contents are: ${manual_imports_array[*]}"
   #at this point we will have read the file location of any existing 'picard' file as well as directories, need to remove these from the array
   remove_picard="picard"
-  for ele in "${remove_picard}"; do
+  for eliminate in ${remove_picard}; do
     enotify "removing 'picard' references from array"
-    manual_imports_array=(${manual_imports_array[@]/*${ele}*/})
+    manual_imports_array=(${manual_imports_array[@]/*${eliminate}*/})
   done
   manual_imports_array_count=${#manual_imports_array[@]}
+  enotify "array contents are: ${manual_imports_array[*]}"
   if [[ "$manual_imports_array_count" -gt 0 ]]; then
     enotify "Found: $manual_imports_array_count folder(s)"
-    enotify "array contents are: ${manual_imports_array[*]}"
     for (( i=0; i<$manual_imports_array_count; i++)); do
       enotify "Searching for musicbrainz ID from file..."
       if [[ -f ${manual_imports_array[$i]}/picard ]]; then
