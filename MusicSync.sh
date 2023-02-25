@@ -369,36 +369,79 @@ if [[ ! -z $manual_mode ]]; then
   manual_imports_array=("$skipped_imports_location"/*/*)
   enotify "initial array contents are: ${manual_imports_array[*]}"
   #at this point we will have read the file location of any existing 'picard' file as well as directories, need to remove these from the array
-  remove_picard="picard"
-  for eliminate in ${remove_picard}; do
-    enotify "removing 'picard' references from array"
-    manual_imports_array=("${manual_imports_array[@]/*${eliminate}*/}")
-    enotify "ammended array contents are: ${manual_imports_array[*]}"
-  done
+
   manual_imports_array_count=${#manual_imports_array[@]}
   if [[ "$manual_imports_array_count" -gt 0 ]]; then
-    enotify "Found: $manual_imports_array_count folder(s)"
+    enotify "Initially found: $manual_imports_array_count folder(s)"
     for (( i=0; i<$manual_imports_array_count; i++)); do
-      enotify "array element [$i]: ${manual_imports_array[$i]}"
+      enotify "scanning array element [$i]: ${manual_imports_array[$i]} for picard, if so removing from array"
+
+      #Do work to strip array elements with paths including 'picard' in them from the array we want to use
+      if [[ ${manual_imports_array[$i]} = *picard* ]]; then
+        enotify "Found 'picard' at element: [$i]"
+        enotify "I'D REMOVE IT HERE"
+        #picard_delete="picard"
+        #manual_imports_array=( "${manual_imports_array[@]/$picard_delete}" )
+      fi
+    done
+
+    #Now we've sanitised the array, recount and process for real
+    manual_imports_array_count=${#manual_imports_array[@]}
+    enotify "Revised array count, found: $manual_imports_array_count folder(s)"
+    enotify "Folders to be processed are: ${manual_imports_array[$i]}"
+    for (( i=0; i<$manual_imports_array_count; i++)); do
+      #Look picard in these folders by manipulating the variable to strip the 'album' path & combine with the parent path
       enotify "Searching for musicbrainz ID from file from: ${manual_imports_array[$i]}/picard"
-      if [[ -f ${manual_imports_array[$i]}/picard ]]; then
-        enotify "found picard file, importing ID from ${manual_imports_array[$i]}/picard"
-        picard_id=$(<"${manual_imports_array[$i]}"/picard)
+      artist_path="${manual_imports_array[$i]}"
+      enotify "Current album path is: $artist_path"
+      artist_path=${artist_path%.*}
+      enotify "isolated album_path is: $artist_path"
+      if [[ -f $artist_path/picard ]]; then
+        enotify "found picard file, importing ID from $artist_path/picard"
+        picard_id=$(<"$artist_path"/picard)
         enotify "running scan now"
         #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" "${manual_imports_array[$i]}"
         #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
       else
         eerror "no picard file found for manual import...exiting"
-      clean_exit
+        rm ~/.config/beets/flac/musiclibrary.blb
+        clean_exit
       fi
     done
   else
     enotify "No folder(s) found to import, exiting"
+    rm ~/.config/beets/flac/musiclibrary.blb
     clean_exit
   fi
 else
   edebug "Automatic mode detected"
 fi
+
+
+
+
+  
+#      enotify "Searching for musicbrainz ID from file from: ${manual_imports_array[$i]}/picard"
+#      if [[ -f ${manual_imports_array[$i]}/picard ]]; then
+#        enotify "found picard file, importing ID from ${manual_imports_array[$i]}/picard"
+#        picard_id=$(<"${manual_imports_array[$i]}"/picard)
+#        enotify "running scan now"
+#        #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" "${manual_imports_array[$i]}"
+#        #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
+#      else
+#        eerror "no picard file found for manual import...exiting"
+#        rm ~/.config/beets/flac/musiclibrary.blb
+#        clean_exit
+#      fi
+#    done
+#  else
+#    enotify "No folder(s) found to import, exiting"
+#    rm ~/.config/beets/flac/musiclibrary.blb
+#    clean_exit
+#  fi
+#else
+#  edebug "Automatic mode detected"
+#fi
 
 
 
