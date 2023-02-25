@@ -362,20 +362,29 @@ debug_missing_var
           #check_empty=
           #clean_exit
           #fi
+shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
+
 if [[ ! -z $manual_mode ]]; then
   enotify "Manual mode detected, scanning $skipped_imports_location"
-  manual_imports_array=($skipped_imports_location/*/*)
+  manual_imports_array=("$skipped_imports_location"/*/*)
+  enotify "initial array contents are: ${manual_imports_array[*]}"
+  #at this point we will have read the file location of any existing 'picard' file as well as directories, need to remove these from the array
+  remove_picard="picard"
+  for ele in "${remove_picard}"; do
+    enotify "removing 'picard' references from array"
+    manual_imports_array=(${manual_imports_array[@]/*${ele}*/})
+  done
   manual_imports_array_count=${#manual_imports_array[@]}
   if [[ "$manual_imports_array_count" -gt 0 ]]; then
     enotify "Found: $manual_imports_array_count folder(s)"
-    edebug "contents are: ${manual_imports_array[*]}"
+    enotify "array contents are: ${manual_imports_array[*]}"
     for (( i=0; i<$manual_imports_array_count; i++)); do
-      edebug "Searching for musicbrainz ID from file..."
-      if [[ -f ${download_flac_array[$i]}/picard ]]; then
-        enotify "found picard file, importing ID from ${download_flac_array[$i]}/picard"
-        picard_id=$(<"${download_flac_array[$i]}"/picard)
+      enotify "Searching for musicbrainz ID from file..."
+      if [[ -f ${manual_imports_array[$i]}/picard ]]; then
+        enotify "found picard file, importing ID from ${manual_imports_array[$i]}/picard"
+        picard_id=$(<"${manual_imports_array[$i]}"/picard)
         enotify "running scan now"
-        #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" "${download_flac_array[$i]}"
+        #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" "${manual_imports_array[$i]}"
         #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
       else
         eerror "no picard file found for manual import...exiting"
@@ -397,9 +406,6 @@ fi
 
 
 
-
-
-shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
 
 einfo "Artist folders that are unable to be tagged will be appended with '-<DATE>', the importer for beets will then igneore these items on subsequent scans"
 
