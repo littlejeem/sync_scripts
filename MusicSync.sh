@@ -299,66 +299,96 @@ fatal_missing_var
 JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
 
-#scan folders download_flac & rip_flac for files -> If they exist process them
-#Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
-#1: Import using the cusomised config, we use the 'move' option as if the import is successful it moves the flac files out of the original source directory
-#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Downloads/
-#2: Create a converted copy via
-#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
-#delete the library and then do rip_flac same way
-#rm ~/.config/beets/flac/musiclibrary.blb
-#see if you can read the results and if folders don't successfulyl scan read into 'beets_import_failure' array
-#rename those folders
-#check for rsync success
-#check new folders from array exist in destination
-#then delete source
-#use same again to
+          #scan folders download_flac & rip_flac for files -> If they exist process them
+          #Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
+          #1: Import using the cusomised config, we use the 'move' option as if the import is successful it moves the flac files out of the original source directory
+          #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Downloads/
+          #2: Create a converted copy via
+          #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
+          #delete the library and then do rip_flac same way
+          #rm ~/.config/beets/flac/musiclibrary.blb
+          #see if you can read the results and if folders don't successfulyl scan read into 'beets_import_failure' array
+          #rename those folders
+          #check for rsync success
+          #check new folders from array exist in destination
+          #then delete source
+          #use same again to
 
-#+------------------------------+
-#+---Checking for manual mode---+
-#+------------------------------+
+          #+------------------------------+
+          #+---Checking for manual mode---+
+          #+------------------------------+
+          #if [[ ! -z $manual_mode ]]; then
+          #  edebug "Running in manual mode, assuming album import from immediate local directory"
+          #  edebug "Searching for musicbrainz ID from file"
+          #  if [[ -f picard ]]; then
+          #    edebug "found picard file, importing ID"
+          #    picard_id=$(<picard)
+          #    edebug "found ID value: $picard_id"
+          #  else
+          #    eerror "no picard file found for manual import...exiting"
+          #    clean_exit
+          #  fi
+          #  /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" .
+          #  edebug "Checking to see if successful"
+          #  check_empty=$(find . -maxdepth 0 -type d -empty)
+          #  if [[ -z $check_empty ]]; then
+          #    edebug "Tagging operation successful"
+
+          #SOMETHING HERE TO CONVERT ALSO?
+            #edebug "beets successfully imported: ${rip_flac_array[i]}", converting to ALAC...
+            #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
+            #rm ~/.config/beets/flac/musiclibrary.blb
+          #########
+
+          #    cd "$skipped_imports_location"
+          #    edebug "checking for empty directories"
+
+              #Check if current directory is now empty, if so, go to skipped_imports_location and delete empty folders
+          #    check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
+          #    if [[ -z $check_empty ]]; then
+          #      cd "$skipped_imports_location"
+          #      edebug "deleting empty source folders in $skipped_imports_location"
+          #      find . -type d -empty -delete
+          #    else
+          #      edebug "no empty source folders in $skipped_imports_location to delete"
+          #    fi
+          #  else
+          #    edebug "files remaining, did tagging fail?"
+          #    rm ~/.config/beets/flac/musiclibrary.blb
+          #    check_empty=
+          #    clean_exit
+          #  fi
+          #rm ~/.config/beets/flac/musiclibrary.blb
+          #check_empty=
+          #clean_exit
+          #fi
 if [[ ! -z $manual_mode ]]; then
-  edebug "Running in manual mode, assuming album import from immediate local directory"
-  edebug "Searching for musicbrainz ID from file"
-  if [[ -f picard ]]; then
-    edebug "found picard file, importing ID"
-    picard_id=$(<picard)
-    edebug "found ID value: $picard_id"
+  enotify "Manual mode detected, scanning $skipped_imports_location"
+  manual_imports_array=($skipped_imports_location/*/*)
+  manual_imports_array_count=${#manual_imports_array[@]}
+  if [[ "$manual_imports_array_count" -gt 0 ]]; then
+    enotify "Found: $manual_imports_array_count folder(s)"
+    edebug "contents are: ${manual_imports_array[*]}"
+    for (( i=0; i<$manual_imports_array_count; i++)); do
+      edebug "Searching for musicbrainz ID from file..."
+      if [[ -f ${download_flac_array[$i]}/picard ]]; then
+        enotify "found picard file, importing ID from ${download_flac_array[$i]}/picard"
+        picard_id=$(<"${download_flac_array[$i]}"/picard)
+        enotify "running scan now"
+        #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" "${download_flac_array[$i]}"
+        #/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
+      else
+        eerror "no picard file found for manual import...exiting"
+      clean_exit
+      fi
+    done
   else
-    eerror "no picard file found for manual import...exiting"
+    enotify "No folder(s) found to import, exiting"
     clean_exit
   fi
-  /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" .
-  edebug "Checking to see if successful"
-  check_empty=$(find . -maxdepth 0 -type d -empty)
-  if [[ -z $check_empty ]]; then
-    edebug "Tagging operation successful"
-    cd "$skipped_imports_location"
-    edebug "checking for empty directories"
-
-    #Check if current directory is now empty, if so, go to skipped_imports_location and delete empty folders
-    check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
-    if [[ -z $check_empty ]]; then
-      cd "$skipped_imports_location"
-      edebug "deleting empty source folders in $skipped_imports_location"
-      find . -type d -empty -delete
-    else
-      edebug "no empty source folders in $skipped_imports_location to delete"
-    fi
-  else
-    edebug "files remaining, did tagging fail?"
-    rm ~/.config/beets/flac/musiclibrary.blb
-    check_empty=
-    clean_exit
-  fi
-rm ~/.config/beets/flac/musiclibrary.blb
-check_empty=
-clean_exit
+else
+  edebug "Automatic mode detected"
 fi
-
-
-
-
 
 
 
