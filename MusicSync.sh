@@ -373,6 +373,7 @@ if [[ ! -z $manual_mode ]]; then
   for eliminate in ${remove_picard}; do
     enotify "removing 'picard' references from array"
     manual_imports_array=(${manual_imports_array[@]/*${eliminate}*/})
+    enotify "ammended array contents are: ${manual_imports_array[*]}"
   done
   manual_imports_array_count=${#manual_imports_array[@]}
   enotify "array contents are: ${manual_imports_array[*]}"
