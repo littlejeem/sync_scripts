@@ -140,7 +140,7 @@ helpFunction () {
 #+---"Get User Options"---+
 #+------------------------+
 OPTIND=1
-while getopts ":PsVGh:" opt
+while getopts ":PMsVGh:" opt
 do
     case "${opt}" in
         P) pushover_integration=1
