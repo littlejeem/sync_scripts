@@ -121,6 +121,7 @@ helpFunction () {
    echo "Usage: $0 MusicSync.sh -G"
    echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
    echo -e "\t-P Turns on pushover integration for skipped beets imports"
+   echo -e "\t-M Activates scripts manual mode, use for processing 'skipped' items from previous script runs. Runs from the current directory. In the artist folder create a file called picard and add the "ALBUM" music-brainz ID"
    echo -e "\t-s Override set verbosity to specify silent log level"
    echo -e "\t-V Override set verbosity to specify Verbose log level"
    echo -e "\t-G Override set verbosity to specify Debug log level"
@@ -142,8 +143,10 @@ OPTIND=1
 while getopts ":PsVGh:" opt
 do
     case "${opt}" in
-        P) pushover_integration=${OPTARG}
+        P) pushover_integration=1
         edebug "-P Pushover integration set";;
+        M) manual_mode=1
+        edebug "-M Manual mode selected";;
         s) verbosity=$silent_lvl
         edebug "-s specified: Silent mode";;
         V) verbosity=$inf_lvl
@@ -310,6 +313,58 @@ debug_missing_var
 #check new folders from array exist in destination
 #then delete source
 #use same again to
+
+#+------------------------------+
+#+---Checking for manual mode---+
+#+------------------------------+
+if [[ ! -z $manual_mode ]]; then
+  edebug "Running in manual mode, assuming album import from immediate local directory"
+  edebug "Searching for musicbrainz ID from file"
+  if [[ -f picard ]]; then
+    edebug "found picard file, importing ID"
+    picard_id=$(<picard)
+    edebug "found ID value: $picard_id"
+  else
+    eerror "no picard file found for manual import...exiting"
+    clean_exit
+  fi
+  /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --search-id "$picard_id" .
+  edebug "Checking to see if successful"
+  check_empty=$(find . -maxdepth 0 -type d -empty)
+  if [[ -z $check_empty ]]; then
+    edebug "Tagging operation successful"
+    cd "$skipped_imports_location"
+    edebug "checking for empty directories"
+
+    check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
+    if [[ -z $check_empty ]]; then
+      cd "$skipped_imports_location"
+      edebug "deleting empty source folders in $skipped_imports_location"
+      find . -type d -empty -delete
+    else
+      edebug "no empty source folders in $skipped_imports_location to delete"
+    fi
+  else
+    edebug "files remaining, did tagging fail?"
+    check_empty=
+    clean_exit
+  fi
+check_empty=
+clean_exit
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
 
