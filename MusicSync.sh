@@ -380,7 +380,7 @@ if [[ ! -z $manual_mode ]]; then
     enotify "Found: $manual_imports_array_count folder(s)"
     for (( i=0; i<$manual_imports_array_count; i++)); do
       enotify "array element [$i]: ${manual_imports_array[$i]}"
-      enotify "Searching for musicbrainz ID from file..."
+      enotify "Searching for musicbrainz ID from file from: ${manual_imports_array[$i]}/picard"
       if [[ -f ${manual_imports_array[$i]}/picard ]]; then
         enotify "found picard file, importing ID from ${manual_imports_array[$i]}/picard"
         picard_id=$(<"${manual_imports_array[$i]}"/picard)
