@@ -376,10 +376,10 @@ if [[ ! -z $manual_mode ]]; then
     enotify "ammended array contents are: ${manual_imports_array[*]}"
   done
   manual_imports_array_count=${#manual_imports_array[@]}
-  enotify "array contents are: ${manual_imports_array[*]}"
   if [[ "$manual_imports_array_count" -gt 0 ]]; then
     enotify "Found: $manual_imports_array_count folder(s)"
     for (( i=0; i<$manual_imports_array_count; i++)); do
+      enotify "array element [$i]: ${manual_imports_array[$i]}"
       enotify "Searching for musicbrainz ID from file..."
       if [[ -f ${manual_imports_array[$i]}/picard ]]; then
         enotify "found picard file, importing ID from ${manual_imports_array[$i]}/picard"
