@@ -336,6 +336,7 @@ if [[ ! -z $manual_mode ]]; then
     cd "$skipped_imports_location"
     edebug "checking for empty directories"
 
+    #Check if current directory is now empty, if so, go to skipped_imports_location and delete empty folders
     check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
     if [[ -z $check_empty ]]; then
       cd "$skipped_imports_location"
@@ -346,9 +347,11 @@ if [[ ! -z $manual_mode ]]; then
     fi
   else
     edebug "files remaining, did tagging fail?"
+    rm ~/.config/beets/flac/musiclibrary.blb
     check_empty=
     clean_exit
   fi
+rm ~/.config/beets/flac/musiclibrary.blb
 check_empty=
 clean_exit
 fi
