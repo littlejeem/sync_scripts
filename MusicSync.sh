@@ -320,8 +320,6 @@ if [[ ! -z $manual_mode ]]; then
       if [[ ${manual_imports_array[$i]} = *picard* ]]; then
         enotify "Found 'picard' at element: [$i]"
         enotify "Moving to new array and removing form this one"
-        #picard_delete="picard"
-        #manual_imports_array=( "${manual_imports_array[@]/$picard_delete}" )
         manual_imports_picard_found_array+=("${manual_imports_array[i]}")
         unset manual_imports_array[i]
       fi
@@ -339,34 +337,46 @@ if [[ ! -z $manual_mode ]]; then
       enotify "Current artist path is: $artist_path"
       artist_path=${artist_path%/*}
       enotify "isolated artist_path is: $artist_path"
-      if [[ -f $artist_path/picard ]]; then
+      if [[ -f "$artist_path/picard" ]]; then
         enotify "found picard file, importing ID from $artist_path/picard"
         picard_id=$(<"$artist_path/picard")
         enotify "running scan now, using ID: $picard_id"
         /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import --flat --search-id "$picard_id" "${manual_imports_array[$i]}"
         /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
+        rm "$artist_path/picard"
       else
         eerror "no picard file found for manual import...exiting"
-        rm ~/.config/beets/flac/musiclibrary.blb
+        if [[ -f ~/.config/beets/flac/musiclibrary.blb ]]; then
+          rm ~/.config/beets/flac/musiclibrary.blb
+        fi
         clean_exit
       fi
     done
   else
     enotify "No folder(s) found to import, exiting"
-    rm ~/.config/beets/flac/musiclibrary.blb
+    if [[ -f ~/.config/beets/flac/musiclibrary.blb ]]; then
+      rm ~/.config/beets/flac/musiclibrary.blb
+    fi
     clean_exit
   fi
 
-###########
-### NEED TIDY UP CONSTRUCTION HERE
-###########
-
-rm ~/.config/beets/flac/musiclibrary.blb
-clean_exit
+  #Now lets tidy things up
+  check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
+  if [[ -z $check_empty ]]; then
+    cd "$skipped_imports_location"
+    edebug "deleting empty source folders in $skipped_imports_location"
+    find . -type d -empty -delete
+  else
+    edebug "no empty source folders in $skipped_imports_location to delete"
+  fi
+  check_empty=
+  if [[ -f ~/.config/beets/flac/musiclibrary.blb ]]; then
+    rm ~/.config/beets/flac/musiclibrary.blb
+  fi
+  clean_exit
 else
   edebug "Automatic mode detected"
 fi
-
 
 einfo "Artist folders that are unable to be tagged will be appended with '-<DATE>', the importer for beets will then igneore these items on subsequent scans"
 
