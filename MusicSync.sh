@@ -379,23 +379,24 @@ if [[ ! -z $manual_mode ]]; then
       #Do work to strip array elements with paths including 'picard' in them from the array we want to use
       if [[ ${manual_imports_array[$i]} = *picard* ]]; then
         enotify "Found 'picard' at element: [$i]"
-        enotify "I'D REMOVE IT HERE"
-        #picard_delete="picard"
-        #manual_imports_array=( "${manual_imports_array[@]/$picard_delete}" )
+        enotify "removing element [$i] from array"
+        picard_delete="picard"
+        manual_imports_array=( "${manual_imports_array[@]/$picard_delete}" )
       fi
     done
 
     #Now we've sanitised the array, recount and process for real
+    manual_imports_array_count=unset
     manual_imports_array_count=${#manual_imports_array[@]}
     enotify "Revised array count, found: $manual_imports_array_count folder(s)"
-    enotify "Folders to be processed are: ${manual_imports_array[$i]}"
+    enotify "Folders to be processed are: ${manual_imports_array[*]}"
     for (( i=0; i<$manual_imports_array_count; i++)); do
       #Look picard in these folders by manipulating the variable to strip the 'album' path & combine with the parent path
-      enotify "Searching for musicbrainz ID from file from: ${manual_imports_array[$i]}/picard"
       artist_path="${manual_imports_array[$i]}"
       enotify "Current album path is: $artist_path"
-      artist_path=${artist_path%.*}
+      artist_path=${artist_path%/*}
       enotify "isolated album_path is: $artist_path"
+      enotify "Searching for musicbrainz ID from file from: $artist_path/picard"
       if [[ -f $artist_path/picard ]]; then
         enotify "found picard file, importing ID from $artist_path/picard"
         picard_id=$(<"$artist_path"/picard)
@@ -416,11 +417,10 @@ if [[ ! -z $manual_mode ]]; then
 else
   edebug "Automatic mode detected"
 fi
+rm ~/.config/beets/flac/musiclibrary.blb
+clean_exit
 
 
-
-
-  
 #      enotify "Searching for musicbrainz ID from file from: ${manual_imports_array[$i]}/picard"
 #      if [[ -f ${manual_imports_array[$i]}/picard ]]; then
 #        enotify "found picard file, importing ID from ${manual_imports_array[$i]}/picard"
