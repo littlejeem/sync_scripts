@@ -320,7 +320,6 @@ if [[ ! -z $manual_mode ]]; then
     enotify "Initially found: $manual_imports_array_count folder(s)"
     for (( i=0; i<$manual_imports_array_count; i++)); do
       enotify "scanning array element [$i]: ${manual_imports_array[$i]} for picard, if so removing from array"
-
       #Do work to strip array elements with paths including 'picard' in them from the array we want to use
       if [[ ${manual_imports_array[$i]} = *picard* ]]; then
         enotify "Found 'picard' at element: [$i]"
@@ -329,34 +328,55 @@ if [[ ! -z $manual_mode ]]; then
         unset manual_imports_array[i]
       fi
     done
-
     #Now we've sanitised with a new array, zero, recount and process for real
     unset manual_imports_array_count
     manual_imports_array_count=${#manual_imports_picard_found_array[@]}
-    enotify "Revised array count, found: $manual_imports_array_count folder(s)"
-    enotify "Folders to be processed are: ${manual_imports_picard_found_array[*]}"
-    for (( i=0; i<$manual_imports_array_count; i++)); do
-      #Look for picard in these folder paths by manipulating the variable to strip the 'album' path & combine with the parent path
-      enotify "Searching for musicbrainz ID from file from: ${manual_imports_picard_found_array[$i]}"
-      artist_path="${manual_imports_picard_found_array[$i]}"
-      enotify "Current artist path is: $artist_path"
-      artist_path=${artist_path%/*}
-      enotify "isolated artist_path is: $artist_path"
-      if [[ -f "$artist_path/picard" ]]; then
-        enotify "found picard file, importing ID from $artist_path/picard"
-        picard_id=$(<"$artist_path/picard")
-        enotify "running scan now, using ID: $picard_id"
-        "$beets_path" -c "$beets_flac_convert_config" import --flat --search-id "$picard_id" "${manual_imports_array[$i]}"
-        "$beets_path" -c "$beets_flac_convert_config" convert -f alac -y -a
-        rm "$artist_path/picard"
-      else
-        eerror "no picard file found for manual import...exiting"
-        if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
-          rm "$beets_flac_path/musiclibrary.blb"
+    enotify "Revised array count, found: $manual_imports_array_count folder(s) with manual picard ID's to  import"
+    if [[ "$manual_imports_array_count" -gt 0 ]]; then
+      enotify "Folders to be processed are: ${manual_imports_picard_found_array[*]}"
+      for (( i=0; i<$manual_imports_array_count; i++)); do
+        #Look for picard in these folder paths by manipulating the variable to strip the 'album' path & combine with the parent path
+        enotify "Searching for musicbrainz ID from file from: ${manual_imports_picard_found_array[$i]}"
+        artist_path="${manual_imports_picard_found_array[$i]}"
+        enotify "Current artist path is: $artist_path"
+        artist_path=${artist_path%/*}
+        enotify "isolated artist_path is: $artist_path"
+        if [[ -f "$artist_path/picard" ]]; then
+          enotify "found picard file, importing ID from $artist_path/picard"
+          picard_id=$(<"$artist_path/picard")
+          enotify "running scan now on: $artist_path, using ID: $picard_id"
+          "$beets_path" -c "$beets_flac_convert_config" import --flat --search-id "$picard_id" "$artist_path"
+          "$beets_path" -c "$beets_flac_convert_config" convert -f alac -y -a
+          rm "$artist_path/picard"
+        else
+          eerror "no picard file found for manual import...exiting"
+          if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+            rm "$beets_flac_path/musiclibrary.blb"
+          fi
+          clean_exit
         fi
-        clean_exit
+      done
+      #Now lets tidy things up
+      check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
+      if [[ -z $check_empty ]]; then
+        cd "$skipped_imports_location"
+        edebug "deleting empty source folders in $skipped_imports_location"
+        find . -type d -empty -delete
+      else
+        edebug "no empty source folders in $skipped_imports_location to delete"
       fi
-    done
+      check_empty=
+      if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+        rm "$beets_flac_path/musiclibrary.blb"
+      fi
+      clean_exit
+    else
+      enotify "No folder(s) found to import, exiting"
+      if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+        rm "$beets_flac_path/musiclibrary.blb"
+      fi
+      clean_exit
+    fi
   else
     enotify "No folder(s) found to import, exiting"
     if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
@@ -364,21 +384,6 @@ if [[ ! -z $manual_mode ]]; then
     fi
     clean_exit
   fi
-
-  #Now lets tidy things up
-  check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
-  if [[ -z $check_empty ]]; then
-    cd "$skipped_imports_location"
-    edebug "deleting empty source folders in $skipped_imports_location"
-    find . -type d -empty -delete
-  else
-    edebug "no empty source folders in $skipped_imports_location to delete"
-  fi
-  check_empty=
-  if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
-    rm "$beets_flac_path/musiclibrary.blb"
-  fi
-  clean_exit
 else
   edebug "Automatic mode detected"
 fi
