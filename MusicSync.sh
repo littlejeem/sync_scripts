@@ -9,6 +9,8 @@
 ##                                                                                             ##
 ## "REQUIREMENTS"                                                                              ##
 ## Requires bin/control_scripts/control_scripts_install.sh running to prep environment         ##
+## Requires config.sh in /usr/loca/bin                                                         ##
+## Requires helper_script,sh in /usr/local/bin                                                 ##
 ##                                                                                             ##
 ## "LOCATION"                                                                                  ##
 ## script is in $HOME/bin/sync_cripts                                                          ##
@@ -121,6 +123,7 @@ helpFunction () {
    echo "Usage: $0 MusicSync.sh -G"
    echo -e "\t Running the script with no flags causes default behaviour with logging level set via 'verbosity' variable"
    echo -e "\t-P Turns on pushover integration for skipped beets imports"
+   echo -e "\t-M Activates scripts manual mode, use for processing 'skipped' items from previous script runs. Runs from the current directory. In the artist folder create a file called picard and add the "ALBUM" music-brainz ID"
    echo -e "\t-s Override set verbosity to specify silent log level"
    echo -e "\t-V Override set verbosity to specify Verbose log level"
    echo -e "\t-G Override set verbosity to specify Debug log level"
@@ -139,11 +142,13 @@ helpFunction () {
 #+---"Get User Options"---+
 #+------------------------+
 OPTIND=1
-while getopts ":PsVGh:" opt
+while getopts ":PMsVGh:" opt
 do
     case "${opt}" in
-        P) pushover_integration=${OPTARG}
+        P) pushover_integration=1
         edebug "-P Pushover integration set";;
+        M) manual_mode=1
+        edebug "-M Manual mode selected";;
         s) verbosity=$silent_lvl
         edebug "-s specified: Silent mode";;
         V) verbosity=$inf_lvl
@@ -296,22 +301,92 @@ fatal_missing_var
 JAIL_FATAL="${beets_upload_path}"
 debug_missing_var
 
-#scan folders download_flac & rip_flac for files -> If they exist process them
-#Step 1: tag and move, Step 2: Convert while copying. Step 1 avoids the capture of what worked and what didn't because beets only moves files if import is successful
-#1: Import using the cusomised config, we use the 'move' option as if the import is successful it moves the flac files out of the original source directory
-#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml import -q /home/jlivin25/Music/Downloads/
-#2: Create a converted copy via
-#/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/flac/flac_convert_config.yaml convert -f alac -y -a
-#delete the library and then do rip_flac same way
-#rm ~/.config/beets/flac/musiclibrary.blb
-#see if you can read the results and if folders don't successfulyl scan read into 'beets_import_failure' array
-#rename those folders
-#check for rsync success
-#check new folders from array exist in destination
-#then delete source
-#use same again to
+JAIL_FATAL="$beets_flac_convert_config"
+fatal_missing_var
 
 shopt -s nullglob #here to prevent globbing of names in arrays that contain spaces
+
+#+------------------------------+
+#+---Checking for manual mode---+
+#+------------------------------+
+if [[ ! -z $manual_mode ]]; then
+  enotify "Manual mode detected, scanning $skipped_imports_location"
+  manual_imports_array=("$skipped_imports_location"/*/*)
+  enotify "initial array contents are: ${manual_imports_array[*]}"
+  #at this point we will have read the file location of any existing 'picard' file as well as directories, need to remove these from the array
+
+  manual_imports_array_count=${#manual_imports_array[@]}
+  if [[ "$manual_imports_array_count" -gt 0 ]]; then
+    enotify "Initially found: $manual_imports_array_count folder(s)"
+    for (( i=0; i<$manual_imports_array_count; i++)); do
+      enotify "scanning array element [$i]: ${manual_imports_array[$i]} for picard, if so removing from array"
+      #Do work to strip array elements with paths including 'picard' in them from the array we want to use
+      if [[ ${manual_imports_array[$i]} = *picard* ]]; then
+        enotify "Found 'picard' at element: [$i]"
+        enotify "Moving to new array and removing form this one"
+        manual_imports_picard_found_array+=("${manual_imports_array[i]}")
+        unset manual_imports_array[i]
+      fi
+    done
+    #Now we've sanitised with a new array, zero, recount and process for real
+    unset manual_imports_array_count
+    manual_imports_array_count=${#manual_imports_picard_found_array[@]}
+    enotify "Revised array count, found: $manual_imports_array_count folder(s) with manual picard ID's to  import"
+    if [[ "$manual_imports_array_count" -gt 0 ]]; then
+      enotify "Folders to be processed are: ${manual_imports_picard_found_array[*]}"
+      for (( i=0; i<$manual_imports_array_count; i++)); do
+        #Look for picard in these folder paths by manipulating the variable to strip the 'album' path & combine with the parent path
+        enotify "Searching for musicbrainz ID from file from: ${manual_imports_picard_found_array[$i]}"
+        artist_path="${manual_imports_picard_found_array[$i]}"
+        enotify "Current artist path is: $artist_path"
+        artist_path=${artist_path%/*}
+        enotify "isolated artist_path is: $artist_path"
+        if [[ -f "$artist_path/picard" ]]; then
+          enotify "found picard file, importing ID from $artist_path/picard"
+          picard_id=$(<"$artist_path/picard")
+          enotify "running scan now on: $artist_path, using ID: $picard_id"
+          "$beets_path" -c "$beets_flac_convert_config" import --flat --search-id "$picard_id" "$artist_path"
+          "$beets_path" -c "$beets_flac_convert_config" convert -f alac -y -a
+          rm "$artist_path/picard"
+        else
+          eerror "no picard file found for manual import...exiting"
+          if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+            rm "$beets_flac_path/musiclibrary.blb"
+          fi
+          clean_exit
+        fi
+      done
+      #Now lets tidy things up
+      check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
+      if [[ -z $check_empty ]]; then
+        cd "$skipped_imports_location"
+        edebug "deleting empty source folders in $skipped_imports_location"
+        find . -type d -empty -delete
+      else
+        edebug "no empty source folders in $skipped_imports_location to delete"
+      fi
+      check_empty=
+      if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+        rm "$beets_flac_path/musiclibrary.blb"
+      fi
+      clean_exit
+    else
+      enotify "No folder(s) found to import, exiting"
+      if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+        rm "$beets_flac_path/musiclibrary.blb"
+      fi
+      clean_exit
+    fi
+  else
+    enotify "No folder(s) found to import, exiting"
+    if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+      rm "$beets_flac_path/musiclibrary.blb"
+    fi
+    clean_exit
+  fi
+else
+  edebug "Automatic mode detected"
+fi
 
 einfo "Artist folders that are unable to be tagged will be appended with '-<DATE>', the importer for beets will then igneore these items on subsequent scans"
 
@@ -332,7 +407,7 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
   #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
   for (( i=0; i<$download_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
     edebug "...artist folder: ${download_flac_array[$i]}"
-    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import -q "${download_flac_array[$i]}")
+    beets_import_result=$("$beets_path" -c "$beets_flac_convert_config" import -q "${download_flac_array[$i]}")
     edebug "beets import result is as: $beets_import_result"
     if $(echo "$beets_import_result" | grep -q "Skipping") ; then
         edebug "detected beets skipping import of ${download_flac_array[i]}"
@@ -341,11 +416,15 @@ if [[ "$download_flac_array_count" -gt 0 ]]; then
           skipped_imports_array+=("${download_flac_array[i]}") #append download_flac_array element 'i' to skipped_import_array
           edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
         fi
-        rm ~/.config/beets/flac/musiclibrary.blb
+        if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+          rm "$beets_flac_path/musiclibrary.blb"
+        fi
     else
       edebug "beets successfully imported: ${download_flac_array[i]}", converting to ALAC...
-      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
-      rm ~/.config/beets/flac/musiclibrary.blb
+      "$beets_path" -c "$beets_flac_convert_config" convert -f alac -y -a
+      if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+        rm "$beets_flac_path/musiclibrary.blb"
+      fi
     fi
     beets_import_result=
   done
@@ -371,7 +450,7 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
   #Now we know there are contents and we've read into the array we need a adecision to be made what to do.
   for (( i=0; i<$rip_flac_array_count; i++)); do #basically says while the count (starting from 0) is less than the value in download_names do the next bit
     edebug "...artist folder: ${rip_flac_array[$i]}"
-    beets_import_result=$(/home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml import -q "${rip_flac_array[$i]}")
+    beets_import_result=$("$beets_path" -c "$beets_flac_convert_config" import -q "${rip_flac_array[$i]}")
     edebug "beets import result is as: $beets_import_result"
     if $(echo "$beets_import_result" | grep -q "Skipping") ; then
         edebug "detected beets skipping import of ${rip_flac_array[i]}"
@@ -380,11 +459,15 @@ if [[ "$rip_flac_array_count" -gt 0 ]]; then
           skipped_imports_array+=("${rip_flac_array[i]}") #append download_flac_array element 'i' to skipped_import_array
           edebug "skipped_imports_array contents are: ${skipped_imports_array[*]}"
         fi
-        rm ~/.config/beets/flac/musiclibrary.blb
+        if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+          rm "$beets_flac_path/musiclibrary.blb"
+        fi
     else
       edebug "beets successfully imported: ${rip_flac_array[i]}", converting to ALAC...
-      /home/jlivin25/.local/bin/beet -c /home/jlivin25/.config/beets/FLAC_and_ALAC_beets_config.yaml convert -f alac -y -a
-      rm ~/.config/beets/flac/musiclibrary.blb
+      "$beets_path" -c "$beets_flac_convert_config" convert -f alac -y -a
+      if [[ -f "$beets_flac_path/musiclibrary.blb" ]]; then
+        rm "$beets_flac_path/musiclibrary.blb"
+      fi
     fi
     beets_import_result=
   done
@@ -443,44 +526,48 @@ rsync_error_catch
 #+---Tidy Up---+
 #+-------------+
 #Tidy up $download_flac
-if [[ -d "$download_flac" ]]; then
+check_empty=$(find $download_flac -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$download_flac"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $download_flac"
   find . -type d -empty -delete
 else
   edebug "no empty source folders in $download_flac to delete"
 fi
+check_empty=
 
 #Tidy up $rip_flac
-if [[ -d "$rip_flac" ]]; then
+check_empty=$(find $rip_flac -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$rip_flac"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $rip_flac"
   find . -type d -empty -delete
 else
-  edebug "no empty source folders in $rip_flac"
+  edebug "no empty source folders in $rip_flac to delete"
 fi
+check_empty=
 
 #Tidy up $flaclibrary_source
-if [[ -d "$flaclibrary_source" ]]; then
+check_empty=$(find $flaclibrary_source -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$flaclibrary_source"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $flaclibrary_source"
   find . -type d -empty -delete
 else
   edebug "no empty source folders in $flaclibrary_source to delete"
 fi
+check_empty=
 
 #Tidy up $alaclibrary_source
-if [[ -d "$alaclibrary_source" ]]; then
+check_empty=$(find $alaclibrary_source -maxdepth 0 -type d -empty)
+if [[ -z $check_empty ]]; then
   cd "$alaclibrary_source"
-  find . -type d -empty -print
   edebug "deleting empty source folders in $alaclibrary_source"
   find . -type d -empty -delete
 else
-  edebug "no empty source folders in $alaclibrary_source"
+  edebug "no empty source folders in $alaclibrary_source to delete"
 fi
+check_empty=
 
 
 #+------------+
