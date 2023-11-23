@@ -177,10 +177,10 @@ ctrlc_count=0
 #+-------------------------+
 if [[ $user_install = "" ]]; then
   install_user="$USER"
-  export install_user
+  export "$install_user"
 else
   install_user=$(echo $user_install)
-  export install_user=$(echo $user_install)
+  export "$install_user"
 fi
 
 
