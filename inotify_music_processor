@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#+-------------------+
+#+---"Main Script"---+
+#+-------------------+
+source /usr/local/bin/helper_script.sh
+echo "inotify_music_processor called"
+#export SYNCME_SOURCE_DIR=$directory
+#export SYNCME_ACTION=$action
+#export SYNCME_FILE=$file
+echo "echo dir is:$SYNCME_SOURCE_DIR, action is:$SYNCME_ACTION, file is:$SYNCME_FILE"
+echo "Starting beets for autotagging"
+/home/emlyn/.local/bin/beet -c /home/emlyn/.config/beets/flac_tag_copy.yaml import -q /media/Data_1/Audio/Music/FLAC_Backups
+#echo "beets tagging completed"
+#if [ -z $dry_run_rsync ]; then
+#  echo "triggering KODI Music Server update..."
+#  update_musiclibrary #"Don't forget to set setting in advanced settings to have kodi mysql server 'clean' on update, or you will need to uncomment library clean""
+#  sleep 5m
+#  echo "...KODI Music Server library update complete"
+#fi
+#
+exit

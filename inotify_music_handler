@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#+-------------------+
+#+---"Main Script"---+
+#+-------------------+
+inotifywait -m -r /media/Data_1/Audio/Music/FLAC_Backups -e create -e moved_to |
+  while read directory action file; do
+    if [[ "$file" =~ .*syncme$ ]]; then # Does the file end with .xml?
+      echo "dir is:$directory, action is:$action, file is:$file"
+      export SYNCME_SOURCE_DIR="$directory"
+      export SYNCME_ACTION="$action"
+      export SYNCME_FILE="$file"
+      echo "calling inotify_music_processor for autotagging"
+      /usr/local/bin/inotify_music_processor
+    fi
+  done

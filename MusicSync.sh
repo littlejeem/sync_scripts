@@ -19,7 +19,7 @@
 #+-----------------+
 #+---Set Version---+
 #+-----------------+
-version="4.1"
+version="5.0"
 
 
 #+---------------------+
@@ -177,10 +177,10 @@ ctrlc_count=0
 #+-------------------------+
 if [[ $user_install = "" ]]; then
   install_user="$USER"
-  export install_user
+  export "$install_user"
 else
   install_user=$(echo $user_install)
-  export install_user=$(echo $user_install)
+  export "$install_user"
 fi
 
 
@@ -356,6 +356,16 @@ if [[ ! -z $manual_mode ]]; then
           clean_exit
         fi
       done
+
+      #sync files
+      einfo "sync of FLAC files started"
+      rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$flaclibrary_source" "$FLAC_musicdest"
+      rsync_error_catch
+
+      einfo "sync of ALAC files started"
+      rsync "$rsync_remove_source" "$rsync_prune_empty" "$rsync_alt_vzr" "$alaclibrary_source" "$M4A_musicdest"
+      rsync_error_catch
+
       #Now lets tidy things up
       check_empty=$(find $skipped_imports_location -maxdepth 0 -type d -empty)
       if [[ -z $check_empty ]]; then

@@ -1,0 +1,15 @@
+[Unit]
+Description=inotify_music_monitor
+
+[Service]
+ExecStart=/usr/local/bin/inotify_music_handler
+Restart=always
+RestartSec=1
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=inotify_music_monitor
+User=emlyn
+Group=media
+
+[Install]
+WantedBy=multi-user.target
