@@ -3,20 +3,117 @@
 #+-------------------+
 #+---"Main Script"---+
 #+-------------------+
+verbosity=6
 source /usr/local/bin/helper_script.sh
-echo "inotify_music_processor called"
+source /usr/local/bin/config.sh
+edebug "inotify_music_processor called"
 #export SYNCME_SOURCE_DIR=$directory
 #export SYNCME_ACTION=$action
 #export SYNCME_FILE=$file
-echo "echo dir is:$SYNCME_SOURCE_DIR, action is:$SYNCME_ACTION, file is:$SYNCME_FILE"
-echo "Starting beets for autotagging"
-/home/emlyn/.local/bin/beet -c /home/emlyn/.config/beets/flac_tag_copy.yaml import -q /media/Data_1/Audio/Music/FLAC_Backups
-#echo "beets tagging completed"
-#if [ -z $dry_run_rsync ]; then
-#  echo "triggering KODI Music Server update..."
-#  update_musiclibrary #"Don't forget to set setting in advanced settings to have kodi mysql server 'clean' on update, or you will need to uncomment library clean""
-#  sleep 5m
-#  echo "...KODI Music Server library update complete"
-#fi
-#
-exit
+
+edebug "dir is:$SYNCME_SOURCE_DIR, action is:$SYNCME_ACTION, file is:$SYNCME_FILE"
+date_timestamp=$(/usr/bin/date "+%H%M_%y%m%d")
+
+#first handle (Albums) Unknown_Artist/Unknown_Album source to make uniquely identifiable and prevent abcde overwrite
+enotify "checking source location for Unknown_Artist/Unknown_Album or Various/Unknown_Album"
+if [[ "$SYNCME_SOURCE_DIR" == "${flaclibrary_source}Albums/Unknown_Artist/Unknown_Album/" ]]; then
+  action_type="singleartist"
+  einfo "Unknown (Artist) Album detected..."
+  edebug "...removing me.syncme to stop repeat inotify triggering"
+  if [ -f "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE" ]; then
+    rm "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE"
+    edebug "...removed"
+  fi
+  SYNCME_SOURCE_DIR_ORIGIN="$SYNCME_SOURCE_DIR" #assign the original path to another variable use in mv command
+  edebug "SYNCME_SOURCE_DIR_ORIGIN: $SYNCME_SOURCE_DIR_ORIGIN"
+  SYNCME_SOURCE_DIR=${SYNCME_SOURCE_DIR%/*} #this line and next...
+  if [[ "$action_type" == "singleartist" ]]; then
+    SYNCME_SOURCE_DIR=${SYNCME_SOURCE_DIR%/*} #...strip back variable to point to YOURDIR/Unknown_Artist
+  fi
+  edebug "SYNCME_SOURCE_DIR: $SYNCME_SOURCE_DIR"
+  edebug "...appending date_timestamp"
+  SYNCME_SOURCE_DIR="${SYNCME_SOURCE_DIR}_${date_timestamp}" #append Unknown_Album with stamp
+  edebug "SYNCME_SOURCE_DIR: $SYNCME_SOURCE_DIR"
+  edebug "making directory to move to: mkdir -p $SYNCME_SOURCE_DIR"
+  mkdir -p "${SYNCME_SOURCE_DIR}"
+  edebug "...moving un-unique: $SYNCME_SOURCE_DIR_ORIGIN $edebug to unique location: $SYNCME_SOURCE_DIR"
+  mv "$SYNCME_SOURCE_DIR_ORIGIN" "$SYNCME_SOURCE_DIR"
+  #tidy up hanging Unknown_Album folder
+  edebug "altering SYNCME_SOURCE_DIR_ORIGIN from: $SYNCME_SOURCE_DIR_ORIGIN ..."
+  SYNCME_SOURCE_DIR_ORIGIN=${SYNCME_SOURCE_DIR_ORIGIN%/*}
+  if [[ "$action_type" == "singleartist" ]]; then
+    SYNCME_SOURCE_DIR_ORIGIN=${SYNCME_SOURCE_DIR_ORIGIN%/*}
+  fi
+  edebug "...to $SYNCME_SOURCE_DIR_ORIGIN"
+  edebug "removing dangling folder $SYNCME_SOURCE_DIR_ORIGIN"
+  rm -r "$SYNCME_SOURCE_DIR_ORIGIN"
+  #sleep 62
+  SYNCME_SOURCE_DIR="${SYNCME_SOURCE_DIR}/Unknown_Album"
+  edebug "immediately prior to beets tagging SYNCME_SOURCE_DIR is: $SYNCME_SOURCE_DIR"
+elif [[ "$SYNCME_SOURCE_DIR" == "${flaclibrary_source}Various/Unknown_Album/" ]]; then ##next handle (Various/Soundtrack) Unknown_Album source to make uniquely identifiable
+  action_typw="variousartist"
+  edebug "Unknown (Various/Soundtrack) Album detected..."
+  edebug "...removing me.syncme to stop repeat inotify triggering"
+  if [ -f "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE" ]; then
+    rm "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE"
+    edebug "...removed"
+  fi
+  edebug "...appending date_timestamp"
+  SYNCME_SOURCE_DIR_ORIGIN="$SYNCME_SOURCE_DIR" #assign the original path to another variable use in mv command
+  edebug "SYNCME_SOURCE_DIR_ORIGIN: $SYNCME_SOURCE_DIR_ORIGIN"
+  SYNCME_SOURCE_DIR=${SYNCME_SOURCE_DIR%/*} #this line to strip back variable to point to YOURDIR/Unknown_Album
+  edebug "SYNCME_SOURCE_DIR: $SYNCME_SOURCE_DIR"
+  SYNCME_SOURCE_DIR="${SYNCME_SOURCE_DIR}_${date_timestamp}" #append Unknown_Album with stamp
+  edebug "SYNCME_SOURCE_DIR: $SYNCME_SOURCE_DIR"
+  edebug "making directory to move to: mkdir -p $SYNCME_SOURCE_DIR"
+  mkdir -p "${SYNCME_SOURCE_DIR}"
+  edebug "ammending SYNCME_SOURCE_DIR_ORIGIN to remove /"
+  SYNCME_SOURCE_DIR_ORIGIN=${SYNCME_SOURCE_DIR_ORIGIN%/*}
+  edebug "...moving un-unique: $SYNCME_SOURCE_DIR_ORIGIN $edebug to unique location: $SYNCME_SOURCE_DIR"
+  if [[ "$action_type" == "variousartist" ]]; then
+    cd "$SYNCME_SOURCE_DIR_ORIGIN" || error "SYNCME_SOURCE_DIR_ORIGIN could not be navigated too; variable shows as: $SYNCME_SOURCE_DIR_ORIGIN"
+    mv -- * "$SYNCME_SOURCE_DIR"
+    cd ../
+    #tidy up hanging Unknown_Album folder
+    rm -r "$SYNCME_SOURCE_DIR_ORIGIN"
+    #sleep 62
+  fi
+  edebug "immediately prior to beets tagging SYNCME_SOURCE_DIR is: $SYNCME_SOURCE_DIR"
+fi
+
+
+#begin autotagging
+edebug "Starting beets for autotagging..."
+##"$beets_path" -c /home/emlyn/.config/beets/flac_tag_copy.yaml import -q /media/Data_1/Audio/Music/FLAC_Backups
+##"$beets_path" -c /home/emlyn/.config/beets/flac_tag_copy.yaml import -q "$SYNCME_SOURCE_DIR"
+
+#check first if manual override
+if [[ -f "${SYNCME_SOURCE_DIR}/picard.id" ]]; then
+  picard_id=$(<"${SYNCME_SOURCE_DIR}/picard.id")
+  enotify "found picard.id file, manual import selected; importing ID:${picard_id}"
+  "$beets_path" -c "/home/jlivin25/.config/beets/flac_tag_copy.yaml" import -q --flat --search-id "$picard_id" "$SYNCME_SOURCE_DIR"
+  rm "${SYNCME_SOURCE_DIR}/picard.id"
+else
+  edebug "...no manual override detected, proceeding in automatic mode"
+  "$beets_path" -c /home/jlivin25/.config/beets/flac_tag_copy.yaml import -q "$SYNCME_SOURCE_DIR"
+fi
+
+
+#check next for skipping from beets
+if [[ $(tail -n 1 ~/.config/beets/beetslog.txt | cut -d " " -f 1) == "duplicate-skip" ]] || [[ $(tail -n 1 ~/.config/beets/beetslog.txt | cut -d " " -f 1) == "skip" ]]; then
+  #ewarn "Detected beets skipping, manual input required, to investigate please navigate to: $(tail -n 1 ~/.config/beets/beetslog.txt | cut -d " " -f 2)"
+  ewarn "Detected beets skipping, manual input required, to investigate please navigate to: $(tail -n 1 ~/.config/beets/beetslog.txt | cut -d " " -f 2 | cut -d "/" -f -8)"
+else
+  edebug "...beets tagging completed"
+fi
+
+
+#finish off
+if [ -f "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE" ]; then
+  edebug "sycnme file detected, removing..."
+  rm "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE"
+  edebug "...removed"
+fi
+enotify "script completed"
+
+exit 0
