@@ -1,16 +1,23 @@
 #!/bin/bash
 
+
 #+-------------------+
 #+---"Main Script"---+
 #+-------------------+
-inotifywait -m -r /media/Data_1/Audio/Music/FLAC_Backups -e create -e moved_to |
-  while read directory action file; do
-    if [[ "$file" =~ .*syncme$ ]]; then # Does the file end with .xml?
-      echo "dir is:$directory, action is:$action, file is:$file"
-      export SYNCME_SOURCE_DIR="$directory"
-      export SYNCME_ACTION="$action"
-      export SYNCME_FILE="$file"
-      echo "calling inotify_music_processor for autotagging"
-      /usr/local/bin/inotify_music_processor
-    fi
-  done
+verbosity=6
+while_type="NEW"
+source /usr/local/bin/helper_script.sh
+source /usr/local/bin/config.sh
+edebug "inotify_music_handler started"
+watch_folder="${flaclibrary_source%/*}"
+edebug "watch_folder will be $watch_folder"
+inotifywait -m -r "$watch_folder" -e create -e moved_to --format="%e %w%f" |
+while read -r action fullpath; do
+  if [[ "$fullpath" =~ .*syncme$ ]]; then # Does the file end with .syncme?
+    echo "action is:${action}, file is:${fullpath}, exporting now"
+    export SYNCME_SOURCE_DIR="${fullpath%/*}"
+    export SYNCME_ACTION="${action}"
+    export WHILE_TYPE="$while_type"
+    /usr/local/bin/inotify_music_processor
+  fi
+done
