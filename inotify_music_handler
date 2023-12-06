@@ -1,11 +1,98 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# (C) 2022 littlejeem
+# https://github.com/littlejeem
+
+# This code is licensed under MIT license:
+# http://opensource.org/licenses/MIT
+
+# Shell Style Guide has been adhered to where viable
+# https://google.github.io/styleguide/shell.xml
+# and
+# https://tldp.org/LDP/abs/html/index.html
+
+# Linted with shellcheck: https://github.com/koalaman/shellcheck
+
+# Developed using Atom: https://atom.io/ & Visual Studio Code
+
+# Credits
+# Thank you to anyone who has made script, posted on stackexchange or posted a blog thats influenced me,
+# if i've used something and not credited message me and I'll add it. ta!
+
+# DISCLAIMER
+# Whilst care has been taken to thoroughly test this script, my knowledge is currently limited to Ubuntu
+# cases, # as with all Linux/UNIX-like affairs, it may still fail in mysterious
+# circumstances. I'M STILL A NEWB!
+
+
+######################################################################################################
+###  This script is designed to function as part of a three script process                         ###
+###  to intelligently monitor, trigger and tag my music using beets                                ###
+###  The three scripts are                                                                         ###
+###  1) systemd - inotify_music_monitor, which triggers                                            ###
+###  2) inotify_music_handler, which sets up inotifywait triggers in a while loop                  ###
+###  3) inotify_music_processor, which is called by inotify_music_handler and processes the music  ###
+######################################################################################################
+
+#+--------------------------------------+
+#+---"Exit Codes & Logging Verbosity"---+
+#+--------------------------------------+
+# Exit codes:
+# pick from 64 - 113 (https://tldp.org/LDP/abs/html/exitcodes.html#FTN.AEN23647)
+# exit 0 = Success
+# exit 64 = Variable Error
+# exit 65 = Sourcing file/folder error
+# exit 66 = Processing Error
+# exit 67 = Required Program Missing
+
+# Verbosity levels
+# silent_lvl=0
+# crt_lvl=1
+# err_lvl=2
+# wrn_lvl=3
+# ntf_lvl=4
+# inf_lvl=5
+# dbg_lvl=6
+
+
+#+----------------------+
+#+---"Notes on style"---+
+#+----------------------+
+# Use one return to seperate chunks of code from each other
+# Use two returns to seperate sections in the script
+# Use #+------+ to header sections
+# Use ########
+#     ###  ###
+#     ######## to indicate important fill-in sections
+
+# Two spaces to indent, NOT TABS!
+
+# don't echo "" or echo -e "" for a blank line, use echo -e "\r" or echo -e "\n"
+# edebug "\r" or equivalent will also work
+
+# Todo example
+# TODO(littlejeem): Handle the unlikely edge cases (bug ####)
+
+# Google style guide states that a function uses the format 'function name () { }' style to declare a function
+# but commonly accepted practice is that 'function' is no longer used and depricated so plain 'name () { }'
+# Use comments to describe inobvious functions, example below
+
+#######################################
+# Cleanup files from the backup directory.
+# Globals:
+#   BACKUP_DIR
+#   ORACLE_SID
+# Arguments:
+#   None
+#######################################
+
+# the help function in this file needs no comments as its usage is straight forward
 
 
 #+-------------------+
 #+---"Main Script"---+
 #+-------------------+
 verbosity=6
-while_type="NEW"
 source /usr/local/bin/helper_script.sh
 source /usr/local/bin/config.sh
 edebug "inotify_music_handler started"
@@ -17,7 +104,6 @@ while read -r action fullpath; do
     echo "action is:${action}, file is:${fullpath}, exporting now"
     export SYNCME_SOURCE_DIR="${fullpath%/*}"
     export SYNCME_ACTION="${action}"
-    export WHILE_TYPE="$while_type"
     /usr/local/bin/inotify_music_processor
   fi
 done

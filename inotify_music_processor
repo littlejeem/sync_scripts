@@ -6,17 +6,14 @@
 # This code is licensed under MIT license:
 # http://opensource.org/licenses/MIT
 
-# Shell Style Guide have been adhered to where viable
+# Shell Style Guide has been adhered to where viable
 # https://google.github.io/styleguide/shell.xml
 # and
 # https://tldp.org/LDP/abs/html/index.html
 
 # Linted with shellcheck: https://github.com/koalaman/shellcheck
 
-# Developed using Atom: https://atom.io/
-
-# References:
-# HERE IF APLICABLE
+# Developed using Atom: https://atom.io/ & Visual Studio Code
 
 # Credits
 # Thank you to anyone who has made script, posted on stackexchange or posted a blog thats influenced me,
@@ -27,10 +24,15 @@
 # cases, # as with all Linux/UNIX-like affairs, it may still fail in mysterious
 # circumstances. I'M STILL A NEWB!
 
-#########################################################################
-###    "PUT INFO ABOUT THE SCRIPT, ITS PURPOSE, HOW IT WORKS"         ###
-###      "WHERE IT SHOULD BE KEPT, DEPENDANCIES, etc...here"          ###
-#########################################################################
+
+######################################################################################################
+###  This script is designed to function as part of a three script process                         ###
+###  to intelligently monitor, trigger and tag my music using beets                                ###
+###  The three scripts are                                                                         ###
+###  1) systemd - inotify_music_monitor, which triggers                                            ###
+###  2) inotify_music_handler, which sets up inotifywait triggers in a while loop                  ###
+###  3) inotify_music_processor, which is called by inotify_music_handler and processes the music  ###
+######################################################################################################
 
 #+--------------------------------------+
 #+---"Exit Codes & Logging Verbosity"---+
@@ -71,8 +73,8 @@
 # Todo example
 # TODO(littlejeem): Handle the unlikely edge cases (bug ####)
 
-# Google style guide states that a function uses the format 'function name () {' style to declare a function
-# but commonly accepted practice is that function is no longer used and depricated so plain 'name () {'
+# Google style guide states that a function uses the format 'function name () { }' style to declare a function
+# but commonly accepted practice is that 'function' is no longer used and depricated so plain 'name () { }'
 # Use comments to describe inobvious functions, example below
 
 #######################################
@@ -166,13 +168,15 @@ single_artist_process () {
   action_type="singleartist"
   edebug "action_type detected as $action_type"
   einfo "Unknown (Artist) Album detected..."
-  edebug "...removing me.syncme to stop repeat inotify triggering"
-  if [ -f "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE" ]; then
-      rm "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE"
-      edebug "...removed"
+  if [ -f "$SYNCME_SOURCE_DIR/me.syncme" ]; then
+    edebug "...removing me.syncme to stop repeat inotify triggering"
+    rm "$SYNCME_SOURCE_DIR/me.syncme"
+    edebug "...removed"
+  else
+    ewarn "...no me.syncme file located for deletion, error?"
   fi
-  SYNCME_SOURCE_DIR_ORIGIN="$SYNCME_SOURCE_DIR" #assign the original path to another variable use in mv command
-  edebug "SYNCME_SOURCE_DIR_ORIGIN: $SYNCME_SOURCE_DIR_ORIGIN"
+  sync_source_dir_origin="$SYNCME_SOURCE_DIR" #assign the original path to another variable use in mv command
+  edebug "sync_source_dir_origin: $sync_source_dir_origin"
   SYNCME_SOURCE_DIR=${SYNCME_SOURCE_DIR%/*} #this line and next...
   if [[ "$action_type" == "singleartist" ]]; then
       SYNCME_SOURCE_DIR=${SYNCME_SOURCE_DIR%/*} #...strip back variable to point to YOURDIR/Unknown_Artist
@@ -183,18 +187,18 @@ single_artist_process () {
   edebug "SYNCME_SOURCE_DIR: $SYNCME_SOURCE_DIR"
   edebug "making directory to move to: mkdir -p $SYNCME_SOURCE_DIR"
   mkdir -p "${SYNCME_SOURCE_DIR}"
-  edebug "...moving un-unique: $SYNCME_SOURCE_DIR_ORIGIN $edebug to unique location: $SYNCME_SOURCE_DIR"
-  mv "$SYNCME_SOURCE_DIR_ORIGIN" "$SYNCME_SOURCE_DIR"
+  edebug "...moving un-unique: $sync_source_dir_origin $edebug to unique location: $SYNCME_SOURCE_DIR"
+  mv "$sync_source_dir_origin" "$SYNCME_SOURCE_DIR"
   #tidy up hanging Unknown_Album folder
-  edebug "altering SYNCME_SOURCE_DIR_ORIGIN from: $SYNCME_SOURCE_DIR_ORIGIN ..."
-  SYNCME_SOURCE_DIR_ORIGIN=${SYNCME_SOURCE_DIR_ORIGIN%/*}
+  edebug "altering sync_source_dir_origin from: $sync_source_dir_origin ..."
+  sync_source_dir_origin=${sync_source_dir_origin%/*}
   if [[ "$action_type" == "singleartist" ]]; then
-      SYNCME_SOURCE_DIR_ORIGIN=${SYNCME_SOURCE_DIR_ORIGIN%/*}
+      sync_source_dir_origin=${sync_source_dir_origin%/*}
   fi
-  edebug "...to $SYNCME_SOURCE_DIR_ORIGIN"
-  edebug "removing dangling folder $SYNCME_SOURCE_DIR_ORIGIN"
+  edebug "...to $sync_source_dir_origin"
+  edebug "removing dangling folder $sync_source_dir_origin"
   #TODO @littlejeem: add in safeguards for 'empty variables both at script start and during?'
-  rm -r "$SYNCME_SOURCE_DIR_ORIGIN"
+  rm -r "$sync_source_dir_origin"
   SYNCME_SOURCE_DIR="${SYNCME_SOURCE_DIR}/Unknown_Album"
 }
 
@@ -202,31 +206,33 @@ various_artist_process () {
   action_type="variousartist"
   edebug "action_type detected as $action_type"
   edebug "Unknown (Various/Soundtrack) Album detected..."
-  edebug "...removing me.syncme to stop repeat inotify triggering"
   #TODO @littlejeem: Need to make the risk of lone '/' safer
-  if [[ -f "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE" ]]; then
-      rm "$SYNCME_SOURCE_DIR"/"$SYNCME_FILE"
-      edebug "...removed"
+  if [[ -f "$SYNCME_SOURCE_DIR/me.syncme" ]]; then
+    edebug "...removing me.syncme to stop repeat inotify triggering"
+    rm "$SYNCME_SOURCE_DIR/me.syncme"
+    edebug "...removed"
+  else
+    ewarn "...no me.syncme file located for deletion, error?"
   fi
   edebug "...appending date_timestamp"
-  SYNCME_SOURCE_DIR_ORIGIN="$SYNCME_SOURCE_DIR" #assign the original path to another variable use in mv command
-  edebug "SYNCME_SOURCE_DIR_ORIGIN: $SYNCME_SOURCE_DIR_ORIGIN"
+  sync_source_dir_origin="$SYNCME_SOURCE_DIR" #assign the original path to another variable use in mv command
+  edebug "sync_source_dir_origin: $sync_source_dir_origin"
   SYNCME_SOURCE_DIR=${SYNCME_SOURCE_DIR%/*} #this line to strip back variable to point to YOURDIR/Unknown_Album
   edebug "SYNCME_SOURCE_DIR: $SYNCME_SOURCE_DIR"
   SYNCME_SOURCE_DIR="${SYNCME_SOURCE_DIR}_${date_timestamp}" #append Unknown_Album with stamp
   edebug "SYNCME_SOURCE_DIR: $SYNCME_SOURCE_DIR"
   edebug "making directory to move to: mkdir -p $SYNCME_SOURCE_DIR"
   mkdir -p "${SYNCME_SOURCE_DIR}"
-  edebug "ammending SYNCME_SOURCE_DIR_ORIGIN to remove /"
-  SYNCME_SOURCE_DIR_ORIGIN=${SYNCME_SOURCE_DIR_ORIGIN%/*}
-  edebug "...moving un-unique: $SYNCME_SOURCE_DIR_ORIGIN to unique location: $SYNCME_SOURCE_DIR"
+  edebug "ammending sync_source_dir_origin to remove /"
+  sync_source_dir_origin=${sync_source_dir_origin%/*}
+  edebug "...moving un-unique: $sync_source_dir_origin to unique location: $SYNCME_SOURCE_DIR"
   if [[ "$action_type" == "variousartist" ]]; then
-      cd "$SYNCME_SOURCE_DIR_ORIGIN" || eerror "SYNCME_SOURCE_DIR_ORIGIN could not be navigated too; variable shows as: $SYNCME_SOURCE_DIR_ORIGIN"
+      cd "$sync_source_dir_origin" || eerror "sync_source_dir_origin could not be navigated too; variable shows as: $sync_source_dir_origin"
       #TODO @littlejeem: Need to make the mv command safer
       mv -- * "$SYNCME_SOURCE_DIR"
       cd ../
       #tidy up hanging Unknown_Album folder
-      rm -r "$SYNCME_SOURCE_DIR_ORIGIN"
+      rm -r "$sync_source_dir_origin"
   fi
 }
 
@@ -407,3 +413,5 @@ beets_skip_check
 beets_tidy
 #finish script
 clean_exit
+
+#TODO:@littlejeem, is this an oppertunity to have an option to run a further section based options? eg. scriptname -B calls additonal beets config?
