@@ -153,6 +153,7 @@ helpFunction () {
    echo -e "\t-S Override set verbosity to specify silent log level"
    echo -e "\t-V Override set verbosity to specify Verbose log level"
    echo -e "\t-G Override set verbosity to specify Debug log level"
+   echo -e "\t-d To complement -G, this option runs command with no redirect of ouput to /dev/null"
    echo -e "\t-h Use this flag for help"
    if [ -d "/tmp/$lockname" ]; then
      edebug "removing lock directory"
@@ -244,11 +245,19 @@ beets_autotagging () {
   if [[ -f "${SYNCME_SOURCE_DIR}/picard.id" ]]; then
     picard_id=$(<"${SYNCME_SOURCE_DIR}/picard.id")
     enotify "found picard.id file, manual import selected; importing ID:${picard_id}"
-    "$beets_path" -c "${beets_config_path}/flac_tag_copy.yaml" import -q --flat --search-id "$picard_id" "$SYNCME_SOURCE_DIR" > /dev/null
+    if [[ $debug == "on" ]]; then
+      "$beets_path" -c "${beets_config_path}/flac_tag_copy.yaml" import -q --flat --search-id "$picard_id" "$SYNCME_SOURCE_DIR"
+    else
+      "$beets_path" -c "${beets_config_path}/flac_tag_copy.yaml" import -q --flat --search-id "$picard_id" "$SYNCME_SOURCE_DIR" > /dev/null
+    fi
     rm "${SYNCME_SOURCE_DIR}/picard.id"
   else
     edebug "...no manual override detected, proceeding in automatic mode"
-    "$beets_path" -c "${beets_config_path}/flac_tag_copy.yaml" import -q "$SYNCME_SOURCE_DIR" > /dev/null
+    if [[ $debug == "on" ]]; then
+      "$beets_path" -c "${beets_config_path}/flac_tag_copy.yaml" import -q "$SYNCME_SOURCE_DIR"
+    else
+      "$beets_path" -c "${beets_config_path}/flac_tag_copy.yaml" import -q "$SYNCME_SOURCE_DIR" > /dev/null
+    fi
   fi
 }
 
@@ -311,7 +320,7 @@ clean_exit () {
 #+---"Get User Options"---+
 #+------------------------+
 OPTIND=1
-while getopts ":SVGHh:" opt
+while getopts ":SVGdHh:" opt
 do
     case "${opt}" in
         S) verbosity=$silent_lvl
@@ -320,6 +329,8 @@ do
         edebug "-V specified: Verbose mode";;
         G) verbosity=$dbg_lvl
         edebug "-G specified: Debug mode";;
+        d) debug=on
+        edebug "-d specified: removing /dev/null redirects";;
         H) helpFunction;;
         h) helpFunction;;
         ?) helpFunction;;
