@@ -88,13 +88,45 @@
 
 # the help function in this file needs no comments as its usage is straight forward
 
+#+-----------------------+
+#+---"Set script name"---+
+#+-----------------------+
+# imports the name of this script
+# failure to to set this as lockname will result in check_running failing and 'hung' script
+# manually set this if being run as child from another script otherwise will inherit name of calling/parent script
+scriptlong=$(basename "$0")
+#test to see if ends in .sh, if so remove
+if [[ "${scriptlong#"${scriptlong%???}"}" == ".sh" ]]; then
+  lockname=${scriptlong::-3}
+else
+  lockname="$scriptlong"
+fi
+
+
+#+---------------------------------------+
+#+---Source necessary 'helper' scripts---+
+#+---------------------------------------+
+source /usr/local/bin/helper_script.sh
+source /usr/local/bin/config.sh
+
+
+#+---------------------+
+#+---"Set Variables"---+
+#+---------------------+
+#set default logging level, failure to set this will cause a 'unary operator expected' error
+#remember at level 3 and lower, only esilent messages show, best to include an override in getopts
+verbosity=3
+
+
+#+-----------------------------------------+
+#+---"Check necessary variables are set"---+
+#+-----------------------------------------+
+check_fatal_missing_var "${flaclibrary_source}"
+
 
 #+-------------------+
 #+---"Main Script"---+
 #+-------------------+
-verbosity=6
-source /usr/local/bin/helper_script.sh
-source /usr/local/bin/config.sh
 edebug "inotify_music_handler started"
 watch_folder="${flaclibrary_source%/*}"
 edebug "watch_folder will be $watch_folder"

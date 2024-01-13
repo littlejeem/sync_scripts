@@ -370,6 +370,15 @@ edebug "Version of helper_script is: $helper_version"
 edebug "PID is $script_pid"
 
 
+#+-----------------------------------------+
+#+---"Check necessary variables are set"---+
+#+-----------------------------------------+
+check_fatal_missing_var beets_path
+check_fatal_missing_var beets_config_path
+check_fatal_missing_var beets_flac_path
+check_debug_missing_var SYNCME_SOURCE_DIR
+
+
 #+-------------------+
 #+---Set up script---+
 #+-------------------+
