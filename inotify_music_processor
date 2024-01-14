@@ -263,15 +263,18 @@ beets_autotagging () {
 
 beets_skip_check () {
 if [[ $(tail -n 1 ${beets_config_path}/beetslog.txt | cut -d " " -f 1) == "duplicate-skip" ]] || [[ $(tail -n 1 ${beets_config_path}/beetslog.txt | cut -d " " -f 1) == "skip" ]]; then
-  skip_folder=$(tail -n 1 ${beets_config_path}/beetslog.txt)
-  skip_folder=${skip_folder%/*}
-  if [[ "$action_type" == "singleartist" ]]; then
+  skip_folder=${SYNCME_SOURCE_DIR//"$flaclibrary_source"/}
+  edebug "skip_folder detetcted as: $skip_folder"
+  if [[ "$skip_folder" = *"Albums/"* ]]; then
+    edebug "single artist type detected, altering skip_folder"
     skip_folder=${skip_folder%/*}
-    skip_folder=${skip_folder%/*}
+  elif [[ "$skip_folder" = *"Various/"* ]]; then
+    edebug "Various artist type detected, no change to skip_folder"
   fi
+  edebug "skip_folder finished as $skip_folder"
   ewarn "Detected beets skipping, manual input required, to investigate please navigate to: $skip_folder"
-  pushover_folder=${skip_folder##*/}
-  message_form="Detected beets skipping, navigate to your rip folder/${pushover_folder}"
+  pushover_folder=${skip_folder}
+  message_form="Detected beets skipping, navigate to your rip folder ${pushover_folder}"
   pushover
 else
   edebug "...beets tagging completed"
@@ -377,6 +380,7 @@ check_fatal_missing_var beets_path
 check_fatal_missing_var beets_config_path
 check_fatal_missing_var beets_flac_path
 check_debug_missing_var SYNCME_SOURCE_DIR
+check_debug_missing_var application_token
 
 
 #+-------------------+
@@ -422,7 +426,7 @@ if [[ "$SYNCME_SOURCE_DIR" == "${flaclibrary_source}Various/Unknown_Album/" ]]; 
   clean_exit
 fi
 
-action_type="normal"
+action_type="named_source_folder"
 edebug "action_type detected as $action_type"
 #if niether of the above processes hold true then proceed with tagging folder as found.
 #check for manual override, else process as is
