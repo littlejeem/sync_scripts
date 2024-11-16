@@ -126,10 +126,9 @@ source /usr/local/bin/helper_script.sh
 #remember at level 3 and lower, only esilent messages show, best to include an override in getopts
 verbosity=3
 #
-version="0.2" #
+version="0.3" #
 script_pid=$(echo $$)
-#TODO(littlejeem): Look here at usage of backtics
-stamp=$(echo "`date +%H.%M`-`date +%d_%m_%Y`")
+stamp=$(echo "$(date +%H%M)_$(date +%d%m%Y)")
 notify_lock=/tmp/${scriptlong}_notify
 #pushover_title="NAME HERE" #Uncomment if using pushover
 
@@ -264,6 +263,7 @@ edebug "PATH is: $PATH"
 #+---"Main Script Contents"---+
 #+----------------------------+
 #TODO(littlejeem): Move variable into a section of /usr/bin/config
+\\TODO
 if grep -qs '//192.168.0.18/MUSICFILES' /proc/mounts; then
   edebug "Samba share located, updating..."
   mpc update --wait NAS/ > /dev/null
